@@ -14,5 +14,5 @@ https://stevenklambert.com/writing/comprehensive-guide-building-packaging-electr
 
 ## SECURITY WARNINGS ON MAC
 - When attempting to run the app on MacOS, you may run into security errors like "fsevent.node" cannot be opened". 
-- To resolve this errore, when you see the pop-up, go to `System Preferences` -> `Privacy and Security` -> Scroll Down -> Click "Allow" for the associatied security warning shown. 
-- Note that you may have to click "click" in the dialog window that appears first for the security item to appear in System Preferences. 
+- To resolve this error, when you see the pop-up, go to `System Preferences` -> `Privacy and Security` -> Scroll Down -> Click "Allow" for the associatied security warning shown. 
+- Note that you may have to click "cancel" in the first dialog window that appears for the security item to appear in System Preferences. 
