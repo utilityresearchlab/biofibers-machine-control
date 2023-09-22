@@ -1,0 +1,116 @@
+{
+  "name": "biofibers-machine-control-app",
+  "productName": "biofibers-machine-control-app",
+  "version": "0.0.1",
+  "description": "Application to control a machine over serial",
+  "main": ".webpack/main",
+  "build": {
+    "appId": "org.utilityresearchlab.basemachinecontrol",
+    "mac": {
+      "category": "public.app-category.utilities"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules",
+    "reinstall": "npm run clean && npm install",
+    "install": "electron-rebuild",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\"",
+  	"pack": "electron-builder --dir",
+  	"dist": "electron-builder",
+    "postinstall": "electron-builder install-app-deps"
+  },
+	"postinstall": "electron-builder install-app-deps",
+  "keywords": [],
+  "author": {
+    "name": "Michael Rivera",
+    "email": "mrivera.lee@gmail.com"
+  },
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "machine_control_app"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ],
+      "plugins": [
+        [
+          "@electron-forge/plugin-webpack",
+          {
+            "mainConfig": "./config/webpack.main.config.js",
+            "renderer": {
+              "nodeIntegration": true,
+              "config": "./config/webpack.renderer.config.js",
+              "entryPoints": [
+                {
+                  "html": "./src/renderer/index.html",
+                  "js": "./src/renderer/renderer.js",
+                  "name": "main_window",
+                  "preload": {
+                    "js": "./src/main/preload.js"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      ]
+    }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.2",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-react": "^7.18.6",
+    "@electron-forge/cli": "^6.0.0-beta.67",
+    "@electron-forge/maker-deb": "^6.0.0-beta.67",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.67",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.67",
+    "@electron-forge/maker-zip": "^6.0.0-beta.67",
+    "@electron-forge/plugin-webpack": "^6.0.0-beta.67",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.7.1",
+    "electron": "^21.1.1",
+    "electron-rebuild": "^3.2.9",
+    "node-loader": "^2.0.0",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.74.0",
+		"electron-builder": "^23.6.0"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@fontsource/roboto": "^4.5.8",
+    "@mui/icons-material": "^5.10.9",
+    "@mui/material": "^5.10.9",
+    "electron-squirrel-startup": "^1.0.0",
+    "node-gyp": "^9.3.0",
+    "serialport": "^10.4.0",
+    "tableify": "1.1.1"
+  },
+  "resolutions": {
+    "serialport": "^10.4.0"
+  }
+}
