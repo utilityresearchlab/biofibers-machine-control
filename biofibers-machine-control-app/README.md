@@ -1,5 +1,8 @@
 # Instructions for Running and Building the Base Machine Control App
 
+## Install the app
+- Run `npm run install`
+
 ## Run / Debug the app
 - Run `npm run start`
 
