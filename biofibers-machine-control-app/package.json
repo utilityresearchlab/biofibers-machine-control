@@ -19,8 +19,8 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
-  	"pack": "electron-builder --dir",
-  	"dist": "electron-builder",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
     "postinstall": "electron-builder install-app-deps"
   },
   "keywords": [],
@@ -91,12 +91,12 @@
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
     "babel-loader": "^9.1.0",
     "css-loader": "^6.7.1",
-    "electron": "^21.1.1",
+    "electron": "^26.2.2",
+    "electron-builder": "^24.6.4",
     "electron-rebuild": "^3.2.9",
     "node-loader": "^2.0.0",
     "style-loader": "^3.3.1",
-    "webpack": "^5.74.0",
-		"electron-builder": "^23.6.0"
+    "webpack": "^5.74.0"
   },
   "dependencies": {
     "@emotion/react": "^11.10.4",
