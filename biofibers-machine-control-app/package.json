@@ -5,7 +5,7 @@
   "description": "Application to control a machine over serial",
   "main": ".webpack/main",
   "build": {
-    "appId": "org.utilityresearchlab.basemachinecontrol",
+    "appId": "org.utilityresearchlab.biofibersmachinecontrol",
     "mac": {
       "category": "public.app-category.utilities"
     }
@@ -23,13 +23,12 @@
   	"dist": "electron-builder",
     "postinstall": "electron-builder install-app-deps"
   },
-	"postinstall": "electron-builder install-app-deps",
   "keywords": [],
   "author": {
     "name": "Michael Rivera",
     "email": "mrivera.lee@gmail.com"
   },
-  "license": "MIT",
+  "license": "GPL-3.0 license",
   "config": {
     "forge": {
       "packagerConfig": {},
@@ -37,7 +36,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "machine_control_app"
+            "name": "biofibers_machine_control_app"
           }
         },
         {
