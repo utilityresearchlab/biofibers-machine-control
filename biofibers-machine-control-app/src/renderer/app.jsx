@@ -15,10 +15,12 @@ import SerialPortHelper from './lib/serial-util/serial-port-helper';
 import {MachineCommandInterpreter} from './lib/machine-control/command-interpreter';
 import {parseLine} from './lib/machine-control/command-parser';
 import {MACHINE_COMMANDS, MACHINE_ERROR_CODES} from './lib/machine-control/machine-protocol';
+import { getHomeAllCommand } from './lib/machine-control/command-builder';
 
 import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
-
+import MultiParamSubmitter from './component/multi-param-submitter'
+import SpinningParamSubmitter from './component/spinning-param-submitter';
 
 import './index.css';
 
@@ -45,6 +47,7 @@ class BaseMachineControlApp extends React.Component {
 		this.handleConnectClick = this.handleConnectClick.bind(this);
 		this.handleSendCommandClick = this.handleSendCommandClick.bind(this);
 		this.handleDisconnectClick = this.handleDisconnectClick.bind(this);
+		this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
 		this.handleOnReceivedConsoleData = this.handleOnReceivedConsoleData.bind(this);
 
 		// set-up machine protocol handler for commands
@@ -264,6 +267,11 @@ class BaseMachineControlApp extends React.Component {
 		this.props.serialCommunication.disconnect(onDisconnectCallback);
 	}
 
+	handleHomeAllClick() {
+		const command = getHomeAllCommand();
+		this.handleSendCommandClick(command);
+	}
+
 	handleSendCommandClick(cmdText) {
 		if (!cmdText || cmdText.length == 0) {
 			return;
@@ -399,8 +407,29 @@ class BaseMachineControlApp extends React.Component {
 							<br/>
 					</div>
 					<br/>
+					<div>
+						<Button
+							size="medium"
+							variant="outlined"
+							onClick={this.handleHomeAllClick} > 
+							Home All
+						</Button>
+					<br/>
+					</div>
+					<br/>
+					<div>
+						<MultiParamSubmitter
+							isEnabled={true}
+							onSubmitCallback={this.handleSendCommandClick} />
+					</div>
+					<div>
+						<SpinningParamSubmitter
+							isEnabled={serialCommIsConnected}
+							onSubmitCallback={this.handleSendCommandClick} />
+					</div>
+					<br/>
 					<TextFieldSubmitter
-						isEnabled={serialCommIsConnected}
+						isEnabled={true}
 						onSubmitCallback={this.handleSendCommandClick} />
 					<br/>
 					<Console data={consoleData} />
