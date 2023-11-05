@@ -19,7 +19,7 @@ import { getHomeAllCommand } from './lib/machine-control/command-builder';
 
 import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
-import MultiParamSubmitter from './component/multi-param-submitter'
+import SetupParamSubmitter from './component/setup-param-submitter'
 import SpinningParamSubmitter from './component/spinning-param-submitter';
 
 import './index.css';
@@ -408,23 +408,13 @@ class BaseMachineControlApp extends React.Component {
 					</div>
 					<br/>
 					<div>
-						<Button
-							size="medium"
-							variant="outlined"
-							onClick={this.handleHomeAllClick} > 
-							Home All
-						</Button>
-					<br/>
-					</div>
-					<br/>
-					<div>
-						<MultiParamSubmitter
+						<SetupParamSubmitter
 							isEnabled={true}
 							onSubmitCallback={this.handleSendCommandClick} />
 					</div>
 					<div>
 						<SpinningParamSubmitter
-							isEnabled={serialCommIsConnected}
+							isEnabled={false}
 							onSubmitCallback={this.handleSendCommandClick} />
 					</div>
 					<br/>

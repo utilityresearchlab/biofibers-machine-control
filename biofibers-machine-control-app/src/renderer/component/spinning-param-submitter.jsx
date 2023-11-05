@@ -9,8 +9,19 @@ class SpinningParamSubmitter extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            length: 150,
+            diameter: 0.3
         }
         this.handleOnSubmit = this.handleOnSubmit.bind(this);
+        this.handleOnChange = this.handleOnChange.bind(this);
+    }
+
+    handleOnChange(event) {
+        const {name, value} = event.target;
+        this.setState({
+            ...this.state,
+            [name]: value
+        });
     }
 
     handleOnSubmit(event) {
@@ -21,9 +32,9 @@ class SpinningParamSubmitter extends React.Component {
 	
 
 		const onSubmitCallback = this.props.onSubmitCallback;
-		// get param and send in call back
+		// TODO: generate gcode based on param and send in call back 
 		if (onSubmitCallback) {
-			onSubmitCallback();
+			onSubmitCallback('');
 		}
 	}
 
@@ -38,7 +49,7 @@ class SpinningParamSubmitter extends React.Component {
             autoComplete="off"
             onSubmit={this.handleOnSubmit}
             > 
-                <p>Spinning</p>
+                <p><b>Spinning</b></p>
                 <Stack
                     direction="row"
                     justifyContent="center"
@@ -47,19 +58,27 @@ class SpinningParamSubmitter extends React.Component {
                 >
                     <p>Length [mm] </p>
                     <TextField
+                        name="length"
 						label="Length"
+                        type="number"
 						size="small"
 						color="primary"
 						margin="dense"
+                        value={this.state.length}
 						disabled={!this.props.isEnabled}
+                        onChange={this.handleOnChange}
 						/> 
-                    <p>Thickness [mm] </p>
+                    <p>Diameter [mm] </p>
                     <TextField
-						label="Thickness"
+                        name="diameter"
+						label="Diameter"
+                        type="number"
 						size="small"
 						color="primary"
 						margin="dense"
+                        value={this.state.diameter}
 						disabled={!this.props.isEnabled}
+                        onChange={this.handleOnChange}
 						/>                 
                 </Stack>
                 <Button
