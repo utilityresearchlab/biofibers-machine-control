@@ -15,7 +15,7 @@ import SerialPortHelper from './lib/serial-util/serial-port-helper';
 import {MachineCommandInterpreter} from './lib/machine-control/command-interpreter';
 import {parseLine} from './lib/machine-control/command-parser';
 import {MACHINE_COMMANDS, MACHINE_ERROR_CODES} from './lib/machine-control/machine-protocol';
-import { getHomeAllCommand } from './lib/machine-control/command-builder';
+import { CMD_HOME_AXES } from './lib/machine-control/gcode_constants';
 
 import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
@@ -268,7 +268,7 @@ class BaseMachineControlApp extends React.Component {
 	}
 
 	handleHomeAllClick() {
-		const command = getHomeAllCommand();
+		const command = CMD_HOME_AXES;
 		this.handleSendCommandClick(command);
 	}
 

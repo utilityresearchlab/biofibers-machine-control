@@ -5,7 +5,8 @@ import Button from '@mui/material/Button';
 import { Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
-import { getHomeAllCommand } from './../lib/machine-control/command-builder';
+import { CMD_HOME_AXES } from './../lib/machine-control/gcode_constants';
+import { GcodeBuilder } from '../lib/machine-control/gcode_builder';
 
 class SetupParamSubmitter extends React.Component {
     constructor(props) {
@@ -14,13 +15,16 @@ class SetupParamSubmitter extends React.Component {
             nozzleTemperature: 60,
             wrapperTemperature: 60,
             collectorSpeed: 60,
-            collectorDirection: 'clockwise'
+            collectorDirection: 'clockwise', 
+            pullDownInProgress: false,
+            nIntervalId: null,
         }
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
-        this.handleOnSubmit = this.handleOnSubmit.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
         this.handleOnDirectionChange = this.handleOnDirectionChange.bind(this);
+        this.handleStartPullDownClick = this.handleStartPullDownClick.bind(this);
+        this.handleStopPullDownClick = this.handleStopPullDownClick.bind(this);
         this.handleOnKeyUp = this.handleOnKeyUp.bind(this);
     }
     
@@ -38,9 +42,40 @@ class SetupParamSubmitter extends React.Component {
     }
 
     handleHomeAllClick(event) {
-		const command = getHomeAllCommand();
-		this.handleSubmitCommand(event, command);
+        var gcodeBuilder = new GcodeBuilder();
+        gcodeBuilder.homeAll();
+		this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
 	}
+
+    handleStartPullDownClick(event) {
+        var gcodeBuilder = new GcodeBuilder();
+        gcodeBuilder.userRelativeCoordinates();
+        gcodeBuilder.useRelativeExtrusionDistances();
+        gcodeBuilder.resetExtrusionDistance();
+
+        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+
+        // keep sending command to extrude until pull-down is stopped
+        // todo: replace test with actual gcode, check buffer
+        var intervalId = setInterval(() => {
+            this.handleSubmitCommand(event, 'test')
+        }, 1000)
+        this.setState({
+            nIntervalId: intervalId,
+            pullDownInProgress: true
+        })
+    }
+
+    handleStopPullDownClick(event) {
+        this.setState({
+            pullDownInProgress: false
+        })
+        clearInterval(this.state.nIntervalId)
+    }
+
+    submitPullDownCommand() {
+        
+    }
 
     handleOnChange(event) {
         const {name, value} = event.target;
@@ -56,39 +91,31 @@ class SetupParamSubmitter extends React.Component {
         });
     }
 
-    // TODO: replace hardcoded gcode 
-    handleOnSubmit(event) {
-        const command = 'G91\nM83\nG92 E0\n'
-		this.handleSubmitCommand(event, command);
-	}
-
-    // Trigger submit if we press enter in the textbox
-    // TODO: replace hardcoded gcode 
-    // TODO: see if we could call onkeyup without triggering onsubmit
+    // Trigger submmit command if we press enter in the textbox
 	handleOnKeyUp(event) {
+        console.log("key up");
 		event.preventDefault();
-        var command;
+        var gcodeBuilder = new GcodeBuilder();
 		if (event.charCode == 13
 			|| event.keyCode == 13
 			|| event.key === 'Enter') {
 			// Enter pressed so trigger submit
 			const {name, value} = event.target;
             if (name == 'nozzleTemperature'){
-                command = 'M109 S' + this.state.nozzleTemperature.toString() + '\n';
+                gcodeBuilder.setTemperature(this.state.nozzleTemperature);
             } 
+            // TODO: look up gcode for set wrapper temperature
             // else if (name == 'wrapperTemperature') {
                 // command = 'M109 ' + this.state.wrapperTemperature.toString() + '\n';
             // } 
             else if (name == 'collectorSpeed') {
                 if (this.state.collectorDirection == 'clockwise') {
-                    command = 'M3 S' + this.state.collectorSpeed.toString() + '\n';
+                    gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, true)
                 } else {
-                    command = 'M4 S' + this.state.collectorSpeed.toString() + '\n';
+                    gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, false)
                 }
-            } else {
-                command = ''
-            }
-            this.handleSubmitCommand(event, command)
+            } 
+            this.handleSubmitCommand(event, gcodeBuilder.toGcodeString())
 		}
 	}
 
@@ -101,7 +128,6 @@ class SetupParamSubmitter extends React.Component {
             }}
             noValidate
             autoComplete="off"
-            onSubmit={this.handleOnSubmit}
             > 
                 <p><b>Setup</b></p>
                 <Button
@@ -177,12 +203,19 @@ class SetupParamSubmitter extends React.Component {
                     </ToggleButtonGroup>
                 </Stack>
                 <Button
-						variant="outlined"
-						size="medium"
-						type='submit'
-						disabled={!this.props.isEnabled}>
-						Start pull-down
-				</Button>
+                    variant="outlined"
+                    size="medium"
+                    disabled={!this.props.isEnabled}
+                    color={(this.state.pullDownInProgress) ? "error" : "success"}
+                    onClick={(this.state.pullDownInProgress)
+                        ? this.handleStopPullDownClick
+                        : this.handleStartPullDownClick} > 
+                    {this.state.pullDownInProgress
+                        ? 'Stop pull-down'
+                        : 'Start pull-down'}
+                </Button>
+                
+                
             </Box>
         )
     }
