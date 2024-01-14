@@ -49,16 +49,20 @@ class SetupParamSubmitter extends React.Component {
 
     handleStartPullDownClick(event) {
         var gcodeBuilder = new GcodeBuilder();
-        gcodeBuilder.userRelativeCoordinates();
-        gcodeBuilder.useRelativeExtrusionDistances();
-        gcodeBuilder.resetExtrusionDistance();
+        gcodeBuilder
+            .userRelativeCoordinates()
+            .useRelativeExtrusionDistances()
+            .resetExtrusionDistance();
 
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
 
         // keep sending command to extrude until pull-down is stopped
-        // todo: replace test with actual gcode, check buffer
+        // todo: check buffer
         var intervalId = setInterval(() => {
-            this.handleSubmitCommand(event, 'test')
+            var pullDownGcodeBuilder = new GcodeBuilder();
+            pullDownGcodeBuilder
+                .extrudeWhileMoveX(0.1, 4, 0.141, 'extrude and move X'); // value from experiments
+            this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString())
         }, 1000)
         this.setState({
             nIntervalId: intervalId,

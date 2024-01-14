@@ -205,6 +205,11 @@ export class GcodeBuilder {
         return this
     }
 
+    extrudeWhileMoveX(value, xValue, compositeFeedrate, comment='') {
+        this.move({'X': xValue, 'E': value, 'F': compositeFeedrate}, comment)
+        return this
+    }
+
     retract(value, feedrate=null, comment='retract') {
         value = (value > 0) ? -1 * value : value
         this.moveE(value, feedrate, comment)
