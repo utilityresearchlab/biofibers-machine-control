@@ -12,6 +12,7 @@ class SerialCommunication {
 	constructor(serialPortPath=defaultSerialPort, baudRate=defaultBaudRate) {
 		this.setSerialPort(serialPortPath, baudRate);
 		this.isReceiving = false;
+		this.nackline = 0; // number of lines that did not receive ok
 	}
 
 	sendCommand(cmd, onSentCallback) {
@@ -25,10 +26,16 @@ class SerialCommunication {
 			}
 			return false;
 		}
+		// todo: replace placeholder 5 with actual buffer size
+		if (this.nackline > 5) {
+			this.log("too many commands sent, wait and resend");
+			return false;
+		}
 		this.serialPort.write(cmd + endOfCommand, (err) => {
 			if (err) {
 				this.log("Error on write: ", err.message);
 			} else {
+				this.nackline += 1;
 				this.log("Command Sent: ", cmd);
 			}
 			if (onSentCallback) {
@@ -57,6 +64,11 @@ class SerialCommunication {
 		const receivingCallback = dataReceivedCallback;
 		this.serialPort.on('data', function (data) {
   		that.log('Received Data:', data.toString());
+			const lastLine = data.toString().split('\n').slice(-1);
+			if (lastLine === 'ok') {
+				this.nackline -= 1;
+				this.log("Unack Lines ", this.nackline);
+			}
 			if (receivingCallback) {
 				receivingCallback(data, Date.now());
 			}
