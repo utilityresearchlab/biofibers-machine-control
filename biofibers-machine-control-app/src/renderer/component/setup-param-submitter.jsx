@@ -2,11 +2,16 @@ import * as React from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import { Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
-import { CMD_HOME_AXES } from './../lib/machine-control/gcode_constants';
+
 import { GcodeBuilder } from '../lib/machine-control/gcode_builder';
+import MaterialHelper from '../lib/material-util/material-helper';
 
 class SetupParamSubmitter extends React.Component {
     constructor(props) {
@@ -18,6 +23,7 @@ class SetupParamSubmitter extends React.Component {
             collectorDirection: 'clockwise', 
             pullDownInProgress: false,
             nIntervalId: null,
+            selectedMaterial: MaterialHelper.availableMaterials()[0]
         }
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
@@ -26,6 +32,7 @@ class SetupParamSubmitter extends React.Component {
         this.handleStartPullDownClick = this.handleStartPullDownClick.bind(this);
         this.handleStopPullDownClick = this.handleStopPullDownClick.bind(this);
         this.handleOnKeyUp = this.handleOnKeyUp.bind(this);
+        this.handleOnSelectMaterial = this.handleOnSelectMaterial.bind(this);
     }
     
     handleSubmitCommand(event, command) {
@@ -60,8 +67,10 @@ class SetupParamSubmitter extends React.Component {
         // todo: check buffer
         var intervalId = setInterval(() => {
             var pullDownGcodeBuilder = new GcodeBuilder();
+            const params = MaterialHelper.defaultParams()[this.state.selectedMaterial];
             pullDownGcodeBuilder
-                .extrudeWhileMoveX(0.1, 4, 0.141, 'extrude and move X'); // value from experiments
+                // .extrudeWhileMoveX(params['E'], params['X'], params['F'], 'extrude and move X'); // value from experiments
+                .moveX(2, 1) // for testing
             this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString())
         }, 1000)
         this.setState({
@@ -75,10 +84,6 @@ class SetupParamSubmitter extends React.Component {
             pullDownInProgress: false
         })
         clearInterval(this.state.nIntervalId)
-    }
-
-    submitPullDownCommand() {
-        
     }
 
     handleOnChange(event) {
@@ -95,9 +100,27 @@ class SetupParamSubmitter extends React.Component {
         });
     }
 
+    handleOnSelectMaterial(event) {
+		console.log("select material", event.target.value);
+		const material = String(event.target.value);
+		this.setState({selectedMaterial: material});
+	}
+
+    getRenderedMaterialItems() {
+        const availableMaterials = MaterialHelper.availableMaterials();
+        let renderedMaterialItems = availableMaterials.map((item, index) => {
+            const value = item.toString();
+            return (
+                <MenuItem
+                    key={"item-material-" + value}
+                    value={value}>{value}</MenuItem>
+            )
+        });
+        return renderedMaterialItems;
+    }
+
     // Trigger submmit command if we press enter in the textbox
 	handleOnKeyUp(event) {
-        console.log("key up");
 		event.preventDefault();
         var gcodeBuilder = new GcodeBuilder();
 		if (event.charCode == 13
@@ -108,7 +131,7 @@ class SetupParamSubmitter extends React.Component {
             if (name == 'nozzleTemperature'){
                 gcodeBuilder.setTemperature(this.state.nozzleTemperature);
             } 
-            // TODO: look up gcode for set wrapper temperature
+            // TODO: look up how to set wrapper temperature
             // else if (name == 'wrapperTemperature') {
                 // command = 'M109 ' + this.state.wrapperTemperature.toString() + '\n';
             // } 
@@ -124,6 +147,7 @@ class SetupParamSubmitter extends React.Component {
 	}
 
     render() {
+        const renderedMaterialItems = this.getRenderedMaterialItems();
         return (
             <Box
             component="form"
@@ -206,6 +230,17 @@ class SetupParamSubmitter extends React.Component {
                         </ToggleButton>
                     </ToggleButtonGroup>
                 </Stack>
+                <FormControl size="small" sx={{mb:1, mr: 1, minWidth: 300 }}>
+                    <InputLabel id="material-label">Material</InputLabel>
+                    <Select
+                        labelId="material"
+                        id="material-select"
+                        label="Material"
+                        value={this.state.selectedMaterial}
+                        onChange={this.handleOnSelectMaterial}>
+                        {renderedMaterialItems}
+                    </Select>
+                </FormControl>
                 <Button
                     variant="outlined"
                     size="medium"
