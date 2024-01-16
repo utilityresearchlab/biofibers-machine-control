@@ -206,7 +206,7 @@ export class GcodeBuilder {
     }
 
     extrudeWhileMoveX(value, xValue, compositeFeedrate, comment='') {
-        this.move({'X': xValue, 'E': value, 'F': compositeFeedrate}, comment)
+        this.move({'X': xValue, 'E': value.toFixed(4), 'F': compositeFeedrate.toFixed(4)}, comment)
         return this
     }
 

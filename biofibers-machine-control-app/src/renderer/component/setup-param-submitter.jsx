@@ -83,7 +83,10 @@ class SetupParamSubmitter extends React.Component {
         this.setState({
             pullDownInProgress: false
         })
-        clearInterval(this.state.nIntervalId)
+        clearInterval(this.state.nIntervalId);
+        var gcodeBuilder = new GcodeBuilder();
+        gcodeBuilder.setSpindleSpeed(0, true);
+        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
     handleOnChange(event) {
@@ -253,8 +256,6 @@ class SetupParamSubmitter extends React.Component {
                         ? 'Stop pull-down'
                         : 'Start pull-down'}
                 </Button>
-                
-                
             </Box>
         )
     }
