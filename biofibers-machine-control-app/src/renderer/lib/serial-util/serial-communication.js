@@ -64,10 +64,11 @@ class SerialCommunication {
 		const receivingCallback = dataReceivedCallback;
 		this.serialPort.on('data', function (data) {
   		that.log('Received Data:', data.toString());
-			const lastLine = data.toString().split('\n').slice(-1);
+			const lastLine = data.toString().trim().split('\n').slice(-1)[0];
+			that.log('last line ', lastLine);
 			if (lastLine === 'ok') {
-				this.nackline -= 1;
-				this.log("Unack Lines ", this.nackline);
+				that.nackline -= 1;
+				that.log("Unack Lines ", that.nackline);
 			}
 			if (receivingCallback) {
 				receivingCallback(data, Date.now());
