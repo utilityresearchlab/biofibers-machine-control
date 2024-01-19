@@ -420,7 +420,7 @@ class BaseMachineControlApp extends React.Component {
 					</div>
 					<div>
 						<SpinningParamSubmitter
-							isEnabled={true}
+							isEnabled={false}
 							onSubmitCallback={this.handleSendCommandClick} />
 					</div>
 					<br/>

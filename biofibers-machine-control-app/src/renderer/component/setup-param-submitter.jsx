@@ -224,6 +224,7 @@ class SetupParamSubmitter extends React.Component {
                         value={this.state.collectorDirection}
                         color="primary"
                         onChange={this.handleOnDirectionChange}
+                        disabled={!this.props.isEnabled}
                         exclusive>
                         <ToggleButton value="clockwise">
                             <RotateRightIcon />
