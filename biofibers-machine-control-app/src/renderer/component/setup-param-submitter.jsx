@@ -69,8 +69,8 @@ class SetupParamSubmitter extends React.Component {
             var pullDownGcodeBuilder = new GcodeBuilder();
             const params = MaterialHelper.defaultParams()[this.state.selectedMaterial];
             pullDownGcodeBuilder
-                // .extrudeWhileMoveX(params['E'], params['X'], params['F'], 'extrude and move X'); // value from experiments
-                .moveX(2, 1) // for testing
+                .extrudeWhileMoveX(params['E'], params['X'], params['F'], 'extrude and move X'); // value from experiments
+                // .moveX(2, 1) // for testing
             this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString())
         }, 1000)
         this.setState({
@@ -132,12 +132,11 @@ class SetupParamSubmitter extends React.Component {
 			// Enter pressed so trigger submit
 			const {name, value} = event.target;
             if (name == 'nozzleTemperature'){
-                gcodeBuilder.setTemperature(this.state.nozzleTemperature);
+                gcodeBuilder.setTemperature(this.state.nozzleTemperature,true, 1);
             } 
-            // TODO: look up how to set wrapper temperature
-            // else if (name == 'wrapperTemperature') {
-                // command = 'M109 ' + this.state.wrapperTemperature.toString() + '\n';
-            // } 
+            else if (name == 'wrapperTemperature') {
+                gcodeBuilder.setTemperature(this.state.wrapperTemperature, true, 0);
+            } 
             else if (name == 'collectorSpeed') {
                 if (this.state.collectorDirection == 'clockwise') {
                     gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, true)
