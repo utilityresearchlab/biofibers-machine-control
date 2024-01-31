@@ -3,7 +3,7 @@ import { SerialPort } from 'serialport';
 
 const noPortSelected = '';
 const defaultSerialPort = noPortSelected;
-const defaultBaudRate = 115200;
+const defaultBaudRate = 250000;
 
 const endOfCommand = '\r\n';
 
@@ -27,10 +27,10 @@ class SerialCommunication {
 			return false;
 		}
 		// todo: replace placeholder 5 with actual buffer size
-		if (this.nackline > 5) {
-			this.log("too many commands sent, wait and resend");
-			return false;
-		}
+		// if (this.nackline > 5) {
+		// 	this.log("too many commands sent, wait and resend");
+		// 	return false;
+		// }
 		this.serialPort.write(cmd + endOfCommand, (err) => {
 			if (err) {
 				this.log("Error on write: ", err.message);

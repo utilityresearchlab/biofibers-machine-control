@@ -15,7 +15,7 @@ import SerialPortHelper from './lib/serial-util/serial-port-helper';
 import {MachineCommandInterpreter} from './lib/machine-control/command-interpreter';
 import {parseLine} from './lib/machine-control/command-parser';
 import {MACHINE_COMMANDS, MACHINE_ERROR_CODES} from './lib/machine-control/machine-protocol';
-import { CMD_HOME_AXES } from './lib/machine-control/gcode_constants';
+import { CMD_HOME_AXES } from './lib/machine-control/gcode-constants';
 
 import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
@@ -168,6 +168,14 @@ class BaseMachineControlApp extends React.Component {
 
 	componentDidMount() {
 		this.listenForAvailableSerialPorts();
+		// Check if this is the first load by seeing if our object exists in local storage
+		if (localStorage.getItem('firstLoadDone') === null) {
+			// If it's the first load, set the flag in local storage to true and reload the page
+			localStorage.setItem('firstLoadDone', 1);
+			console.log('This is the initial load');
+		  } else {
+			console.log('This is a page refresh');
+		  } 
 	}
 
 	componentWillUnmount() {

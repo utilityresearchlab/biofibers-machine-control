@@ -1,10 +1,11 @@
 import * as React from 'react';
+import { setTimeout } from 'timers/promises';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { Stack, TextField } from '@mui/material';
 
-import { GcodeBuilder } from '../lib/machine-control/gcode_builder';
+import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
 
 class TestingParamSubmitter extends React.Component {
     constructor(props) {
@@ -14,12 +15,14 @@ class TestingParamSubmitter extends React.Component {
             eFeedrate: 0.01,
             xValue:4, 
             xFeedrate: 0.01, 
-            spinningInProgress: false
+            spinningInProgress: false, 
+            numCommands: 5
         }
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
         this.handleStartSpinningClick = this.handleStartSpinningClick.bind(this);
         this.handleStopSpinningClick = this.handleStopSpinningClick.bind(this);
+        this.handleSendMultipleCommands = this.handleSendMultipleCommands.bind(this);
     }
 
     handleOnChange(event) {
@@ -46,17 +49,14 @@ class TestingParamSubmitter extends React.Component {
 
     handleStartSpinningClick(event) {
         // keep sending command to extrude until spinning is stopped
-        // todo: check buffer
-        console.log(this.state.eValue);
         var intervalId = setInterval(() => {
             var gcodeBuilder = new GcodeBuilder();
             gcodeBuilder
                 .extrudeWhileMoveX(
                     this.state.eValue, 
                     this.state.xValue,
-                    Math.sqrt(
-                        Math.pow(this.state.eFeedrate, 2)+Math.pow(this.state.xFeedrate, 2))
-                    , 'extrude and move X'); 
+                    this.getCompositeFeedrate(),
+                    'extrude and move X'); 
             this.handleSubmitCommand(event, gcodeBuilder.toGcodeString())
         }, 1000)
         this.setState({
@@ -65,7 +65,7 @@ class TestingParamSubmitter extends React.Component {
         })
     }
 
-    handleStopSpinningClick(event) {
+     handleStopSpinningClick(event) {
         this.setState({
             spinningInProgress: false
         })
@@ -73,6 +73,24 @@ class TestingParamSubmitter extends React.Component {
         var gcodeBuilder = new GcodeBuilder();
         gcodeBuilder.setSpindleSpeed(0, true);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+    }
+
+    handleSendMultipleCommands(event) {
+        for (let i = 0; i < this.state.numCommands; i ++) {
+            var gcodeBuilder = new GcodeBuilder();
+            gcodeBuilder
+                .extrudeWhileMoveX(
+                    this.state.eValue, 
+                    this.state.xValue,
+                    this.getCompositeFeedrate(),
+                    'extrude and move X'); 
+            this.handleSubmitCommand(event, gcodeBuilder.toGcodeString())
+        }
+    }
+
+    getCompositeFeedrate() {
+        return Math.sqrt(
+            Math.pow(this.state.eFeedrate, 2)+Math.pow(this.state.xFeedrate, 2));
     }
 
     render() {
@@ -148,7 +166,23 @@ class TestingParamSubmitter extends React.Component {
                         onChange={this.handleOnChange}
 						/>                   
                 </Stack>
-                <Button
+                <Stack
+                    direction="row"
+                    justifyContent="right"
+                    alignItems="center"
+                    spacing={1}
+                ><p>Composite Feed Rate [mm/min]: {this.getCompositeFeedrate().toFixed(4)} </p></Stack>
+                <TextField
+                        name="numCommands"
+						label="number of commands to send"
+                        type="number"
+						size="small"
+						color="primary"
+                        value={this.state.numCommands}
+						disabled={!this.props.isEnabled}
+                        onChange={this.handleOnChange}
+						/> 
+                {/* <Button
                     variant="outlined"
                     size="medium"
                     disabled={!this.props.isEnabled}
@@ -159,6 +193,14 @@ class TestingParamSubmitter extends React.Component {
                     {this.state.spinningInProgress
                         ? 'Stop spinning'
                         : 'Start spinning'}
+                </Button> */}
+                <Button
+                    variant="outlined"
+                    size="medium"
+                    disabled={!this.props.isEnabled}
+                    color="success"
+                    onClick={this.handleSendMultipleCommands} > 
+                    Send Commands
                 </Button>
             </Box>
         )

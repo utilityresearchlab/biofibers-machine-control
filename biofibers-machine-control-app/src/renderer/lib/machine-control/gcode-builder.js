@@ -1,5 +1,5 @@
 
-import * as GCODE_CONSTANTS from './gcode_constants.js'
+import * as GCODE_CONSTANTS from './gcode-constants.js'
 
 export class GcodeBuilder {
 
@@ -201,7 +201,7 @@ export class GcodeBuilder {
     }
 
     extrude(value, feedrate=null, comment='') {
-        this.moveE(value, feedrate, comment)
+        this.moveE(value.toFixed(4), feedrate, comment)
         return this
     }
 

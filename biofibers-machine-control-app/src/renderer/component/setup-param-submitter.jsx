@@ -10,23 +10,28 @@ import { Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 
-import { GcodeBuilder } from '../lib/machine-control/gcode_builder';
+import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
 import MaterialHelper from '../lib/material-util/material-helper';
+import MiscUtil from '../lib/machine-control/misc-util';
 
 class SetupParamSubmitter extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            nozzleTemperature: 60,
-            wrapperTemperature: 60,
-            collectorSpeed: 60,
-            collectorDirection: 'clockwise', 
+            adjustPump: 2,
+            nozzleTemperature: 32,
+            wrapperTemperature: 52,
+            collectorSpeed: 100,
+            collectorDirection: 'counterclockwise', 
             pullDownInProgress: false,
             nIntervalId: null,
             selectedMaterial: MaterialHelper.availableMaterials()[0]
         }
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
+        this.handleLowerPumpClick = this.handleLowerPumpClick.bind(this);
+        this.handleRetractPumpClick = this.handleRetractPumpClick.bind(this);
+        this.handlePurgeClick = this.handlePurgeClick.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
         this.handleOnDirectionChange = this.handleOnDirectionChange.bind(this);
         this.handleStartPullDownClick = this.handleStartPullDownClick.bind(this);
@@ -50,9 +55,33 @@ class SetupParamSubmitter extends React.Component {
 
     handleHomeAllClick(event) {
         var gcodeBuilder = new GcodeBuilder();
-        gcodeBuilder.homeAll();
+        gcodeBuilder
+            .homeAll()
+            .userRelativeCoordinates()
+            .useRelativeExtrusionDistances()
+            .resetExtrusionDistance();;
 		this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
 	}
+
+    handleLowerPumpClick(event) {
+        var gcodeBuilder = new GcodeBuilder();
+        console.log(this.state.adjustPump);
+        gcodeBuilder.extrude(this.state.adjustPump, 4);
+        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+    }
+
+    handleRetractPumpClick(event) {
+        var gcodeBuilder = new GcodeBuilder();
+        console.log(this.state.adjustPump);
+        gcodeBuilder.extrude(this.state.adjustPump * (-1), 4);
+        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+    }
+
+    handlePurgeClick(event) {
+        var gcodeBuilder = new GcodeBuilder();
+        gcodeBuilder.extrude(0.1, 1, "Purge 0.1 mm material");
+		this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+    }
 
     handleStartPullDownClick(event) {
         var gcodeBuilder = new GcodeBuilder();
@@ -64,7 +93,7 @@ class SetupParamSubmitter extends React.Component {
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
 
         // keep sending command to extrude until pull-down is stopped
-        // todo: check buffer
+        // const commandTime = MiscUtil.calculateCommandTimeInMiliSec(params['E'], params['X'], params['F']);
         var intervalId = setInterval(() => {
             var pullDownGcodeBuilder = new GcodeBuilder();
             const params = MaterialHelper.defaultParams()[this.state.selectedMaterial];
@@ -72,7 +101,7 @@ class SetupParamSubmitter extends React.Component {
                 .extrudeWhileMoveX(params['E'], params['X'], params['F'], 'extrude and move X'); // value from experiments
                 // .moveX(2, 1) // for testing
             this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString())
-        }, 1000)
+        }, 5000)
         this.setState({
             nIntervalId: intervalId,
             pullDownInProgress: true
@@ -85,7 +114,7 @@ class SetupParamSubmitter extends React.Component {
         })
         clearInterval(this.state.nIntervalId);
         var gcodeBuilder = new GcodeBuilder();
-        gcodeBuilder.setSpindleSpeed(0, true);
+        // gcodeBuilder.setSpindleSpeed(0, true);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
@@ -93,7 +122,7 @@ class SetupParamSubmitter extends React.Component {
         const {name, value} = event.target;
         this.setState({
             ...this.state,
-            [name]: value
+            [name]: name == 'adjustPump' ? Number(value) : value
         });
     }
 
@@ -131,12 +160,15 @@ class SetupParamSubmitter extends React.Component {
 			|| event.key === 'Enter') {
 			// Enter pressed so trigger submit
 			const {name, value} = event.target;
+            // Set extruder temperature: tool 1
             if (name == 'nozzleTemperature'){
-                gcodeBuilder.setTemperature(this.state.nozzleTemperature,true, 1);
+                gcodeBuilder.setTemperature(this.state.nozzleTemperature, false, 1);
             } 
+            // Set wrapper temperature: tool 0
             else if (name == 'wrapperTemperature') {
-                gcodeBuilder.setTemperature(this.state.wrapperTemperature, true, 0);
+                gcodeBuilder.setTemperature(this.state.wrapperTemperature, false, 0);
             } 
+            // Set collector speed 
             else if (name == 'collectorSpeed') {
                 if (this.state.collectorDirection == 'clockwise') {
                     gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, true)
@@ -164,7 +196,45 @@ class SetupParamSubmitter extends React.Component {
                     size="medium"
                     variant="outlined"
                     onClick={this.handleHomeAllClick} > 
-                    Home All
+                    Home All & Set Axes to Relative
+                </Button>
+                <Stack
+                    direction="row"
+                    justifyContent="left"
+                    alignItems="center"
+                    spacing={1}
+                    mt={1}
+                    mb={1}
+                >
+                    <TextField
+						label="Adjust Pump Height"
+                        name="adjustPump"
+                        type="number"
+						size="small"
+						color="primary"
+						margin="normal"
+						value={this.state.adjustPump}
+						disabled={!this.props.isEnabled}
+                        onChange={this.handleOnChange}
+						/> 
+                    <Button
+                    size="medium"
+                    variant="outlined"
+                    onClick={this.handleLowerPumpClick} > 
+                    Lower
+                    </Button>
+                    <Button
+                    size="medium"
+                    variant="outlined"
+                    onClick={this.handleRetractPumpClick} > 
+                    Retract
+                    </Button>
+                </Stack>
+                <Button
+                    size="medium"
+                    variant="outlined"
+                    onClick={this.handlePurgeClick} > 
+                    Purge material
                 </Button>
                 <Stack
                     direction="row"
@@ -207,7 +277,7 @@ class SetupParamSubmitter extends React.Component {
                     <p>Collector: </p>
                     <TextField
                         name="collectorSpeed"
-						label="Speed"
+						label="Speed (out of 255 in PWM)"
 						size="small"
                         type="number"
 						color="primary"
