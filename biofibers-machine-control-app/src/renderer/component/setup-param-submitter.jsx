@@ -93,6 +93,7 @@ class SetupParamSubmitter extends React.Component {
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
 
         // keep sending command to extrude until pull-down is stopped
+        // TODO: Determine proper interval timing instead of hard-coding 5000 ms
         // const commandTime = MiscUtil.calculateCommandTimeInMiliSec(params['E'], params['X'], params['F']);
         let intervalId = setInterval(() => {
             let pullDownGcodeBuilder = new GcodeBuilder();
@@ -101,7 +102,7 @@ class SetupParamSubmitter extends React.Component {
                 .extrudeWhileMoveX(params['E'], params['X'], params['F'], 'extrude and move X'); // value from experiments
                 // .moveX(2, 1) // for testing
             this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString());
-        }, 5000);
+        }, 5000); 
         this.setState({
             nIntervalId: intervalId,
             pullDownInProgress: true

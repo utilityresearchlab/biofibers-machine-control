@@ -49,6 +49,7 @@ class TestingParamSubmitter extends React.Component {
 
     handleStartSpinningClick(event) {
         // keep sending command to extrude until spinning is stopped
+        // TODO: Determine proper interval timing instead of hard-coding 1000 ms
         let intervalId = setInterval(() => {
             let gcodeBuilder = new GcodeBuilder();
             gcodeBuilder
