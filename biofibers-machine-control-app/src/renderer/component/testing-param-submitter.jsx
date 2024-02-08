@@ -68,10 +68,12 @@ class TestingParamSubmitter extends React.Component {
     }
 
      handleStopSpinningClick(event) {
+        let intervalId = this.state.nIntervalId;
         this.setState({
-            spinningInProgress: false
+            spinningInProgress: false,
+            nIntervalId: null
         });
-        clearInterval(this.state.nIntervalId);
+        clearInterval(intervalId);
         let gcodeBuilder = new GcodeBuilder();
         gcodeBuilder.setSpindleSpeed(0, true);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
