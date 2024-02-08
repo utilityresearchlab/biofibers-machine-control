@@ -16,7 +16,8 @@ class TestingParamSubmitter extends React.Component {
             xValue:4, 
             xFeedrate: 0.01, 
             spinningInProgress: false, 
-            numCommands: 5
+            numCommands: 5,
+            nIntervalId: null
         };
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
