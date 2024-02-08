@@ -94,7 +94,7 @@ class SetupParamSubmitter extends React.Component {
 
         // keep sending command to extrude until pull-down is stopped
         // TODO: Determine proper interval timing instead of hard-coding 5000 ms
-        // const commandTime = MiscUtil.calculateCommandTimeInMiliSec(params['E'], params['X'], params['F']);
+        // const commandTime = MiscUtil.calculateCommandTimeInMilliSec(params['E'], params['X'], params['F']);
         let intervalId = setInterval(() => {
             let pullDownGcodeBuilder = new GcodeBuilder();
             const params = MaterialHelper.defaultParams()[this.state.selectedMaterial];
