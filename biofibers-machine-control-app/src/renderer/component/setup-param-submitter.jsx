@@ -26,7 +26,7 @@ class SetupParamSubmitter extends React.Component {
             pullDownInProgress: false,
             nIntervalId: null,
             selectedMaterial: MaterialHelper.availableMaterials()[0]
-        }
+        };
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
         this.handleLowerPumpClick = this.handleLowerPumpClick.bind(this);
@@ -54,37 +54,37 @@ class SetupParamSubmitter extends React.Component {
     }
 
     handleHomeAllClick(event) {
-        var gcodeBuilder = new GcodeBuilder();
+        let gcodeBuilder = new GcodeBuilder();
         gcodeBuilder
             .homeAll()
             .useRelativeCoordinates()
             .useRelativeExtrusionDistances()
-            .resetExtrusionDistance();;
+            .resetExtrusionDistance();
 		this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
 	}
 
     handleLowerPumpClick(event) {
-        var gcodeBuilder = new GcodeBuilder();
+        let gcodeBuilder = new GcodeBuilder();
         console.log(this.state.adjustPump);
         gcodeBuilder.extrude(this.state.adjustPump, 4);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
     handleRetractPumpClick(event) {
-        var gcodeBuilder = new GcodeBuilder();
+        let gcodeBuilder = new GcodeBuilder();
         console.log(this.state.adjustPump);
         gcodeBuilder.extrude(this.state.adjustPump * (-1), 4);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
     handlePurgeClick(event) {
-        var gcodeBuilder = new GcodeBuilder();
+        let gcodeBuilder = new GcodeBuilder();
         gcodeBuilder.extrude(0.1, 1, "Purge 0.1 mm material");
 		this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
     handleStartPullDownClick(event) {
-        var gcodeBuilder = new GcodeBuilder();
+        let gcodeBuilder = new GcodeBuilder();
         gcodeBuilder
             .useRelativeCoordinates()
             .useRelativeExtrusionDistances()
@@ -94,26 +94,26 @@ class SetupParamSubmitter extends React.Component {
 
         // keep sending command to extrude until pull-down is stopped
         // const commandTime = MiscUtil.calculateCommandTimeInMiliSec(params['E'], params['X'], params['F']);
-        var intervalId = setInterval(() => {
-            var pullDownGcodeBuilder = new GcodeBuilder();
+        let intervalId = setInterval(() => {
+            let pullDownGcodeBuilder = new GcodeBuilder();
             const params = MaterialHelper.defaultParams()[this.state.selectedMaterial];
             pullDownGcodeBuilder
                 .extrudeWhileMoveX(params['E'], params['X'], params['F'], 'extrude and move X'); // value from experiments
                 // .moveX(2, 1) // for testing
-            this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString())
-        }, 5000)
+            this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString());
+        }, 5000);
         this.setState({
             nIntervalId: intervalId,
             pullDownInProgress: true
-        })
+        });
     }
 
     handleStopPullDownClick(event) {
         this.setState({
             pullDownInProgress: false
-        })
+        });
         clearInterval(this.state.nIntervalId);
-        var gcodeBuilder = new GcodeBuilder();
+        let gcodeBuilder = new GcodeBuilder();
         // gcodeBuilder.setSpindleSpeed(0, true);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
@@ -154,7 +154,7 @@ class SetupParamSubmitter extends React.Component {
     // Trigger submmit command if we press enter in the textbox
 	handleOnKeyUp(event) {
 		event.preventDefault();
-        var gcodeBuilder = new GcodeBuilder();
+        let gcodeBuilder = new GcodeBuilder();
 		if (event.charCode == 13
 			|| event.keyCode == 13
 			|| event.key === 'Enter') {
@@ -171,12 +171,12 @@ class SetupParamSubmitter extends React.Component {
             // Set collector speed 
             else if (name == 'collectorSpeed') {
                 if (this.state.collectorDirection == 'clockwise') {
-                    gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, true)
+                    gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, true);
                 } else {
-                    gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, false)
+                    gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, false);
                 }
             } 
-            this.handleSubmitCommand(event, gcodeBuilder.toGcodeString())
+            this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
 		}
 	}
 
@@ -327,7 +327,7 @@ class SetupParamSubmitter extends React.Component {
                         : 'Start pull-down'}
                 </Button>
             </Box>
-        )
+        );
     }
 }
 

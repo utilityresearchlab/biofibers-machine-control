@@ -17,7 +17,7 @@ class TestingParamSubmitter extends React.Component {
             xFeedrate: 0.01, 
             spinningInProgress: false, 
             numCommands: 5
-        }
+        };
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
         this.handleStartSpinningClick = this.handleStartSpinningClick.bind(this);
@@ -49,42 +49,42 @@ class TestingParamSubmitter extends React.Component {
 
     handleStartSpinningClick(event) {
         // keep sending command to extrude until spinning is stopped
-        var intervalId = setInterval(() => {
-            var gcodeBuilder = new GcodeBuilder();
+        let intervalId = setInterval(() => {
+            let gcodeBuilder = new GcodeBuilder();
             gcodeBuilder
                 .extrudeWhileMoveX(
                     this.state.eValue, 
                     this.state.xValue,
                     this.getCompositeFeedrate(),
                     'extrude and move X'); 
-            this.handleSubmitCommand(event, gcodeBuilder.toGcodeString())
-        }, 1000)
+            this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+        }, 1000);
         this.setState({
             nIntervalId: intervalId,
             spinningInProgress: true
-        })
+        });
     }
 
      handleStopSpinningClick(event) {
         this.setState({
             spinningInProgress: false
-        })
+        });
         clearInterval(this.state.nIntervalId);
-        var gcodeBuilder = new GcodeBuilder();
+        let gcodeBuilder = new GcodeBuilder();
         gcodeBuilder.setSpindleSpeed(0, true);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
     handleSendMultipleCommands(event) {
         for (let i = 0; i < this.state.numCommands; i ++) {
-            var gcodeBuilder = new GcodeBuilder();
+            let gcodeBuilder = new GcodeBuilder();
             gcodeBuilder
                 .extrudeWhileMoveX(
                     this.state.eValue, 
                     this.state.xValue,
                     this.getCompositeFeedrate(),
                     'extrude and move X'); 
-            this.handleSubmitCommand(event, gcodeBuilder.toGcodeString())
+            this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
         }
     }
 
@@ -203,7 +203,7 @@ class TestingParamSubmitter extends React.Component {
                     Send Commands
                 </Button>
             </Box>
-        )
+        );
     }
 }
 

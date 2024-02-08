@@ -21,7 +21,7 @@ class SpinningParamSubmitter extends React.Component {
             pulseCycle: 20, 
             eFeedrate: 0.01, 
             spinningInProgress: false
-        }
+        };
         // this.handleSubmit = this.handleSubmitCommand.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
         this.handleOnDirectionChange = this.handleOnDirectionChange.bind(this);
@@ -199,7 +199,7 @@ class SpinningParamSubmitter extends React.Component {
                         /> 
                 </Stack>
             </Box>
-        )
+        );
     }
 }
 

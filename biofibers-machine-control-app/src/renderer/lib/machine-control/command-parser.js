@@ -13,20 +13,20 @@ const parseLine = (() => {
         return (line => line.replace(whitespaceRe, ''));
     })();
 
-		const removeNewLines = (() => {
-			const newlineRe = /\r?\n|\r/igm;
-			return (line => line.replace(newlineRe, ''));
-		})();
+	const removeNewLines = (() => {
+		const newlineRe = /\r?\n|\r/igm;
+		return (line => line.replace(newlineRe, ''));
+	})();
 
-		const splitCommandsInBrackets =  (() => {
-				const cmdRe = /\[.*?\]/igm;
-				return (line => line.match(cmdRe, ''));
-		})();
+	const splitCommandsInBrackets =  (() => {
+			const cmdRe = /\[.*?\]/igm;
+			return (line => line.match(cmdRe, ''));
+	})();
 
-		const replaceBrackets = (() => {
-			const bracketsRe = /[\[\]']+/gm;
-			return (line => line.replace(bracketsRe, ''));
-		})();
+	const replaceBrackets = (() => {
+		const bracketsRe = /[\[\]']+/gm;
+		return (line => line.replace(bracketsRe, ''));
+	})();
 
 		// Matches commands formatted like: [R], [R,1] etc.
     const re = /\[([A-Za-z]+)((,.*)?)\]/igm;
@@ -44,47 +44,43 @@ const parseLine = (() => {
         if (options.noParseLine) {
             return result;
         }
+		const cmdsInBrackets = splitCommandsInBrackets(removeNewLines(line.trim())) || [];
+		const cmds = cmdsInBrackets.map((item, idx) => {
+			return replaceBrackets(item);
+		});
 
-
-				const cmdsInBrackets = splitCommandsInBrackets(removeNewLines(line.trim())) || [];
-				const cmds = cmdsInBrackets.map((item, idx) => {
-					return replaceBrackets(item);
-				});
-
-				result.words = [];
-				for (let i = 0; i < cmds.length; i++) {
-					// Go through cmds, split on comma, parse parameters if necessary
-					const cmd = cmds[i];
-					// If only a single char, that's the command [R] => "R"
-					if (cmd.length == 1) {
-						result.words.push([[cmd[0].trim()]]);
-					} else {
-						// More than 1 char, with a comma separator [R,10] => ["R", "10"]
-						const splitCmd = cmd.split(',');
-						const letter = splitCmd[0].toUpperCase().trim();
-						const params = splitCmd.slice(1).map((param, idx) => {
-							let trimmedParam = param.trim();
-							let value = Number(param);
-							if (Number.isNaN(value) || letter == MACHINE_COMMANDS.DEBUG) {
-								value = param;
-							}
-							return value;
-						});
-						if (options.flatten) {
-							result.words.push(letter + params);
-						} else {
-							result.words.push([letter, ...params]);
-						}
+		result.words = [];
+		for (let i = 0; i < cmds.length; i++) {
+			// Go through cmds, split on comma, parse parameters if necessary
+			const cmd = cmds[i];
+			// If only a single char, that's the command [R] => "R"
+			if (cmd.length == 1) {
+				result.words.push([[cmd[0].trim()]]);
+			} else {
+				// More than 1 char, with a comma separator [R,10] => ["R", "10"]
+				const splitCmd = cmd.split(',');
+				const letter = splitCmd[0].toUpperCase().trim();
+				const params = splitCmd.slice(1).map((param, idx) => {
+					let trimmedParam = param.trim();
+					let value = Number(param);
+					if (Number.isNaN(value) || letter == MACHINE_COMMANDS.DEBUG) {
+						value = param;
 					}
+					return value;
+				});
+				if (options.flatten) {
+					result.words.push(letter + params);
+				} else {
+					result.words.push([letter, ...params]);
 				}
-				console.log(result);
+			}
+		}
+		console.log(result);
         // Line number
         (typeof (ln) !== 'undefined') && (result.ln = ln);
         return result;
     };
 })();
-
-
 
 export {
 	parseLine,
