@@ -279,7 +279,7 @@ export class GcodeBuilder {
         return this
     }
 
-    userRelativeCoordinates() {
+    useRelativeCoordinates() {
         this._appendCommand(GCODE_CONSTANTS.CMD_USE_RELATIVE_COORDINATES, null, 'use relative coordinates')
         return this
     }

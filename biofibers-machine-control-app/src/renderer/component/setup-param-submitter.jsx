@@ -57,7 +57,7 @@ class SetupParamSubmitter extends React.Component {
         var gcodeBuilder = new GcodeBuilder();
         gcodeBuilder
             .homeAll()
-            .userRelativeCoordinates()
+            .useRelativeCoordinates()
             .useRelativeExtrusionDistances()
             .resetExtrusionDistance();;
 		this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
@@ -86,7 +86,7 @@ class SetupParamSubmitter extends React.Component {
     handleStartPullDownClick(event) {
         var gcodeBuilder = new GcodeBuilder();
         gcodeBuilder
-            .userRelativeCoordinates()
+            .useRelativeCoordinates()
             .useRelativeExtrusionDistances()
             .resetExtrusionDistance();
 
