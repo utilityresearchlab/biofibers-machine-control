@@ -21,7 +21,6 @@ import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
 import SetupParamSubmitter from './component/setup-param-submitter'
 import TestingParamSubmitter from './component/testing-param-submitter'
-import SpinningParamSubmitter from './component/spinning-param-submitter';
 
 import './index.css';
 
@@ -424,11 +423,6 @@ class BaseMachineControlApp extends React.Component {
 					<div>
 						<TestingParamSubmitter
 							isEnabled={true}
-							onSubmitCallback={this.handleSendCommandClick} />
-					</div>
-					<div>
-						<SpinningParamSubmitter
-							isEnabled={false}
 							onSubmitCallback={this.handleSendCommandClick} />
 					</div>
 					<br/>
