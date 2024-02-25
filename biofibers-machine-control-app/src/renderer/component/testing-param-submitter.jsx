@@ -12,9 +12,9 @@ class TestingParamSubmitter extends React.Component {
         super(props);
         this.state = {
             eValue:0.1, 
-            eFeedrate: 0.01,
+            eFeedrate: 0.2,
             xValue:4, 
-            xFeedrate: 0.01, 
+            xFeedrate: 8, 
             spinningInProgress: false, 
             numCommands: 5,
             nIntervalId: null

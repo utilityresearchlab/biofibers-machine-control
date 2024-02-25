@@ -66,7 +66,7 @@ class SetupParamSubmitter extends React.Component {
     handleLowerPumpClick(event) {
         let gcodeBuilder = new GcodeBuilder();
         console.log(this.state.adjustPump);
-        gcodeBuilder.extrude(this.state.adjustPump, 4);
+        gcodeBuilder.extrude(this.state.adjustPump, 20);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
@@ -100,9 +100,8 @@ class SetupParamSubmitter extends React.Component {
             const params = MaterialHelper.defaultParams()[this.state.selectedMaterial];
             pullDownGcodeBuilder
                 .extrudeWhileMoveX(params['E'], params['X'], params['F'], 'extrude and move X'); // value from experiments
-                // .moveX(2, 1) // for testing
             this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString());
-        }, 5000); 
+        }, 28000); 
         this.setState({
             nIntervalId: intervalId,
             pullDownInProgress: true
