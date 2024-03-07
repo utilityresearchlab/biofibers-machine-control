@@ -14,7 +14,6 @@ class TestingParamSubmitter extends React.Component {
             eValue:0.1, 
             eFeedrate: 0.2,
             xValue:4, 
-            xFeedrate: 8, 
             spinningInProgress: false, 
             numCommands: 5,
             nIntervalId: null
@@ -94,7 +93,11 @@ class TestingParamSubmitter extends React.Component {
 
     getCompositeFeedrate() {
         return Math.sqrt(
-            Math.pow(this.state.eFeedrate, 2)+Math.pow(this.state.xFeedrate, 2));
+            Math.pow(this.state.eFeedrate, 2)+Math.pow(this.calculateXFeedrate(), 2));
+    }
+
+    calculateXFeedrate() {
+        return this.state.eFeedrate * (this.state.xValue / this.state.eValue);
     }
 
     render() {
@@ -157,23 +160,12 @@ class TestingParamSubmitter extends React.Component {
 						disabled={!this.props.isEnabled}
                         onChange={this.handleOnChange}
 						/>   
-                    
-                    <p>X Axis Feed Rate [mm/min]</p>
-                    <TextField
-                        name="xFeedrate"
-						label="x axis feedrate"
-                        type="number"
-						size="small"
-						color="primary"
-                        value={this.state.xFeedrate}
-						disabled={!this.props.isEnabled}
-                        onChange={this.handleOnChange}
-						/>                   
+                    <p>X Axis Feed Rate [mm/min]: {this.calculateXFeedrate()} </p>
                 </Stack>
                 <Stack
                     direction="row"
                     justifyContent="right"
-                    alignItems="center"
+                    alignItems="centxer"
                     spacing={1}
                 ><p>Composite Feed Rate [mm/min]: {this.getCompositeFeedrate().toFixed(4)} </p></Stack>
                 <TextField
