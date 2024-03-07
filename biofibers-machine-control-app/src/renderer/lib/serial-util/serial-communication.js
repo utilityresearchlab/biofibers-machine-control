@@ -35,7 +35,8 @@ class SerialCommunication {
 			if (err) {
 				this.log("Error on write: ", err.message);
 			} else {
-				this.nackline += 1;
+				const numCmd = cmd.split(endOfCommand).length;
+				this.nackline += numCmd;
 				this.log("Command Sent: ", cmd);
 			}
 			if (onSentCallback) {
@@ -64,11 +65,12 @@ class SerialCommunication {
 		const receivingCallback = dataReceivedCallback;
 		this.serialPort.on('data', function (data) {
   		that.log('Received Data:', data.toString());
-			const lastLine = data.toString().trim().split('\n').slice(-1)[0];
-			that.log('last line ', lastLine);
-			if (lastLine === 'ok') {
-				that.nackline -= 1;
-				that.log("Unack Lines ", that.nackline);
+			const receivedData = data.toString().trim().split('\n');
+			for (const line of receivedData) {
+				if (line === 'ok') {
+					that.nackline -= 1;
+					that.log("Unack Lines ", that.nackline);
+				}
 			}
 			if (receivingCallback) {
 				receivingCallback(data, Date.now());
