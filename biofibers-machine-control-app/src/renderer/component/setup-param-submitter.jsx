@@ -65,7 +65,6 @@ class SetupParamSubmitter extends React.Component {
 
     handleLowerPumpClick(event) {
         let gcodeBuilder = new GcodeBuilder();
-        console.log(this.state.adjustPump);
         gcodeBuilder.extrude(this.state.adjustPump, 20);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }

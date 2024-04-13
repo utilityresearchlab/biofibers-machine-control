@@ -21,6 +21,7 @@ import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
 import SetupParamSubmitter from './component/setup-param-submitter'
 import TestingParamSubmitter from './component/testing-param-submitter'
+import GcodeUploader from './component/gcode-uploader'
 
 import './index.css';
 
@@ -424,6 +425,12 @@ class BaseMachineControlApp extends React.Component {
 						<TestingParamSubmitter
 							isEnabled={true}
 							onSubmitCallback={this.handleSendCommandClick} />
+					</div>
+					<br/>
+					<div>
+						<GcodeUploader
+							isEnabled={true}
+							onSubmitCallback={this.handleSendCommandClick}/>
 					</div>
 					<br/>
 					<TextFieldSubmitter

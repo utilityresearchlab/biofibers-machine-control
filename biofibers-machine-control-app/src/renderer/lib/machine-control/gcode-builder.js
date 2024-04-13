@@ -210,6 +210,13 @@ export class GcodeBuilder {
         return this;
     }
 
+    extrudeWhileMoveXAtFeedrates(value, xValue, eFeedrate, xFeedrate, comment='') {
+        const compositeFeedrate = Math.sqrt(
+            Math.pow(eFeedrate, 2)+Math.pow(xFeedrate, 2));
+        this.move({'X': xValue, 'E': value.toFixed(4), 'F': compositeFeedrate.toFixed(4)}, comment);
+        return this;
+    }
+
     retract(value, feedrate=null, comment='retract') {
         value = (value > 0) ? -1 * value : value;
         this.moveE(value, feedrate, comment);

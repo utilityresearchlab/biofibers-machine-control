@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { setTimeout } from 'timers/promises';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
