@@ -1,7 +1,7 @@
 # Instructions for Running, Building, and Distributing the Biofibers Machine Control App
 
 ## Install the app
-- Run `npm run install`
+- Run `npm install`
 
 ## Run / Debug the app
 - Run `npm run start`
@@ -20,7 +20,8 @@ https://stevenklambert.com/writing/comprehensive-guide-building-packaging-electr
 ## To compile app for Mac Distribution 
 - If you want a MacOS Universal app, run `npm run pack-mac-unv`.
 - If you want a MacOS x64 app, run `npm run pack-mac-x64`
-- The output of either file will be present in the `dist` folder.
+- If you want a MacOS arm64 app, run `npm run pack-mac-arm64`
+- The output of either file will be present in the `out` folder.
 - Zip the app, then share.
 
 ## Handling the "App is Damaged Message" When Installing on MacOS
