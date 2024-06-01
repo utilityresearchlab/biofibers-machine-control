@@ -118,7 +118,9 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "style-loader": "^4.0.0",
-    "webpack": "^5.91.0"
+    "webpack": "^5.91.0",
+    "fs-extra": "^11.2.0",
+    "node-gyp": "^9.3.0"
   },
   "dependencies": {
       "@emotion/react": "^11.10.4",
@@ -127,8 +129,6 @@
       "@mui/icons-material": "^5.10.9",
       "@mui/material": "^5.10.9",
       "electron-squirrel-startup": "^1.0.0",
-      "fs-extra": "^11.2.0",
-      "node-gyp": "^9.3.0",
       "tableify": "1.1.1",
       "serialport": "^10.4.0"
   },
