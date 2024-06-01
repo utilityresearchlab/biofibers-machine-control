@@ -20,7 +20,8 @@ module.exports = {
     packageAfterPrune: async (forgeConfig, buildPath) => {
     console.log(buildPath);
     return new Promise((resolve, reject) => {
-        const npmInstall = spawn('npm', ['install'], {
+        // See both answers for https://stackoverflow.com/questions/71930401/webpack-not-including-module-with-electron-forge-and-serialport
+        const npmInstall = spawn('npm', ['install', '--omit=dev'], {
         cwd: buildPath,
         stdio: 'inherit',
         shell: true
