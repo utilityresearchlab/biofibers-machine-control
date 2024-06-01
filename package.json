@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "clean": "rm -rf node_modules",
+    "reinstall": "npm run clean && npm install"
+  },
   "devDependencies": {
     "@babel/core": "^7.19.3",
     "@babel/preset-react": "^7.18.6",

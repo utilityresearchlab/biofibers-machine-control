@@ -1,27 +1,36 @@
 {
   "name": "biofibers-machine-control-app",
-  "productName": "biofibers-machine-control-app",
+  "productName": "biofibers-machine-control",
   "version": "0.0.1",
   "description": "Application to control a machine over serial",
   "main": ".webpack/main",
   "build": {
-    "appId": "org.utilityresearchlab.biofibersmachinecontrol",
+    "appId": "org.utilityresearchlab.biofiberscontrol",
+    "icon": "icon/utility-icon-512x512.jpg",
     "mac": {
       "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": "portable"
+    },
+    "linux": {
+      "target": "AppImage"
     }
   },
   "scripts": {
     "clean": "rm -rf node_modules",
     "reinstall": "npm run clean && npm install",
     "install": "electron-rebuild",
+    "pack": "electron-builder --dir",
+    "pack-mac-unv": "electron-builder --dir --mac --universal",
+    "pack-mac-x64": "electron-builder --dir --mac --x64",
+    "pack-mac-arm64": "electron-builder --dir --mac --arm64",
+    "dist": "electron-builder",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\"",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder",
-    "postinstall": "electron-builder install-app-deps"
+    "lint": "echo \"No linting configured\""
   },
   "keywords": [],
   "author": {
@@ -32,6 +41,7 @@
   "config": {
     "forge": {
       "packagerConfig": {},
+      "hooks": "require:./config/hooks.js",
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
@@ -105,6 +115,7 @@
     "@mui/icons-material": "^5.10.9",
     "@mui/material": "^5.10.9",
     "electron-squirrel-startup": "^1.0.0",
+    "fs-extra": "^11.2.0",
     "node-gyp": "^9.3.0",
     "serialport": "^10.4.0",
     "tableify": "1.1.1"
