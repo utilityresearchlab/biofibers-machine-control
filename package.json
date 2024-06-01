@@ -88,9 +88,6 @@
       ]
     }
   },
-  "extraResources": [
-    "./biofibers-machine-control-app/src/main/preload.js"
-  ],
   "devDependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
