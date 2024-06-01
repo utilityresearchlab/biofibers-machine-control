@@ -3,6 +3,7 @@
   "productName": "biofibers-machine-control",
   "version": "0.0.1",
   "description": "Application to control a machine over serial",
+  "private": true,
   "main": ".webpack/main",
   "build": {
     "appId": "org.utilityresearchlab.biofiberscontrol",
@@ -22,16 +23,19 @@
     "clean": "rm -rf node_modules",
     "reinstall": "npm run clean && npm install && npm run postinstall",
     "rebuild": "electron-rebuild",
-    "pack": "electron-builder --dir",
-    "postinstall": "electron-builder install-app-deps",
-    "pack-mac-unv": "electron-builder --dir --mac --universal",
-    "pack-mac-x64": "electron-builder --dir --mac --x64",
-    "pack-mac-arm64": "electron-builder --dir --mac --arm64",
-    "dist": "electron-builder",
     "start": "electron-forge start",
     "package": "electron-forge package",
+    "pack-mac-unv": "electron-forge make --platform='darwin' --arch='universal'",
+    "pack-mac-x64": "electron-forge make --platform='darwin' --arch='x64'",
+    "pack-mac-arm64": "electron-forge make --platform='darwin' --arch='arm64'",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
+    "postinstall": "electron-builder install-app-deps",
+    "pack": "electron-builder --dir",
+    "bpack-mac-unv": "electron-builder --dir --mac --universal",
+    "bpack-mac-x64": "electron-builder --dir --mac --x64",
+    "bpack-mac-arm64": "electron-builder --dir --mac --arm64",
+    "dist": "electron-builder",
     "lint": "echo \"No linting configured\""
   },
   "keywords": [],
@@ -42,7 +46,20 @@
   "license": "GPL-3.0 license",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "hooks": "require:./config/hooks.js",
+      "packagerConfig": {
+        "appId": "org.utilityresearchlab.biofiberscontrol",
+        "icon": "icon/utility-icon-512x512.jpg",
+        "mac": {
+          "category": "public.app-category.utilities"
+        },
+        "win": {
+          "target": "portable"
+        },
+        "linux": {
+          "target": "AppImage"
+        }
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
