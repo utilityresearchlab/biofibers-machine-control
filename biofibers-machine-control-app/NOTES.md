@@ -1,5 +1,4 @@
 
-
 # Adding Node Modules like Require in Renderer.js
 A note about nodeIntegrations via https://www.electronforge.io/config/plugins/webpack .
 Must set nodeIntegration: true in both the main.js window settings and the package.json under the "plugins" -> renderer" before "config".
@@ -11,3 +10,8 @@ Must set nodeIntegration: true in both the main.js window settings and the packa
 
 # Adding React to Electron + WebPack
 - https://www.electronforge.io/guides/framework-integration/react
+
+# 2024-05-31
+added icon
+added fs-extra 
+added hooks.js
