@@ -13,7 +13,6 @@
     "electron-squirrel-startup": "^1.0.0",
     "fs-extra": "^11.2.0",
     "node-gyp": "^9.3.0",
-    "serialport": "^10.4.0",
     "tableify": "1.1.1"
   },
   "resolutions": {

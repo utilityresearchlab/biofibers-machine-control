@@ -9,7 +9,7 @@ module.exports = {
     readPackageJson: async (forgeConfig, packageJson) => {
     // only copy deps if there isn't any
     if (Object.keys(packageJson.dependencies).length === 0) {
-        const originalPackageJson = await fs.readJson('./package.json');
+        const originalPackageJson = await fs.readJson(path.resolve("./", 'package.json'));
         const webpackConfigJs = require('./webpack.renderer.config.js');
         Object.keys(webpackConfigJs.externals).forEach(package => {
         packageJson.dependencies[package] = originalPackageJson.dependencies[package];

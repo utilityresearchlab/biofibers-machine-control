@@ -7,7 +7,5 @@ window.addEventListener('DOMContentLoaded', () => {
 	// for (const versionType of['chrome', 'electron', 'node']) {
 	// 		document.getElementById(`${versionType}-version`).innerText = process.versions[versionType]
 	// }
-
 	//console.log("SerialPort version:" + require('serialport/package').version);
-
 });
