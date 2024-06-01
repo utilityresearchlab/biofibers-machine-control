@@ -7,7 +7,7 @@
   "main": ".webpack/main",
   "build": {
     "appId": "org.utilityresearchlab.biofiberscontrol",
-    "icon": "icon/utility-icon-512x512.jpg",
+    "icon": "./icon/utility-icon-512x512.jpg",
     "mac": {
       "category": "public.app-category.utilities"
     },
@@ -21,21 +21,15 @@
   },
   "scripts": {
     "clean": "rm -rf node_modules",
-    "reinstall": "npm run clean && npm install && npm run postinstall",
+    "reinstall": "npm run clean && npm install",
     "rebuild": "electron-rebuild",
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "pack-mac-unv": "electron-forge make --platform='darwin' --arch='universal'",
-    "pack-mac-x64": "electron-forge make --platform='darwin' --arch='x64'",
-    "pack-mac-arm64": "electron-forge make --platform='darwin' --arch='arm64'",
+    "pack-mac-unv": "rm -rf ./out/biofibers-machine-control-darwin-universal && electron-forge package --platform='darwin' --arch='universal'",
+    "pack-mac-x64": "rm -rf ./out/biofibers-machine-control-darwin-x64 && electron-forge package --platform='darwin' --arch='x64'",
+    "pack-mac-arm64": "rm -rf ./out/biofibers-machine-control-darwin-arm64 && electron-forge package --platform='darwin' --arch='arm64'",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "postinstall": "electron-builder install-app-deps",
-    "pack": "electron-builder --dir",
-    "bpack-mac-unv": "electron-builder --dir --mac --universal",
-    "bpack-mac-x64": "electron-builder --dir --mac --x64",
-    "bpack-mac-arm64": "electron-builder --dir --mac --arm64",
-    "dist": "electron-builder",
     "lint": "echo \"No linting configured\""
   },
   "keywords": [],
@@ -49,7 +43,7 @@
       "hooks": "require:./config/hooks.js",
       "packagerConfig": {
         "appId": "org.utilityresearchlab.biofiberscontrol",
-        "icon": "icon/utility-icon-512x512.jpg",
+        "icon": "./icon/utility-icon-512x512",
         "mac": {
           "category": "public.app-category.utilities"
         },
@@ -69,13 +63,13 @@
         },
         {
           "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
+          "platforms": ["darwin"]
         },
         {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
+          "name": "@electron-forge/maker-dmg",
+          "config": {
+              "icon": "icon/utility-icon-512x512.icns"
+          }
         },
         {
           "name": "@electron-forge/maker-rpm",
@@ -120,7 +114,6 @@
     "babel-loader": "^9.1.3",
     "css-loader": "^6.7.1",
     "electron": "^30.0.9",
-    "electron-builder": "^24.13.3",
     "node-loader": "^2.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
