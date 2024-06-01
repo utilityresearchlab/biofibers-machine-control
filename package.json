@@ -15,12 +15,13 @@
     },
     "linux": {
       "target": "AppImage"
-    }
+    },
+    "extends": null
   },
   "scripts": {
     "clean": "rm -rf node_modules",
-    "reinstall": "npm run clean && npm install",
-    "install": "electron-rebuild",
+    "reinstall": "npm run clean && npm install && npm run postinstall",
+    "rebuild": "electron-rebuild",
     "pack": "electron-builder --dir",
     "postinstall": "electron-builder install-app-deps",
     "pack-mac-unv": "electron-builder --dir --mac --universal",
@@ -65,32 +66,30 @@
         }
       ],
       "plugins": [
-          {
-            "name": "@electron-forge/plugin-webpack",
-            "config": {
-              "mainConfig": "./config/webpack.main.config.js",
-              "renderer": {
-                "nodeIntegration": true,
-                "config": "./config/webpack.renderer.config.js",
-                "entryPoints": [
-                  {
-                    "html": "./biofibers-machine-control-app/src/renderer/index.html",
-                    "js": "./biofibers-machine-control-app/src/renderer/renderer.js",
-                    "name": "main_window",
-                    "preload": {
-                      "js": "./biofibers-machine-control-app/src/main/preload.js"
-                    }
+        {
+          "name": "@electron-forge/plugin-webpack",
+          "config": {
+            "mainConfig": "./config/webpack.main.config.js",
+            "renderer": {
+              "nodeIntegration": true,
+              "config": "./config/webpack.renderer.config.js",
+              "entryPoints": [
+                {
+                  "html": "./biofibers-machine-control-app/src/renderer/index.html",
+                  "js": "./biofibers-machine-control-app/src/renderer/renderer.js",
+                  "name": "main_window",
+                  "preload": {
+                    "js": "./biofibers-machine-control-app/src/main/preload.js"
                   }
-                ]
-              }
+                }
+              ]
             }
           }
+        }
       ]
     }
   },
   "devDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "@babel/core": "^7.24.6",
     "@babel/preset-env": "^7.24.6",
     "@babel/preset-react": "^7.24.6",
@@ -105,10 +104,25 @@
     "css-loader": "^6.7.1",
     "electron": "^30.0.9",
     "electron-builder": "^24.13.3",
-    "@electron/rebuild": "^3.6.0",
     "node-loader": "^2.0.0",
-    "style-loader": "^3.3.1",
-    "webpack": "^5.91.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.91.0"
+  },
+  "dependencies": {
+      "@emotion/react": "^11.10.4",
+      "@emotion/styled": "^11.10.4",
+      "@fontsource/roboto": "^4.5.8",
+      "@mui/icons-material": "^5.10.9",
+      "@mui/material": "^5.10.9",
+      "electron-squirrel-startup": "^1.0.0",
+      "fs-extra": "^11.2.0",
+      "node-gyp": "^9.3.0",
+      "tableify": "1.1.1",
+      "serialport": "^10.4.0"
+  },
+  "resolutions": {
     "serialport": "^10.4.0"
   }
 }
