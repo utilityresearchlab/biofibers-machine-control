@@ -44,6 +44,9 @@
       "packagerConfig": {
         "appId": "org.utilityresearchlab.biofiberscontrol",
         "icon": "./icon/utility-icon-512x512",
+        "osxUniversal": { 
+          "x64ArchFiles": "*"
+        },
         "mac": {
           "category": "public.app-category.utilities"
         },
