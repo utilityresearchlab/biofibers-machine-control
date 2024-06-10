@@ -134,3 +134,6 @@ dist
 
 # Electron-Forge
 out/
+
+# Python VEnv
+.venv/
