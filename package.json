@@ -29,6 +29,10 @@
     "pack-mac-x64": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-darwin-x64 && electron-forge package --platform='darwin' --arch='x64'",
     "pack-mac-arm64": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-darwin-arm64 && electron-forge package --platform='darwin' --arch='arm64'",
     "pack-win-x64": "source .venv/bin/activate && rm -rf ./biofibers-machine-control-win32-x64 && electron-forge package --platform='win32' --arch='x64'",
+    "make-mac-unv": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-darwin-universal && electron-forge make --platform='darwin' --arch='universal'",
+    "make-mac-x64": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-darwin-x64 && electron-forge make --platform='darwin' --arch='x64'",
+    "make-mac-arm64": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-darwin-arm64 && electron-forge make --platform='darwin' --arch='arm64'",
+    "make-win-x64": "source .venv/bin/activate && rm -rf ./biofibers-machine-control-win32-x64 && electron-forge make --platform='win32' --arch='x64'",
     "make": "source .venv/bin/activate && electron-forge make",
     "publish": "source .venv/bin/activate && electron-forge publish",
     "lint": "echo \"No linting configured\""
@@ -47,6 +51,7 @@
     "@babel/preset-env": "^7.24.6",
     "@babel/preset-react": "^7.24.6",
     "@electron-forge/cli": "^7.4.0",
+    "@electron-forge/maker-dmg": "^7.4.0",
     "@electron-forge/maker-deb": "^7.4.0",
     "@electron-forge/maker-rpm": "^7.4.0",
     "@electron-forge/maker-squirrel": "^7.4.0",
@@ -75,6 +80,6 @@
     "tableify": "1.1.1"
   },
   "resolutions": {
-    "serialport": "^10.4.0"
+    "serialport": "^12.0.0"
   }
 }

@@ -1,5 +1,13 @@
+// TODO (mrivera): use a postmake hook to rename the file with the date / version
+// See:
+// - https://github.com/electron/forge/issues/2169
+// - https://github.com/kethan1/Simple-To-Do-App/blob/main/forge.config.js
+const buildID = new Date().toISOString().replace(/T.*/,'').split('-').reverse().join('-');
+
+
 module.exports = {
   hooks: "require:./config/hooks.js",
+  buildIdentifier: buildID,
   packagerConfig: {
     appId: "org.utilityresearchlab.biofiberscontrol",
     icon: "./icon/utility-icon-512x512",
