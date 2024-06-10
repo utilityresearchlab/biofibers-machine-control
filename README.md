@@ -13,13 +13,12 @@ Desktop App to Control the Biofibers Spinning Machine
 ## Run / Debug the app
 - Run `source .venv/bin/activate`
 - Run `npm run start`
+### Build Errors
+- Build doesn't compile on MacOS Sonoma + Python 3.12 because node-gyp fails to compile serialport bindings:
+    - Run `pip3 install setuptools` (you should probably run this in a virtual environment)
+    - For more info see this [post](https://github.com/nodejs/node-gyp/issues/2992#issuecomment-2101781719)
 
-## Make the app for distribution using Electron Builder
-- Run `source .venv/bin/activate`
-- Run `npm run dist`
 
-## Info about Packaging Apps for Mac/Windows/Linux Guide
-https://stevenklambert.com/writing/comprehensive-guide-building-packaging-electron-app/#packaging-an-electron-app
 
 ## SECURITY WARNINGS ON MAC
 - When attempting to run the app on MacOS, you may run into security errors like "fsevent.node" cannot be opened". 
@@ -48,12 +47,14 @@ You can find more information about this issue on this [Apple Discussions Forum 
 
 ### Windows App
 https://stevenklambert.com/writing/comprehensive-guide-building-packaging-electron-app/#packaging-an-electron-app
-
-- To compile a x64 windows application, run `npm run pack-win-x64`
+- To build the app for Windows (on a mac), you must first install wine and mono. See these guides for reference:
+        1. [Packaging Apps with Electron-Forge](https://stevenklambert.com/writing/comprehensive-guide-building-packaging-electron-app/#packaging-an-electron-app) 
+        2. [Installing Wine on a Mac](https://github.com/Gcenx/wine-on-mac)
+    - With HomeBrew Installed already, in your terminal run `brew install --cask --no-quarantine wine@staging`
+    - Then run `brew install mono`
+- Now to compile a x64 windows application, run `npm run pack-win-x64`
 - The output app will be present in the `out` folder.
 
 
-# Build Errors
-- Build doesn't compile on MacOS Sonoma + Python 3.12 because node-gyp fails to compile serialport bindings:
-    - Run `pip3 install setuptools` (you should probably run this in a virtual environment)
-    - For more info see this [post](https://github.com/nodejs/node-gyp/issues/2992#issuecomment-2101781719)
+## Other references
+- Info about Packaging Apps for Mac/Windows/Linux Guide: https://stevenklambert.com/writing/comprehensive-guide-building-packaging-electron-app/#packaging-an-electron-app
