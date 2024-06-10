@@ -22,7 +22,14 @@ module.exports = {
     },
     linux: {
       target: "AppImage"
-    }
+    },
+    // see: https://stackoverflow.com/questions/73377178/electron-forge-stuck-on-squirrel for reference
+    // ignore: [
+    //     "^\\/public$",
+    //     "^\\/src$",
+    //     "^\\/node_modules$",
+    //     "^\\/[.].+",
+    //     ]
   },
   makers: [
     {

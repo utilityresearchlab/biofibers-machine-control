@@ -45,14 +45,16 @@ To open the application properly once you have downloaded the zip file, you must
 
 You can find more information about this issue on this [Apple Discussions Forum Post](https://discussions.apple.com/thread/253714860?sortBy=best)
 
-### Windows App
-https://stevenklambert.com/writing/comprehensive-guide-building-packaging-electron-app/#packaging-an-electron-app
+### Windows App (Not working)
+#### On Mac
+- The instructions below do not appear to work on MacOS due to its lack of support for Squirrel Distributions; see this [github issue](https://github.com/electron/forge/issues/3142).
 - To build the app for Windows (on a mac), you must first install wine and mono. See these guides for reference:
-        1. [Packaging Apps with Electron-Forge](https://stevenklambert.com/writing/comprehensive-guide-building-packaging-electron-app/#packaging-an-electron-app) 
-        2. [Installing Wine on a Mac](https://github.com/Gcenx/wine-on-mac)
+    1. [Packaging Apps with Electron-Forge](https://stevenklambert.com/writing/comprehensive-guide-building-packaging-electron-app/#packaging-an-electron-app) 
+    2. [Installing Wine on a Mac](https://github.com/Gcenx/wine-on-mac)
     - With HomeBrew Installed already, in your terminal run `brew install --cask --no-quarantine wine@staging`
     - Then run `brew install mono`
-- Now to compile a x64 windows application, run `npm run pack-win-x64`
+#### Building the App for Windows
+- To compile a x64 windows application, run `npm run pack-win-x64`
 - The output app will be present in the `out` folder.
 
 
