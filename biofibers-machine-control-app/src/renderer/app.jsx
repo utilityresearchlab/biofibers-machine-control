@@ -15,10 +15,13 @@ import SerialPortHelper from './lib/serial-util/serial-port-helper';
 import {MachineCommandInterpreter} from './lib/machine-control/command-interpreter';
 import {parseLine} from './lib/machine-control/command-parser';
 import {MACHINE_COMMANDS, MACHINE_ERROR_CODES} from './lib/machine-control/machine-protocol';
+import { CMD_HOME_AXES } from './lib/machine-control/gcode-constants';
 
 import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
-
+import SetupParamSubmitter from './component/setup-param-submitter'
+import TestingParamSubmitter from './component/testing-param-submitter'
+import GcodeUploader from './component/gcode-uploader'
 
 import './index.css';
 
@@ -45,6 +48,7 @@ class BaseMachineControlApp extends React.Component {
 		this.handleConnectClick = this.handleConnectClick.bind(this);
 		this.handleSendCommandClick = this.handleSendCommandClick.bind(this);
 		this.handleDisconnectClick = this.handleDisconnectClick.bind(this);
+		this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
 		this.handleOnReceivedConsoleData = this.handleOnReceivedConsoleData.bind(this);
 
 		// set-up machine protocol handler for commands
@@ -164,6 +168,14 @@ class BaseMachineControlApp extends React.Component {
 
 	componentDidMount() {
 		this.listenForAvailableSerialPorts();
+		// Check if this is the first load by seeing if our object exists in local storage
+		if (localStorage.getItem('firstLoadDone') === null) {
+			// If it's the first load, set the flag in local storage to true and reload the page
+			localStorage.setItem('firstLoadDone', 1);
+			console.log('This is the initial load');
+		  } else {
+			console.log('This is a page refresh');
+		  } 
 	}
 
 	componentWillUnmount() {
@@ -262,6 +274,11 @@ class BaseMachineControlApp extends React.Component {
 		};
 		// Start Disconnect;
 		this.props.serialCommunication.disconnect(onDisconnectCallback);
+	}
+
+	handleHomeAllClick() {
+		const command = CMD_HOME_AXES;
+		this.handleSendCommandClick(command);
 	}
 
 	handleSendCommandClick(cmdText) {
@@ -399,8 +416,25 @@ class BaseMachineControlApp extends React.Component {
 							<br/>
 					</div>
 					<br/>
+					<div>
+						<SetupParamSubmitter
+							isEnabled={true}
+							onSubmitCallback={this.handleSendCommandClick} />
+					</div>
+					<div>
+						<TestingParamSubmitter
+							isEnabled={true}
+							onSubmitCallback={this.handleSendCommandClick} />
+					</div>
+					<br/>
+					<div>
+						<GcodeUploader
+							isEnabled={true}
+							onSubmitCallback={this.handleSendCommandClick}/>
+					</div>
+					<br/>
 					<TextFieldSubmitter
-						isEnabled={serialCommIsConnected}
+						isEnabled={true}
 						onSubmitCallback={this.handleSendCommandClick} />
 					<br/>
 					<Console data={consoleData} />

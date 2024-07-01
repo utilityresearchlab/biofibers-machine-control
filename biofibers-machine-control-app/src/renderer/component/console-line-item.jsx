@@ -64,7 +64,7 @@ class ConsoleLineItem extends React.Component {
 						</Typography>}
 					/>
 			</ListItem>
-		)
+		);
 	}
 }
 

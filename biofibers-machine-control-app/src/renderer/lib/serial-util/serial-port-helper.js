@@ -8,7 +8,7 @@ SerialPortHelper.serialPortPathNone = () => { return ''};
 SerialPortHelper.nonePort = {
 	path: SerialPortHelper.serialPortPathNone()
 };
-SerialPortHelper.defaultBaudRate = () => { return 115200}
+SerialPortHelper.defaultBaudRate = () => { return 250000}
 SerialPortHelper.availableBaudRates = () => {
 	return [
 		9600,
