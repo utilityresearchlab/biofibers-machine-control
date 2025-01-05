@@ -6,7 +6,7 @@ import BaseMachineControlApp from './app';
 import applyTheme from './style/theme'
 
 import {SerialCommunication, defaultBaudRate, defaultSerialPort} from './lib/serial-util/serial-communication';
-
+import Image from './component/image';
 const serialComm = new SerialCommunication(defaultSerialPort, defaultBaudRate);
 
 let appStarted = false;
@@ -20,9 +20,12 @@ function initApp() {
 	const renderApp = () => {
 		return (<BaseMachineControlApp serialCommunication={serialComm} />);
 	}
+
+
 	root.render(
 		<React.StrictMode>
 			{applyTheme(renderApp())}
+			{(<Image/>)}
 		</React.StrictMode>
 		);
 	appStarted = true;
