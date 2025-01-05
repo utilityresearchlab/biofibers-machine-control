@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "description": "Application to control a machine over serial",
   "private": true,
-  "main": ".webpack/main",
+  "main": "./biofibers-machine-control-app/src/dist/bundle.js",
   "build": {
     "appId": "org.utilityresearchlab.biofiberscontrol",
     "icon": "./icon/utility-icon-512x512.jpg",
