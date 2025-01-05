@@ -3,8 +3,12 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { Stack, TextField } from '@mui/material';
+import Typography from '@mui/material/Typography';
+
 
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
+
+import {BF_CONSTANTS} from '../lib/biofibers-machine-constants'
 
 class TestingParamSubmitter extends React.Component {
     constructor(props) {
@@ -107,96 +111,105 @@ class TestingParamSubmitter extends React.Component {
                 '& .MuiTextField-root': {m: 0, width: '100%' },
             }}
             noValidate
-            autoComplete="off"
-            > 
-                <p><b>Testing</b></p>
+            autoComplete="off">   
+                <Typography gutterBottom variant="h6" component="div">
+                    Spinning
+                </Typography>
                 <Stack
                     direction="row"
                     justifyContent="center"
-                    alignItems="center"
-                    spacing={1}
+                    alignItems="left"
+                    spacing={2}
+                    padding={1}
                 >
-                    <p>Extrusion Amount [mm]</p>  
                     <TextField
                         name="eValue"
-						label="extrusion amount"
+                        label="Extrusion Amount [mm]"
                         type="number"
-						size="small"
-						color="primary"
-						margin="dense"
+                        size="small"
+                        color="primary"
+                        margin="dense"
                         value={this.state.eValue}
-						disabled={!this.props.isEnabled}
+                        disabled={!this.props.isEnabled}
                         onChange={this.handleOnChange}
-						/> 
-                    <p>Extrusion Feed Rate [mm/min]</p>
+                        />
                     <TextField
                         name="eFeedrate"
-						label="extrusion feedrate"
+                        label="Extrusion Feedrate [mm/min]"
                         type="number"
-						size="small"
-						color="primary"
-						margin="dense"
+                        size="small"
+                        color="primary"
+                        margin="dense"
                         value={this.state.eFeedrate}
-						disabled={!this.props.isEnabled}
+                        disabled={!this.props.isEnabled}
                         onChange={this.handleOnChange}
-						/>  
-                </Stack>
-                <Stack
-                    direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    spacing={1}
-                >
-                    <p>X Axis Movement [mm]</p>
+                        />  
                     <TextField
                         name="xValue"
-						label="x axis movement"
+                        label="X-Axis Movement [mm]"
                         type="number"
-						size="small"
-						color="primary"
-						margin="dense"
+                        size="small"
+                        color="primary"
+                        margin="dense"
                         value={this.state.xValue}
-						disabled={!this.props.isEnabled}
+                        disabled={!this.props.isEnabled}
                         onChange={this.handleOnChange}
-						/>   
-                    <p>X Axis Feed Rate [mm/min]: {this.calculateXFeedrate()} </p>
+                        />   
+
                 </Stack>
                 <Stack
-                    direction="row"
-                    justifyContent="right"
-                    alignItems="centxer"
+                    direction="column"
+                    justifyContent="left"
+                    alignContent="left"
                     spacing={1}
-                ><p>Composite Feed Rate [mm/min]: {this.getCompositeFeedrate().toFixed(4)} </p></Stack>
-                <TextField
-                        name="numCommands"
-						label="number of commands to send"
-                        type="number"
-						size="small"
-						color="primary"
-                        value={this.state.numCommands}
-						disabled={!this.props.isEnabled}
-                        onChange={this.handleOnChange}
-						/> 
-                {/* <Button
-                    variant="outlined"
-                    size="medium"
-                    disabled={!this.props.isEnabled}
-                    color={(this.state.spinningInProgress) ? "error" : "success"}
-                    onClick={(this.state.spinningInProgress)
-                        ? this.handleStopSpinningClick
-                        : this.handleStartSpinningClick} > 
-                    {this.state.spinningInProgress
-                        ? 'Stop spinning'
-                        : 'Start spinning'}
-                </Button> */}
-                <Button
-                    variant="outlined"
-                    size="medium"
-                    disabled={!this.props.isEnabled}
-                    color="success"
-                    onClick={this.handleSendMultipleCommands} > 
-                    Send Commands
-                </Button>
+                    padding={2}
+                >
+                    <Typography gutterBottom variant="body1" component="div">
+                        X Axis Feed Rate [mm/min]: {this.calculateXFeedrate()}
+                    </Typography>
+                    <Typography gutterBottom variant="body1" component="div">
+                    Composite Feed Rate [mm/min]: {this.getCompositeFeedrate().toFixed(4)}
+                    </Typography>
+                </Stack>
+                <Stack
+                        direction="row"
+                        alignItems="left"
+                        alignContent="left"
+                        justifySelf={true}
+                        spacing={1}
+                    >
+                    <TextField
+                            name="numCommands"
+                            label="number of commands to send"
+                            type="number"
+                            size="small"
+                            color="primary"
+                            value={this.state.numCommands}
+                            disabled={!this.props.isEnabled}
+                            onChange={this.handleOnChange}
+                            sx={{maxWidth: '30%'}}
+                            /> 
+                    {/* <Button
+                        variant="outlined"
+                        size="medium"
+                        disabled={!this.props.isEnabled}
+                        color={(this.state.spinningInProgress) ? "error" : "success"}
+                        onClick={(this.state.spinningInProgress)
+                            ? this.handleStopSpinningClick
+                            : this.handleStartSpinningClick} > 
+                        {this.state.spinningInProgress
+                            ? 'Stop spinning'
+                            : 'Start spinning'}
+                    </Button> */}
+                    <Button
+                        variant="outlined"
+                        size="medium"
+                        disabled={!this.props.isEnabled}
+                        color="success"
+                        onClick={this.handleSendMultipleCommands} > 
+                        Send Commands
+                    </Button>
+                </Stack>
             </Box>
         );
     }

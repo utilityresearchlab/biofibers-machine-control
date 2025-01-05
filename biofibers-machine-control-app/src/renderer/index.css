@@ -1,7 +1,175 @@
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
-  margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box
 }
+
+/* Common classes */
+.clear { clear:both; }
+
+/* to align div vertically and horizontally in center of another div */
+.parent { display: flex;}
+.inner { align-self: center; }
+
+/* justify */
+.justify-center { justify-content: center; }
+.justify-spaceBetween { justify-content: space-between; }
+
+.w100 { width: 100% }
+.h100 { height: 100% }
+.wh100 { width: 100%; height: 100%}
+
+/* position */
+.absolute { position: absolute; }
+.relative { position: relative; }
+.top { top: 0 }
+.bottom { bottom: 0 }
+.right { right: 0 }
+.left { left: 0 }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  padding: 0 30px;
+}
+
+
+/* Put custom style under this point -- */
+hr {
+  border: none;
+  color: #eee;
+  width: 100%;
+  height: 1px;
+  background-color: #eee;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.standard-hr {
+    width: 100%;
+    height: 1px;
+    background-color: #eee;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.small-hr {
+    width: 30%;
+    height: 1px;
+    background-color: #eee;
+    margin: 0 auto;
+}
+
+.col {
+  width: 100%;
+  height: 100%;
+  float: left;
+  object-fit: cover;
+  box-sizing:border-box;
+  padding: 0.5em;
+}
+
+.float-right{
+  float: right;
+}
+
+.float-left{
+  float: left;
+}
+
+.float-none{
+  float: none;
+}
+
+.clearfix, .float-clear {
+  clear: both;
+}
+
+.one {
+  width:33.33%;
+}
+.two {
+  width: 66.66%;
+}
+.three{
+  width: 100%;
+}
+.one-tenth {
+  width: 10%;
+}
+.two-tenths {
+  width: 20%;
+}
+.three-tenths {
+  width: 30%;
+}
+.four-tenths{
+  width: 40%;
+}
+.five-tenths, .half {
+  width: 50%;
+}
+.six-tenths {
+  width: 60%;
+}
+.seven-tenths {
+  width: 70%;
+}
+.eight-tenths {
+  width: 80%;
+}
+.nine-tenths {
+  width: 90%;
+}
+.whole, .full {
+  width:100%;
+}
+
+.text-align-right {
+    text-align: right;
+}
+
+.text-align-left {
+    text-align: left;
+}
+
+.text-align-center {
+    text-align: center;
+}
+
+.text-align-justify-center {
+    text-align: justify-center;
+}
+
+.text-align-justify {
+    text-align: justify;
+}
+
+.text-underline {
+    text-decoration: underline;
+}
+.site-header-wrapper {
+    margin-top: 1.5em;
+}
+
+.center-page {
+  min-width: 600px;
+  max-width: 1000px;
+  margin: auto;
+}
+
+/* Custom Stuff */
+.app-logo { 
+  border-radius: 5px;
+  border: 1px solid rgba(188, 188, 188, 0.449);
+  margin-left: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  width: 120px;
+  height: 120px;
+}
+
+.app-header-title {
+  text-align: center;
+}
+

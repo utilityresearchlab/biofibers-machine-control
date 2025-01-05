@@ -10,8 +10,11 @@ if (require('electron-squirrel-startup')) {
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
+    //width: 800,
+    //height: 800,
     width: 800,
     height: 600,
+    minWidth: 800,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
 			nodeIntegration: true, // See: https://stackoverflow.com/questions/44391448/electron-require-is-not-defined
@@ -37,7 +40,6 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
-
 
 
 // Quit when all windows are closed, except on macOS. There, it's common

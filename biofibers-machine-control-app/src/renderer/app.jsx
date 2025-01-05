@@ -1,10 +1,14 @@
 import * as React from 'react';
 
-import { Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
+import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+
+import { Stack } from '@mui/material';
+import Typography from '@mui/material/Typography';
 
 import UsbIcon from '@mui/icons-material/Usb';
 import UsbOffIcon from '@mui/icons-material/UsbOff';
@@ -22,6 +26,8 @@ import TextFieldSubmitter from './component/text-field-submitter'
 import SetupParamSubmitter from './component/setup-param-submitter'
 import TestingParamSubmitter from './component/testing-param-submitter'
 import GcodeUploader from './component/gcode-uploader'
+
+import imgMachineLogoSrc from '../assets/img/machine-render-logo.png'
 
 import './index.css';
 
@@ -367,16 +373,40 @@ class BaseMachineControlApp extends React.Component {
 		const serialCommIsConnected = (this.props.serialCommunication) ? this.props.serialCommunication.isConnected() : false;
 		const serialCommIsDisconnected = !serialCommIsConnected;
 		return (
-			<div className="App">
-				<header className="App-header">
+			<Box component="div" className="App center-page" sx={{paddingTop: 2, paddingBottom: 2}}>
+				<Box component="header">
+					<Stack
+						direction="row"
+						justifyContent="left"
+						alignItems="center"
+						spacing={2}
+						p={1}>
+						<img className={"app-logo"} src={imgMachineLogoSrc} alt="Biofibers Machine Logo" />
+						<Typography gutterBottom variant="h4">
+							Biofibers Machine Control 
+							<Typography  variant="h5">
+								Beta-Release v0.1.0
+							</Typography>
+							<Typography  variant="body1">
+								<a style={{textColor: 'gray', textDecoration: 'none'}} href="https://github.com/utilityresearchlab/desktop-biofibers-spinning" target='_blank'>https://github.com/utilityresearchlab/desktop-biofibers-spinning</a>
+							</Typography>
+						</Typography>
+						
+					</Stack>
+					<Divider />
 
-				</header>
+					<Box component="div">
+					<ul>
+						<li style={{fontWeight: "600"}}> This app is in beta testing and likely has bugs!</li>
+						<li>If you run into issues, please reach out with your version number in <span style={{fontWeight: "600"}}><em>#software-control</em></span> on Discord.</li>
+					</ul>
+					</Box>
+
+				<Divider />
+				</Box>
 				<div>
-				<img src='' className="App-logo" alt="logo" />
-					<p>
-						Edit <code>src/App.js</code> and save to reload.
-					</p>
 					<div>
+						<h2>Connect</h2>
 						<FormControl size="small" sx={{mb:1, mr: 1, minWidth: 300 }}>
 								<InputLabel id="available-serial-ports-label">Serial Port</InputLabel>
 								<Select
@@ -412,7 +442,7 @@ class BaseMachineControlApp extends React.Component {
 											{(!serialCommIsConnected)
 												? "Connect"
 												: "Disconnect"}
-									</Button>
+							</Button>
 							<br/>
 					</div>
 					<br/>
@@ -427,28 +457,23 @@ class BaseMachineControlApp extends React.Component {
 							onSubmitCallback={this.handleSendCommandClick} />
 					</div>
 					<br/>
-					<div>
+					<div className="col">
+						<h2>Testing</h2>
 						<GcodeUploader
 							isEnabled={true}
 							onSubmitCallback={this.handleSendCommandClick}/>
 					</div>
 					<br/>
-					<TextFieldSubmitter
-						isEnabled={true}
-						onSubmitCallback={this.handleSendCommandClick} />
+					<div className="col">
+						<TextFieldSubmitter
+							isEnabled={true}
+							onSubmitCallback={this.handleSendCommandClick} />
+						<br/>
+						<Console data={consoleData} />
 					<br/>
-					<Console data={consoleData} />
-					<br/>
-					<a
-						className="App-link"
-						href="https://reactjs.org"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Learn React
-					</a>
+					</div>
 				</div>
-			</div>
+			</Box>
 		);
 	}
 }

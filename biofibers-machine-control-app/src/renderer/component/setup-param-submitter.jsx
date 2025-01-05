@@ -9,10 +9,13 @@ import Select from '@mui/material/Select';
 import { Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
+import Tooltip from '@mui/material/Tooltip';
 
+import * as BF_CONSTANTS from '../lib/biofibers-machine-constants'
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
 import MaterialHelper from '../lib/material-util/material-helper';
 import MiscUtil from '../lib/machine-control/misc-util';
+import Typography from '@mui/material/Typography';
 
 class SetupParamSubmitter extends React.Component {
     constructor(props) {
@@ -22,14 +25,14 @@ class SetupParamSubmitter extends React.Component {
             nozzleTemperature: 32,
             wrapperTemperature: 52,
             collectorSpeed: 100,
-            collectorDirection: 'counterclockwise', 
+            collectorDirection: BF_CONSTANTS.COLLECTOR_DIRECTION_CLOCKWISE, // clockwise by default
             pullDownInProgress: false,
             nIntervalId: null,
             selectedMaterial: MaterialHelper.availableMaterials()[0]
         };
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
-        this.handleLowerPumpClick = this.handleLowerPumpClick.bind(this);
+        this.handleExtrudePumpClick = this.handleExtrudePumpClick.bind(this);
         this.handleRetractPumpClick = this.handleRetractPumpClick.bind(this);
         this.handlePurgeClick = this.handlePurgeClick.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
@@ -39,18 +42,18 @@ class SetupParamSubmitter extends React.Component {
         this.handleOnKeyUp = this.handleOnKeyUp.bind(this);
         this.handleOnSelectMaterial = this.handleOnSelectMaterial.bind(this);
     }
-    
+
     handleSubmitCommand(event, command) {
         // prevent page refresh on submit
-		if (event) {
-			event.preventDefault();
-		}
+        if (event) {
+            event.preventDefault();
+        }
 
         const onSubmitCallback = this.props.onSubmitCallback;
-		// get param and send in call back
-		if (onSubmitCallback) {
-			onSubmitCallback(command);
-		}
+        // get param and send in call back
+        if (onSubmitCallback) {
+            onSubmitCallback(command);
+        }
     }
 
     handleHomeAllClick(event) {
@@ -60,10 +63,10 @@ class SetupParamSubmitter extends React.Component {
             .useRelativeCoordinates()
             .useRelativeExtrusionDistances()
             .resetExtrusionDistance();
-		this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
-	}
+        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+    }
 
-    handleLowerPumpClick(event) {
+    handleExtrudePumpClick(event) {
         let gcodeBuilder = new GcodeBuilder();
         gcodeBuilder.extrude(this.state.adjustPump, 20);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
@@ -79,7 +82,7 @@ class SetupParamSubmitter extends React.Component {
     handlePurgeClick(event) {
         let gcodeBuilder = new GcodeBuilder();
         gcodeBuilder.extrude(0.1, 1, "Purge 0.1 mm material");
-		this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
     handleStartPullDownClick(event) {
@@ -100,7 +103,7 @@ class SetupParamSubmitter extends React.Component {
             pullDownGcodeBuilder
                 .extrudeWhileMoveX(params['E'], params['X'], params['F'], 'extrude and move X'); // value from experiments
             this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString());
-        }, 28000); 
+        }, 28000);
         this.setState({
             nIntervalId: intervalId,
             pullDownInProgress: true
@@ -118,24 +121,27 @@ class SetupParamSubmitter extends React.Component {
     }
 
     handleOnChange(event) {
-        const {name, value} = event.target;
+        const { name, value } = event.target;
         this.setState({
             ...this.state,
             [name]: name == 'adjustPump' ? Number(value) : value
         });
     }
 
-    handleOnDirectionChange( event, newDirection ) {
+    handleOnDirectionChange(event, newDirection) {
         this.setState({
             collectorDirection: newDirection
         });
+        let gcodeBuilder = new GcodeBuilder();
+        gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, this.state.collectorDirection);
+        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
     handleOnSelectMaterial(event) {
-		console.log("select material", event.target.value);
-		const material = String(event.target.value);
-		this.setState({selectedMaterial: material});
-	}
+        console.log("select material", event.target.value);
+        const material = String(event.target.value);
+        this.setState({ selectedMaterial: material });
+    }
 
     getRenderedMaterialItems() {
         const availableMaterials = MaterialHelper.availableMaterials();
@@ -151,180 +157,193 @@ class SetupParamSubmitter extends React.Component {
     }
 
     // Trigger submmit command if we press enter in the textbox
-	handleOnKeyUp(event) {
-		event.preventDefault();
+    handleOnKeyUp(event) {
+        // TODO need to handle mix/max values for collector speed (mrivera)
+        event.preventDefault();
         let gcodeBuilder = new GcodeBuilder();
-		if (event.charCode == 13
-			|| event.keyCode == 13
-			|| event.key === 'Enter') {
-			// Enter pressed so trigger submit
-			const {name, value} = event.target;
+        if (event.charCode == 13
+            || event.keyCode == 13
+            || event.key === 'Enter') {
+            // Enter pressed so trigger submit
+            const { name, value } = event.target;
             // Set extruder temperature: tool 1
-            if (name == 'nozzleTemperature'){
+            if (name == 'nozzleTemperature') {
                 gcodeBuilder.setTemperature(this.state.nozzleTemperature, false, 1);
-            } 
-            // Set wrapper temperature: tool 0
-            else if (name == 'wrapperTemperature') {
+            } else if (name == 'wrapperTemperature') {
+                // Set wrapper temperature: tool 0
                 gcodeBuilder.setTemperature(this.state.wrapperTemperature, false, 0);
-            } 
-            // Set collector speed 
-            else if (name == 'collectorSpeed') {
-                if (this.state.collectorDirection == 'clockwise') {
-                    gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, true);
-                } else {
-                    gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, false);
-                }
-            } 
+            } else if (name == 'collectorSpeed') {
+                // Set collector speed 
+                gcodeBuilder.setSpindleSpeed(value, this.state.collectorDirection);
+            }
             this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
-		}
-	}
+        }
+    }
 
     render() {
         const renderedMaterialItems = this.getRenderedMaterialItems();
         return (
             <Box
-            component="form"
-            sx={{
-                '& .MuiTextField-root': {m: 0, width: '100%' },
-            }}
-            noValidate
-            autoComplete="off"
-            > 
-                <p><b>Setup</b></p>
-                <Button
-                    size="medium"
-                    variant="outlined"
-                    onClick={this.handleHomeAllClick} > 
-                    Home All & Set Axes to Relative
-                </Button>
+                component="form"
+                sx={{'& .MuiTextField-root': { m: 0, width: '100%' }}}
+                noValidate
+                autoComplete="off"
+            >
+                <Typography gutterBottom variant="h6" component="div">
+                    Setup
+                </Typography>
                 <Stack
                     direction="row"
                     justifyContent="left"
                     alignItems="center"
+                    spacing={2}
+                    p={1}>
+                    <Button
+                        size="medium"
+                        variant="outlined"
+                        onClick={this.handleHomeAllClick} >
+                        Home All & Set Axes to Relative
+                    </Button>
+                </Stack>
+
+                <Stack
+                    direction="row"
+                    justifyContent="left"
+                    alignItems="left"
                     spacing={1}
-                    mt={1}
-                    mb={1}
-                >
+                    p={1}>
                     <TextField
-						label="Adjust Pump Height"
+                        label="Adjust Syringe Shuttle Position [mm]"
                         name="adjustPump"
                         type="number"
-						size="small"
-						color="primary"
-						margin="normal"
-						value={this.state.adjustPump}
-						disabled={!this.props.isEnabled}
+                        size="small"
+                        color="primary"
+                        margin="normal"
+                        value={this.state.adjustPump}
+                        disabled={!this.props.isEnabled}
                         onChange={this.handleOnChange}
-						/> 
+                    />
                     <Button
-                    size="medium"
-                    variant="outlined"
-                    onClick={this.handleLowerPumpClick} > 
-                    Lower
+                        size="medium"
+                        variant="outlined"
+                        onClick={this.handleRetractPumpClick} >
+                        Retract
                     </Button>
                     <Button
-                    size="medium"
-                    variant="outlined"
-                    onClick={this.handleRetractPumpClick} > 
-                    Retract
+                        size="medium"
+                        variant="outlined"
+                        onClick={this.handleExtrudePumpClick} >
+                        Extrude
                     </Button>
                 </Stack>
-                <Button
-                    size="medium"
-                    variant="outlined"
-                    onClick={this.handlePurgeClick} > 
-                    Purge material
-                </Button>
+  
                 <Stack
                     direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    spacing={1}
-                >
-                    <p>Extruder: </p>
+                    justifyContent="left"
+                    alignItems="left"
+                    spacing={2}
+                    p={1}>
                     <TextField
-						label="Temperature"
+                        label="Nozzle Temperature ºC"
                         name="nozzleTemperature"
                         type="number"
-						size="small"
-						color="primary"
-						margin="dense"
-						value={this.state.nozzleTemperature}
-						disabled={!this.props.isEnabled}
+                        size="small"
+                        color="primary"
+                        value={this.state.nozzleTemperature}
+                        disabled={!this.props.isEnabled}
                         onChange={this.handleOnChange}
                         onKeyUp={this.handleOnKeyUp}
-						/> 
-                    <p>Wrapper: </p>
+                        inputProps={{min: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN, max: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MAX}}
+                    />
+                    
                     <TextField
-						label="Temperature"
+                        label="Heat Wrap Temperature ºC"
                         name="wrapperTemperature"
                         type="number"
-						size="small"
-						color="primary"
-						margin="dense"
-						value={this.state.wrapperTemperature}
-						disabled={!this.props.isEnabled}
+                        size="small"
+                        color="primary"
+                        value={this.state.wrapperTemperature}
+                        disabled={!this.props.isEnabled}
                         onChange={this.handleOnChange}
                         onKeyUp={this.handleOnKeyUp}
-						/>                 
+                        inputProps={{min: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN, max: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MAX}}
+                    />
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={this.handlePurgeClick}>
+                        Purge material
+                    </Button>
                 </Stack>
                 <Stack
                     direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    spacing={1}>
-                    <p>Collector: </p>
+                    justifyContent="left"
+                    alignItems="left"
+                    spacing={1}
+                    p={1}>
                     <TextField
                         name="collectorSpeed"
-						label="Speed (out of 255 in PWM)"
-						size="small"
+                        label="Collector Speed PWM [from 0 to 255]"
+                        size="small"
                         type="number"
-						color="primary"
-						margin="dense"
-						value={this.state.collectorSpeed}
-						disabled={!this.props.isEnabled}
+                        color="primary"
+                        margin="dense"
+                        value={this.state.collectorSpeed}
+                        disabled={!this.props.isEnabled}
                         onChange={this.handleOnChange}
                         onKeyUp={this.handleOnKeyUp}
-						/>  
+                    />
                     <ToggleButtonGroup
                         name="collectorDirection"
                         label="Direction"
                         value={this.state.collectorDirection}
                         color="primary"
+                        size={"small"}
                         onChange={this.handleOnDirectionChange}
                         disabled={!this.props.isEnabled}
                         exclusive>
-                        <ToggleButton value="clockwise">
-                            <RotateRightIcon />
-                        </ToggleButton>
-                        <ToggleButton value="counterclockwise">
-                            <RotateLeftIcon />
-                        </ToggleButton>
+                        <Tooltip title="Clockwise Rotation">
+                            <ToggleButton aria-label="clockwise rotation" value={BF_CONSTANTS.COLLECTOR_DIRECTION_CLOCKWISE}>
+                                <RotateRightIcon />
+                            </ToggleButton>
+                        </Tooltip>
+                        <Tooltip title="Counterclockwise Rotation">
+                            <ToggleButton aria-label="counterclockwise rotation" value={BF_CONSTANTS.COLLECTOR_DIRECTION_COUNTERCLOCKWISE}>
+                                <RotateLeftIcon />
+                            </ToggleButton>
+                        </Tooltip>
                     </ToggleButtonGroup>
                 </Stack>
-                <FormControl size="small" sx={{mb:1, mr: 1, minWidth: 300 }}>
-                    <InputLabel id="material-label">Material</InputLabel>
-                    <Select
-                        labelId="material"
-                        id="material-select"
-                        label="Material"
-                        value={this.state.selectedMaterial}
-                        onChange={this.handleOnSelectMaterial}>
-                        {renderedMaterialItems}
-                    </Select>
-                </FormControl>
-                <Button
-                    variant="outlined"
-                    size="medium"
-                    disabled={!this.props.isEnabled}
-                    color={(this.state.pullDownInProgress) ? "error" : "success"}
-                    onClick={(this.state.pullDownInProgress)
-                        ? this.handleStopPullDownClick
-                        : this.handleStartPullDownClick} > 
-                    {this.state.pullDownInProgress
-                        ? 'Stop pull-down'
-                        : 'Start pull-down'}
-                </Button>
+                <Stack
+                    direction="row"
+                    justifyContent="left"
+                    alignItems="left"
+                    spacing={1}
+                    p={1}>
+                    <FormControl size="small" sx={{ mb: 1, mr: 1, minWidth: 300 }}>
+                        <InputLabel id="material-label">Material</InputLabel>
+                        <Select
+                            labelId="material"
+                            id="material-select"
+                            label="Material"
+                            value={this.state.selectedMaterial}
+                            onChange={this.handleOnSelectMaterial}>
+                            {renderedMaterialItems}
+                        </Select>
+                    </FormControl>
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        disabled={!this.props.isEnabled}
+                        color={(this.state.pullDownInProgress) ? "error" : "success"}
+                        onClick={(this.state.pullDownInProgress)
+                            ? this.handleStopPullDownClick
+                            : this.handleStartPullDownClick} >
+                        {this.state.pullDownInProgress
+                            ? 'Stop pull-down'
+                            : 'Start pull-down'}
+                    </Button>
+                </Stack>
             </Box>
         );
     }
