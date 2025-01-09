@@ -92,7 +92,7 @@ class Console extends React.Component {
 					sx={{
 						width: "100%",
 						height: 300,
-						bgcolor: "#f9f9f9",
+						bgcolor: "#f4f4f4",
 						border: "1px solid gray",
 						overflow: "auto", 
 						fontFamily: 'monotype',
