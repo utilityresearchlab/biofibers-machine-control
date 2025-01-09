@@ -477,7 +477,7 @@ class BaseMachineControlApp extends React.Component {
                     		Setup
                 		</Typography>         
 						<SetupParamSubmitter
-							isEnabled={true}
+							disabled={serialCommIsDisconnected}
 							onSubmitCallback={this.handleSendCommandClick} />
 					</Box>
 
@@ -489,7 +489,7 @@ class BaseMachineControlApp extends React.Component {
                 		</Typography>
 
 						<TestingParamSubmitter
-							isEnabled={true}
+							disabled={serialCommIsDisconnected}
 							onSubmitCallback={this.handleSendCommandClick} />
 					</Box>
 
@@ -507,7 +507,7 @@ class BaseMachineControlApp extends React.Component {
 								fieldLabel="Send Command"
 								buttonLabel="Send"
 								buttonIcon={<SendIcon />}
-								isEnabled={true}
+								disabled={serialCommIsDisconnected}
 								onSubmitCallback={this.handleSendCommandClick} />
 							<Box 
 								variant="div"

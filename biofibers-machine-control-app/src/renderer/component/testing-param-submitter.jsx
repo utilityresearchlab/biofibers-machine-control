@@ -168,7 +168,7 @@ class TestingParamSubmitter extends React.Component {
                             value={this.state.eValue}
                             min={BF_CONSTANTS.EXTRUSION_AMOUNT_MIN}
                             max={BF_CONSTANTS.EXTRUSION_AMOUNT_MAX}
-                            disabled={!this.props.isEnabled}
+                            disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             />
                     </Box>
@@ -183,7 +183,7 @@ class TestingParamSubmitter extends React.Component {
                         sx={{minWidth: 200, maxWidth: 200}}
                         min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
                         value={this.state.eFeedrate}
-                        disabled={!this.props.isEnabled}
+                        disabled={this.props.disabled}
                         onChange={this.handleOnChange}
                         />  
                     </Box>
@@ -197,7 +197,7 @@ class TestingParamSubmitter extends React.Component {
                             margin="dense"
                             sx={{minWidth: 170, maxWidth: 170}}
                             value={this.state.xValue}
-                            disabled={!this.props.isEnabled}
+                            disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             />   
                     </Box>
@@ -243,7 +243,7 @@ class TestingParamSubmitter extends React.Component {
                             size="small"
                             color="primary"
                             value={this.state.numCommands}
-                            disabled={!this.props.isEnabled}
+                            disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             sx={{maxWidth: '30%'}}
                             /> 
@@ -262,7 +262,7 @@ class TestingParamSubmitter extends React.Component {
                     <Button
                         variant="outlined"
                         size="medium"
-                        disabled={!this.props.isEnabled}
+                        disabled={this.props.disabled}
                         color="success"
                         startIcon={<PlayCircleOutlineIcon/>}
                         onClick={this.handleSendMultipleCommands} > 

@@ -247,6 +247,7 @@ class SetupParamSubmitter extends React.Component {
                         size="medium"
                         variant="outlined"
                         startIcon={<HomeIcon/>}
+                        disabled={this.props.disabled}
                         onClick={this.handleHomeAllClick} >
                         Home All & Set Axes to Relative
                     </Button>
@@ -269,7 +270,7 @@ class SetupParamSubmitter extends React.Component {
                         min={BF_CONSTANTS.EXTRUSION_AMOUNT_MIN}
                         max={BF_CONSTANTS.EXTRUSION_AMOUNT_MAX}
                         onChange={this.handleOnChange}                        
-                        disabled={!this.props.isEnabled}
+                        disabled={this.props.disabled}
                         />
                     <ConstrainedNumberTextField
                         name="adjustPumpFeedRate"
@@ -281,13 +282,14 @@ class SetupParamSubmitter extends React.Component {
                         sx={{minWidth: 200, maxWidth: 200}}
                         min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
                         value={this.state.adjustPumpFeedRate}
-                        disabled={!this.props.isEnabled}
+                        disabled={this.props.disabled}
                         onChange={this.handleOnChange}
                         />  
                     <Button
                         size="medium"
                         variant="outlined"
                         startIcon={<KeyboardDoubleArrowUpIcon />}
+                        disabled={this.props.disabled}
                         onClick={this.handleRetractPumpClick} >
                         Retract
                     </Button>
@@ -295,6 +297,7 @@ class SetupParamSubmitter extends React.Component {
                         size="medium"
                         variant="outlined"
                         startIcon={<KeyboardDoubleArrowDownIcon />}
+                        disabled={this.props.disabled}
                         onClick={this.handleExtrudePumpClick} >
                         Extrude
                     </Button>
@@ -314,7 +317,7 @@ class SetupParamSubmitter extends React.Component {
                             color="primary"
                             sx={{minWidth: 175, maxWidth: 175}}
                             value={this.state.wrapperTemperature}
-                            disabled={!this.props.isEnabled}
+                            disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             onKeyUp={this.handleOnKeyUp}
                             min={BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN}
@@ -328,7 +331,7 @@ class SetupParamSubmitter extends React.Component {
                             color="primary"
                             sx={{minWidth: 145, maxWidth: 145}}
                             value={this.state.nozzleTemperature}
-                            disabled={!this.props.isEnabled}
+                            disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             onKeyUp={this.handleOnKeyUp}
                             min={BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN} 
@@ -352,7 +355,7 @@ class SetupParamSubmitter extends React.Component {
                             min={BF_CONSTANTS.EXTRUSION_AMOUNT_MIN}
                             max={BF_CONSTANTS.EXTRUSION_AMOUNT_MAX}
                             onChange={this.handleOnChange}                        
-                            disabled={!this.props.isEnabled}
+                            disabled={this.props.disabled}
                             />
                         <ConstrainedNumberTextField
                             name="purgeFeedRate"
@@ -364,13 +367,14 @@ class SetupParamSubmitter extends React.Component {
                             sx={{minWidth: 190, maxWidth: 190}}
                             min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
                             value={this.state.purgeFeedRate}
-                            disabled={!this.props.isEnabled}
+                            disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             /> 
                         <Button
                             size="small"
                             variant="outlined"
                             startIcon={<DeleteOutlineIcon />}
+                            disabled={this.props.disabled}
                             onClick={this.handlePurgeClick}>
                             Purge material
                         </Button>
@@ -394,39 +398,50 @@ class SetupParamSubmitter extends React.Component {
                             min={BF_CONSTANTS.COLLECTOR_PWM_SPEED_MIN}
                             max={BF_CONSTANTS.COLLECTOR_PWM_SPEED_MAX}
                             value={this.state.collectorSpeed}
-                            disabled={!this.props.isEnabled}
+                            disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             onKeyUp={this.handleOnKeyUp} />
                     </Box>
                     <ToggleButtonGroup
                         name="collectorDirection"
                         label="Direction"
-                        value={this.state.collectorDirection}
+                        value={this.props.disabled ? null : this.state.collectorDirection}
                         color="primary"
                         size="small"
                         onChange={this.handleOnDirectionChange}
-                        disabled={!this.props.isEnabled}
+                        disabled={this.props.disabled}
                         exclusive>
+                      
                         <Tooltip title="Stop Collector">
-                            <ToggleButton 
-                                aria-label="Stop collector" 
-                                value={BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED}>
-                                <StopCircleIcon />
-                            </ToggleButton>
+                            <span>
+                                <ToggleButton
+                                    aria-label="Stop collector"
+                                    disabled={this.props.disabled}
+                                    value={BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED}>
+                                    <StopCircleIcon />
+                                </ToggleButton>
+                            </span>
                         </Tooltip>
+          
                         <Tooltip title="Start Clockwise Rotation">
-                            <ToggleButton 
-                                aria-label="clockwise rotation" 
-                                value={BF_CONSTANTS.COLLECTOR_DIRECTION_CLOCKWISE}>
-                                <RotateRightIcon />
-                            </ToggleButton>
+                            <span>
+                                <ToggleButton
+                                    aria-label="clockwise rotation"
+                                    disabled={this.props.disabled}
+                                    value={BF_CONSTANTS.COLLECTOR_DIRECTION_CLOCKWISE}>
+                                    <RotateRightIcon />
+                                </ToggleButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="Start Counterclockwise Rotation">
-                            <ToggleButton 
-                                aria-label="counterclockwise rotation" 
-                                value={BF_CONSTANTS.COLLECTOR_DIRECTION_COUNTERCLOCKWISE}>
-                                <RotateLeftIcon />
-                            </ToggleButton>
+                            <span>
+                                <ToggleButton
+                                    aria-label="counterclockwise rotation"
+                                    disabled={this.props.disabled}
+                                    value={BF_CONSTANTS.COLLECTOR_DIRECTION_COUNTERCLOCKWISE}>
+                                    <RotateLeftIcon />
+                                </ToggleButton>
+                            </span>
                         </Tooltip>
                     </ToggleButtonGroup>
                 </Stack>
@@ -443,14 +458,15 @@ class SetupParamSubmitter extends React.Component {
                             id="material-select"
                             label="Material"
                             value={this.state.selectedMaterial}
-                            onChange={this.handleOnSelectMaterial}>
+                            onChange={this.handleOnSelectMaterial}
+                            disabled={this.props.disabled}>
                             {renderedMaterialItems}
                         </Select>
                     </FormControl>
                     <Button
                         variant="outlined"
                         size="small"
-                        disabled={!this.props.isEnabled}
+                        disabled={this.props.disabled}
                         color={(this.state.pullDownInProgress) ? "error" : "success"}
                         startIcon={<SwipeDownAltIcon />}
                         onClick={(this.state.pullDownInProgress)
