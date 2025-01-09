@@ -24,15 +24,12 @@ SerialPortHelper.availableBaudRates = () => {
 
 	SerialPortHelper.listSerialPorts =
 		async function() {
-			// console.log("listing ports");
 			return await SerialPort.list().then(
 				(ports, err) => {
 				if (err) {
 						console.log(err.message);
 						return {ports, err};
 				}
-
-				// console.log('ports', ports);
 
 				if (ports.length === 0) {
 					console.log("No ports discovered!");
