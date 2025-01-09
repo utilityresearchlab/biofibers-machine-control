@@ -29,8 +29,13 @@ export const CMD_USE_RELATIVE_DISTANCES_FOR_EXTRUSION = 'M83';
 
 export const CMD_SET_SPINDLE_SPEED_CW = 'M3';
 export const CMD_SET_SPINDLE_SPEED_CCW = 'M4';
+export const CMD_SET_SPINDLE_SPEED_OFF = 'M5';
 
 export const CMD_COLD_EXTRUSION = 'M302';
+
+// Marlin shutdown and halt - https://marlinfw.org/docs/gcode/M112.html
+// Note requires space in the buffer!
+export const CMD_FULL_SHUTDOWN = 'M112';
 
 // GCode Parameters
 export const PARAM_X = 'X';
