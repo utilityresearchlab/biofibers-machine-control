@@ -369,6 +369,7 @@ class BaseMachineControlApp extends React.Component {
 		const selectedPortName = this.state.serialPort;
 		const serialCommIsConnected = (this.props.serialCommunication) ? this.props.serialCommunication.isConnected() : false;
 		const serialCommIsDisconnected = !serialCommIsConnected;
+		const isInputDisabled = serialCommIsDisconnected && !this.props.isDebugging;
 		const githubUrl = APP_SETTINGS.BIOFIBERS_GITHUB_URL;
 		const currentYear = new Date().getFullYear();
 		return (
@@ -477,7 +478,7 @@ class BaseMachineControlApp extends React.Component {
                     		Setup
                 		</Typography>         
 						<SetupParamSubmitter
-							disabled={serialCommIsDisconnected}
+							disabled={isInputDisabled}
 							onSubmitCallback={this.handleSendCommandClick} />
 					</Box>
 
@@ -489,7 +490,7 @@ class BaseMachineControlApp extends React.Component {
                 		</Typography>
 
 						<TestingParamSubmitter
-							disabled={serialCommIsDisconnected}
+							disabled={isInputDisabled}
 							onSubmitCallback={this.handleSendCommandClick} />
 					</Box>
 
@@ -507,7 +508,7 @@ class BaseMachineControlApp extends React.Component {
 								fieldLabel="Send Command"
 								buttonLabel="Send"
 								buttonIcon={<SendIcon />}
-								disabled={serialCommIsDisconnected}
+								disabled={isInputDisabled}
 								onSubmitCallback={this.handleSendCommandClick} />
 							<Box 
 								variant="div"

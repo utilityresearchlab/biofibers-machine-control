@@ -6,8 +6,11 @@ import BaseMachineControlApp from './app';
 import applyTheme from './style/theme'
 
 import {SerialCommunication, defaultBaudRate, defaultSerialPort} from './lib/serial-util/serial-communication';
+import * as APP_SETTINGS from './app-settings'
 
 const serialComm = new SerialCommunication(defaultSerialPort, defaultBaudRate);
+const isDebugging = APP_SETTINGS.DEBUG_MODE;
+
 
 let appStarted = false;
 // Set-up react app here; see: https://reactjs.org/docs/hello-world.html
@@ -18,7 +21,12 @@ function initApp() {
 	}
 	const root = ReactDOM.createRoot(document.getElementById('root'));
 	const renderApp = () => {
-		return (<BaseMachineControlApp serialCommunication={serialComm} />);
+		return (
+			<BaseMachineControlApp 
+				serialCommunication={serialComm}
+				isDebugging={isDebugging} 
+				/>
+		);
 	};
 
 	root.render(
