@@ -7,7 +7,7 @@ export class GcodeBuilder {
         /**
          * command = {
          *    'code': 'G1',
-         *    'params: { 'X': 10.00},
+         *    'params: { GCODE_CONSTANTS.PARAM_X: 10.00},
          *    'comment': 'this is some text'
          *  }
          */
@@ -56,12 +56,59 @@ export class GcodeBuilder {
                 formattedParamValue = "0";
             } else {
                 let isFloat = (Math.abs(paramValue - Math.round(paramValue))) > 0;
-                formattedParamValue = isFloat ? paramValue.toFixed(9) : paramValue.toString();
+                formattedParamValue = isFloat ? this._getPrecisionParamValue(paramValue, paramName) : paramValue.toString();
             }
         } else {
             formattedParamValue = paramValue.toString();
         }
         return paramName.toString().toUpperCase() + formattedParamValue;
+    }
+
+    // Counts the number of decimals in a number/string 
+    _countDecimals(value) {
+        if (Math.floor(value.valueOf()) === value.valueOf()) {
+            return 0;
+        }
+        const str = value.toString();
+        if (str.indexOf(".") !== -1 && str.indexOf("-") !== -1) {
+            return str.split("-")[1] || 0;
+        } else if (str.indexOf(".") !== -1) {
+            return str.split(".")[1].length || 0;
+        }
+        return str.split("-")[1] || 0;
+    }
+
+    _getPrecisionParamValue(value, paramKey) {
+        if (!paramKey) {
+            return value;
+        }
+        // Check decimal count
+        const decimalCount = this._countDecimals(value);
+        if (decimalCount == 0) {
+            // No decimals - then just return the number
+            return value;
+        }
+        // has decimals, so cap based on parameter max
+        let maxPrecision = decimalCount;
+        switch (paramKey) {
+            case GCODE_CONSTANTS.PARAM_X:
+            case GCODE_CONSTANTS.PARAM_Y:
+            case GCODE_CONSTANTS.PARAM_Z:
+                maxPrecision = GCODE_CONSTANTS.PARAM_XYZ_FLOAT_PRECISION;
+                break;
+            case GCODE_CONSTANTS.PARAM_F:
+                maxPrecision = GCODE_CONSTANTS.PARAM_F_FLOAT_PRECISION;
+                break;
+            case GCODE_CONSTANTS.PARAM_E:
+                maxPrecision = GCODE_CONSTANTS.PARAM_E_FLOAT_PRECISION;
+                break;
+            case GCODE_CONSTANTS.PARAM_T:
+                maxPrecision = GCODE_CONSTANTS.PARAM_T_FLOAT_PRECISION;
+                break;
+            default: 
+                break;
+        }
+        return value.toFixed(Math.min(maxPrecision, decimalCount));
     }
 
     _concatCommand(cmd='', params={}, comment='') {
@@ -98,9 +145,6 @@ export class GcodeBuilder {
         return this;
     }
 
-    // get debugOutput() {
-    //     return this._debugOutput
-    // }
 
     set debugOutput(value=true) {
         this._debugOutput = value;
@@ -128,27 +172,27 @@ export class GcodeBuilder {
     }
 
     moveX(value, feedrate=null, comment=null) {
-        this.move(this._getMoveParams('X', value, feedrate), comment);
+        this.move(this._getMoveParams(GCODE_CONSTANTS.PARAM_X, value, feedrate), comment);
         return this;
     }
 
     moveY(value, feedrate=null, comment=null) {
-        this.move(this._getMoveParams('Y', value, feedrate), comment);
+        this.move(this._getMoveParams(GCODE_CONSTANTS.PARAM_Y, value, feedrate), comment);
         return this;
     }
 
     moveZ(value, feedrate=null, comment=null) {
-        this.move(this._getMoveParams('Z', value, feedrate), comment);
+        this.move(this._getMoveParams(GCODE_CONSTANTS.PARAM_Z, value, feedrate), comment);
         return this;
     }
 
     moveE(value, feedrate=null, comment=null) {
-        this.move(this._getMoveParams('E', value, feedrate), comment);
+        this.move(this._getMoveParams(GCODE_CONSTANTS.PARAM_E, value, feedrate), comment);
         return this;
     }
 
     setFeedRate(value, comment=null) {
-        this.move({'F': value}, comment=null);
+        this.move({[GCODE_CONSTANTS.PARAM_F]: value}, comment=null);
         return this;
     }
 
@@ -158,22 +202,22 @@ export class GcodeBuilder {
     }
 
     homeX(comment='home x') {
-        this._home(['X'], comment);
+        this._home([GCODE_CONSTANTS.PARAM_X], comment);
         return this;
     }
 
     homeY(comment='home y') {
-        this._home(['Y'], comment);
+        this._home([GCODE_CONSTANTS.PARAM_Y], comment);
         return this;
     }
 
     homeZ(comment='home z') {
-        this._home(['Z'], comment);
+        this._home([GCODE_CONSTANTS.PARAM_Z], comment);
         return this;
     }
 
     homeXY(comment='home xy') {
-        this._home(['X', 'Y'], comment);
+        this._home([GCODE_CONSTANTS.PARAM_X, GCODE_CONSTANTS.PARAM_Y], comment);
         return ;
     }
 
@@ -204,19 +248,7 @@ export class GcodeBuilder {
         this.moveE(value.toFixed(4), feedrate, comment);
         return this;
     }
-
-    extrudeWhileMoveX(value, xValue, compositeFeedrate, comment='') {
-        this.move({'X': xValue, 'E': value.toFixed(4), 'F': compositeFeedrate.toFixed(4)}, comment);
-        return this;
-    }
-
-    extrudeWhileMoveXAtFeedrates(value, xValue, eFeedrate, xFeedrate, comment='') {
-        const compositeFeedrate = Math.sqrt(
-            Math.pow(eFeedrate, 2)+Math.pow(xFeedrate, 2));
-        this.move({'X': xValue, 'E': value.toFixed(4), 'F': compositeFeedrate.toFixed(4)}, comment);
-        return this;
-    }
-
+    
     retract(value, feedrate=null, comment='retract') {
         value = (value > 0) ? -1 * value : value;
         this.moveE(value, feedrate, comment);
@@ -230,7 +262,7 @@ export class GcodeBuilder {
     }
 
     resetExtrusionDistance() {
-        this._appendCommand(GCODE_CONSTANTS.CMD_RESET_EXTRUSION_DISTANCE, {'E': 0}, 'reset extrusion distance');
+        this._appendCommand(GCODE_CONSTANTS.CMD_RESET_EXTRUSION_DISTANCE, {[GCODE_CONSTANTS.PARAM_E]: 0}, 'reset extrusion distance');
         return this;
     }
 
@@ -302,9 +334,9 @@ export class GcodeBuilder {
     }
 
     setTemperature(value, shouldWait=false, toolIndex=null) {
-        let tempParams = {'S': value};
+        let tempParams = {[GCODE_CONSTANTS.PARAM_S]: value};
         if (toolIndex !== null) {
-            tempParams['T'] = toolIndex;
+            tempParams[GCODE_CONSTANTS.PARAM_T] = toolIndex;
         }
         let cmd = (shouldWait) ? GCODE_CONSTANTS.CMD_SET_TEMPERATURE_AND_WAIT : GCODE_CONSTANTS.CMD_SET_TEMPERATURE;
         this._appendCommand(cmd, tempParams, (shouldWait) ? 'set temperature and wait' : 'set temperature');
@@ -334,7 +366,7 @@ export class GcodeBuilder {
     }
 
     setSpindleSpeed(value, clockwise=true) {
-        let speedParams = {'S': value};
+        let speedParams = {[GCODE_CONSTANTS.PARAM_S]: value};
         let cmd = (clockwise) ? GCODE_CONSTANTS.CMD_SET_SPINDLE_SPEED_CW : GCODE_CONSTANTS.CMD_SET_SPINDLE_SPEED_CCW;
         this._appendCommand(cmd, speedParams, (clockwise) ? 'set spindle rotation clockwise' : 'set spindle rotation counterclockwise');
         return this;

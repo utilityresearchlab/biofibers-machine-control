@@ -22,10 +22,10 @@ import RotateRightIcon from '@mui/icons-material/RotateRight';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import SwipeDownAltIcon from '@mui/icons-material/SwipeDownAlt';
 
-
 import ConstrainedNumberTextField from './constrained-number-text-field'
 import * as BF_CONSTANTS from '../lib/biofibers-machine-constants'
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
+import * as GCODE_CONSTANTS from '../lib/machine-control/gcode-constants'
 import MaterialHelper from '../lib/material-util/material-helper';
 import MathUtil from '../lib/math-util'
 import MiscUtil from '../lib/machine-control/misc-util';
@@ -110,13 +110,18 @@ class SetupParamSubmitter extends React.Component {
         // keep sending command to extrude until pull-down is stopped
         // TODO: Determine proper interval timing instead of hard-coding 5000 ms
         // const commandTime = MiscUtil.calculateCommandTimeInMilliSec(params['E'], params['X'], params['F']);
+        // TODO (mrivera) - fix timeout interval 
         let intervalId = setInterval(() => {
             let pullDownGcodeBuilder = new GcodeBuilder();
-            const params = MaterialHelper.defaultParams()[this.state.selectedMaterial];
-            pullDownGcodeBuilder
-                .extrudeWhileMoveX(params['E'], params['X'], params['F'], 'extrude and move X'); // value from experiments
+            const defaultParams = MaterialHelper.defaultParams()[this.state.selectedMaterial];
+            pullDownGcodeBuilder.move({
+                    [GCODE_CONSTANTS.PARAM_E]: defaultParams[GCODE_CONSTANTS.PARAM_E],
+                    [GCODE_CONSTANTS.PARAM_X]: defaultParams[GCODE_CONSTANTS.PARAM_X],
+                    [GCODE_CONSTANTS.PARAM_F]: defaultParams[GCODE_CONSTANTS.PARAM_F],
+                }, 
+                'extrude and move X'); // value from experiments
             this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString());
-        }, 28000);
+        }, 100);
         this.setState({
             ...this.state,
             nIntervalId: intervalId,
@@ -265,7 +270,8 @@ class SetupParamSubmitter extends React.Component {
                         label="Adjust Syringe Shuttle Position [mm]"                       
                         name="adjustPump"
                         value={this.state.adjustPump}
-                        min={0}
+                        min={BF_CONSTANTS.EXTRUSION_AMOUNT_MIN}
+                        max={BF_CONSTANTS.EXTRUSION_AMOUNT_MAX}
                         onChange={this.handleOnChange}                        
                         disabled={!this.props.isEnabled}
                         />

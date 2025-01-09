@@ -8,8 +8,12 @@ import Typography from '@mui/material/Typography';
 
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
+import ConstrainedNumberTextField from './constrained-number-text-field'
+
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
-import {BF_CONSTANTS} from '../lib/biofibers-machine-constants'
+import * as GCODE_CONSTANTS from '../lib/machine-control/gcode-constants'
+
+import * as BF_CONSTANTS from '../lib/biofibers-machine-constants'
 
 class TestingParamSubmitter extends React.Component {
     constructor(props) {
@@ -34,7 +38,7 @@ class TestingParamSubmitter extends React.Component {
         console.log(name);
         this.setState({
             ...this.state,
-            [name]: Number(value)
+            [name]: parseFloat(value)
         });
     }
 
@@ -56,12 +60,12 @@ class TestingParamSubmitter extends React.Component {
         // TODO: Determine proper interval timing instead of hard-coding 1000 ms
         let intervalId = setInterval(() => {
             let gcodeBuilder = new GcodeBuilder();
-            gcodeBuilder
-                .extrudeWhileMoveX(
-                    this.state.eValue, 
-                    this.state.xValue,
-                    this.getCompositeFeedrate(),
-                    'extrude and move X'); 
+            gcodeBuilder.move({
+                    [GCODE_CONSTANTS.PARAM_E]: this.state.eValue,
+                    [GCODE_CONSTANTS.PARAM_X]: this.state.xValue,
+                    [GCODE_CONSTANTS.PARAM_F]: this.getCompositeFeedrate(),
+                }, 
+                'extrude and move X'); 
             this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
         }, 1000);
         this.setState({
@@ -85,25 +89,34 @@ class TestingParamSubmitter extends React.Component {
     }
 
     handleSendMultipleCommands(event) {
+        let gcodeBuilder = new GcodeBuilder();
         for (let i = 0; i < this.state.numCommands; i ++) {
-            let gcodeBuilder = new GcodeBuilder();
-            gcodeBuilder
-                .extrudeWhileMoveX(
-                    this.state.eValue, 
-                    this.state.xValue,
-                    this.getCompositeFeedrate(),
-                    'extrude and move X'); 
+            gcodeBuilder.reset();
+            gcodeBuilder.move({
+                [GCODE_CONSTANTS.PARAM_E]: this.state.eValue,
+                [GCODE_CONSTANTS.PARAM_X]: this.state.xValue,
+                [GCODE_CONSTANTS.PARAM_F]: this.getCompositeFeedrate(),
+                }, 
+                'extrude and move X'); 
             this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
         }
     }
 
     getCompositeFeedrate() {
-        return Math.sqrt(
-            Math.pow(this.state.eFeedrate, 2)+Math.pow(this.calculateXFeedrate(), 2));
+        return Math.sqrt( 
+            Math.pow(this.state.eFeedrate, 2) + Math.pow(this.calculateXFeedrate(), 2));
     }
 
     calculateXFeedrate() {
-        return this.state.eFeedrate * (this.state.xValue / this.state.eValue);
+        // If no extrusion simply use the default X feed rate
+        if (this.state.eValue == 0) {
+            return BF_CONSTANTS.X_AXIS_DEFAULT_FEED_RATE;
+        }
+        // If no e-feed rate, use default X feedrate
+        if (this.state.eFeedrate == 0) {
+            return BF_CONSTANTS.X_AXIS_DEFAULT_FEED_RATE;
+        }
+        return this.state.xValue * (this.state.eFeedrate / this.state.eValue);
     }
 
     render() {
@@ -120,7 +133,7 @@ class TestingParamSubmitter extends React.Component {
                     padding={1}
                 >
                     <Box variant="div">
-                        <TextField
+                        <ConstrainedNumberTextField
                             name="eValue"
                             label="Extrusion Amount [mm]"
                             type="number"
@@ -129,12 +142,14 @@ class TestingParamSubmitter extends React.Component {
                             margin="dense"
                             sx={{minWidth: 170, maxWidth: 170}}
                             value={this.state.eValue}
+                            min={BF_CONSTANTS.EXTRUSION_AMOUNT_MIN}
+                            max={BF_CONSTANTS.EXTRUSION_AMOUNT_MAX}
                             disabled={!this.props.isEnabled}
                             onChange={this.handleOnChange}
                             />
                     </Box>
                     <Box variant="div">
-                    <TextField
+                    <ConstrainedNumberTextField
                         name="eFeedrate"
                         label="Extrusion Feedrate [mm/min]"
                         type="number"
@@ -142,13 +157,14 @@ class TestingParamSubmitter extends React.Component {
                         color="primary"
                         margin="dense"
                         sx={{minWidth: 200, maxWidth: 200}}
+                        min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
                         value={this.state.eFeedrate}
                         disabled={!this.props.isEnabled}
                         onChange={this.handleOnChange}
                         />  
                     </Box>
                     <Box variant="div">
-                        <TextField
+                        <ConstrainedNumberTextField
                             name="xValue"
                             label="X-Axis Movement [mm]"
                             type="number"
@@ -183,7 +199,7 @@ class TestingParamSubmitter extends React.Component {
                         justifySelf={true}
                         spacing={1}
                     >
-                    <TextField
+                    <ConstrainedNumberTextField
                             name="numCommands"
                             label="Number of Commands to Send"
                             type="number"
