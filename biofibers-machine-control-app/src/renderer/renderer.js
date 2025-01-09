@@ -27,12 +27,12 @@
  */
 
 import SerialPortHelper from './lib/serial-util/serial-port-helper';
-const tableify = require('tableify')
+import * as LOGGER from './lib/logger-util.js';
 
 
 import './index.css';
 
-console.log('👋 This message is being logged by "renderer.js", included via webpack');
+LOGGER.logD('👋 This message is being logged by "renderer.js", included via webpack');
 //console.log(SerialPortHelper.listSerialPorts());
 
 // Integrates React: https://www.electronforge.io/guides/framework-integration/react

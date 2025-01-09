@@ -28,7 +28,7 @@ import {MachineCommandInterpreter} from './lib/machine-control/command-interpret
 import {parseLine} from './lib/machine-control/command-parser';
 import {MACHINE_COMMANDS, MACHINE_ERROR_CODES} from './lib/machine-control/machine-protocol';
 
-import * as APP_SETTINGS from './app-settings'
+import * as APP_SETTINGS from './app-settings';
 import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
 import SetupParamSubmitter from './component/setup-param-submitter'
@@ -38,8 +38,8 @@ import GcodeUploader from './component/gcode-uploader'
 import imgMachineLogoSrc from '../assets/img/machine-render-logo.png'
 import imgUtilityLabLogoSrc from '../assets/img/utility-research-web-logo-500x75.png'
 
-import './index.css';
-import { GcodeBuilder } from './lib/machine-control/gcode-builder';
+import * as LOGGER from './lib/logger-util';
+
 
 const ScanPortsRefreshTimeInMs = 3000;
 
@@ -52,7 +52,7 @@ class BaseMachineControlApp extends React.Component {
 			selectedSerialPort: this.props.serialCommunication.serialPortPath,
 			baudRate: this.props.serialCommunication.baudRate,
 			consoleData: [],
-			availableSerialPorts: [SerialPortHelper.nonePort],
+			availableSerialPorts: [SerialPortHelper.nonePort()],
 		};
 
 		// init serialport listening
@@ -72,7 +72,6 @@ class BaseMachineControlApp extends React.Component {
 			MACHINE_COMMANDS.ALL_COMMANDS,
 			this.createCommandInterpreterErrorCallback());
 	}
-
 
 	createCommandResponseHandler() {
 		const that = this;
@@ -176,7 +175,7 @@ class BaseMachineControlApp extends React.Component {
 	createCommandInterpreterErrorCallback() {
 		const that = this;
 		const errCallback = (cmd, err) => {
-			console.error(`Error: ${err.toString()}: ${cmd}`);
+			LOGGER.logE(`${err.toString()}: ${cmd}`);
 		};
 		return errCallback;
 	}
@@ -187,9 +186,9 @@ class BaseMachineControlApp extends React.Component {
 		if (localStorage.getItem('firstLoadDone') === null) {
 			// If it's the first load, set the flag in local storage to true and reload the page
 			localStorage.setItem('firstLoadDone', 1);
-			console.log('This is the initial load');
+			LOGGER.logD('This is the initial load'); 
 		  } else {
-			console.log('This is a page refresh');
+			LOGGER.logD('This is a page refresh');
 		  } 
 	}
 
@@ -213,24 +212,22 @@ class BaseMachineControlApp extends React.Component {
 
 	handleUpdateAvailableSerialPorts(updatedPortsInfo, err) {
 		if (err) {
-			this.log(err);
+			LOGGER.logE(err);
 			// todo show port info in console?
 		}
 		const updatedPorts = (err || !updatedPortsInfo || updatedPortsInfo.length == 0)
-			? [SerialPortHelper.nonePort]
-			: [SerialPortHelper.nonePort].concat(updatedPortsInfo);
+			? [SerialPortHelper.nonePort()]
+			: updatedPortsInfo;
 		this.setState({availableSerialPorts: updatedPorts});
-		this.log("Serial Ports - ", updatedPorts);
+		LOGGER.log("Serial Ports - ", updatedPorts);
 	}
 
 	handleOnSelectSerialPort(event) {
-		this.log("select port", event.target.value);
 		const serialPortName = String(event.target.value);
 		this.setState({selectedSerialPort: serialPortName});
 	}
 
 	handleOnSelectBaudRate(event) {
-		this.log("select baud", event.target.value);
 		const baudRate = Number(event.target.value);
 		this.setState({baudRate: baudRate});
 	}
@@ -326,7 +323,7 @@ class BaseMachineControlApp extends React.Component {
 		// this.setState(prevState => ({
 		// 	consoleData: [...prevState.consoleData, newData]
 		// }));
-		// this.log("Received data:", newData, " // new state: ", this.state.consoleData);
+		// LOGGER.logD("Received data:", newData, " // new state: ", this.state.consoleData);
 	}
 
 	addConsoleData(data, dataType=ConsoleDataType.INFO, timestamp=Date.now()) {
@@ -337,22 +334,19 @@ class BaseMachineControlApp extends React.Component {
 		}));
 	}
 
-	log(...info) {
-		console.log("App: ", ...info)
-	}
-
 	getRenderedSerialPortItems() {
 		const availableSerialPorts = this.state.availableSerialPorts;
 		let renderedSerialPortsItems = availableSerialPorts.map((item, index) => {
 			const portPath = item.path;
-			const portName = item.path == SerialPortHelper.serialPortPathNone() ? 'None' : item.path;
+			const portName = item.path == SerialPortHelper.serialPortPathNone() 
+				? 'None' 
+				: item.path;
 			return (
 				<MenuItem
 					key={"item-menu-serial-port-" + portName}
 					value={portPath}>{portName}</MenuItem>
 			);
 		});
-		//this.log(renderedSerialPortsItems);
 		return renderedSerialPortsItems;
 	}
 
