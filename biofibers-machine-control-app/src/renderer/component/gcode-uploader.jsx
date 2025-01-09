@@ -61,7 +61,6 @@ class GcodeUploader extends React.Component {
             commandBuilder: gcodeSampleBuilder
         });
     }
- 
 
     handleSendMultiLineCommands(event) {
         for (let i = 0; i < this.state.commandBuilder.commands.length; i ++) {
@@ -88,26 +87,21 @@ class GcodeUploader extends React.Component {
     render() {
         return (
             <Box
-            component="form"
-            sx={{
-                '& .MuiTextField-root': {m: 0, width: '100%' },
-            }}
-            noValidate
-            autoComplete="off"
-            onSubmit={e => { e.preventDefault();}}
-            >
-        
+                component="form"
+                sx={{'& .MuiTextField-root': {m: 0, width: '100%' }}}
+                noValidate
+                autoComplete="off"
+                onSubmit={e => { e.preventDefault();}}>
                 <Button
-                        variant="outlined"
-                        size="medium"
-                        disabled={!this.props.isEnabled}
-                        color="success"
-                        onClick={this.handleSendMultiLineCommands} > 
-                        Send Commands
-                    </Button>
+                    variant="outlined"
+                    size="medium"
+                    disabled={!this.props.isEnabled}
+                    color="success"
+                    onClick={this.handleSendMultiLineCommands} > 
+                    Send Commands
+                </Button>
             </Box>
-          
-        )
+        );
     }
 }
 
