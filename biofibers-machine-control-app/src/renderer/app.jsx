@@ -27,6 +27,7 @@ import {MachineCommandInterpreter} from './lib/machine-control/command-interpret
 import {parseLine} from './lib/machine-control/command-parser';
 import {MACHINE_COMMANDS, MACHINE_ERROR_CODES} from './lib/machine-control/machine-protocol';
 
+import * as APP_SETTINGS from './app-settings'
 import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
 import SetupParamSubmitter from './component/setup-param-submitter'
@@ -34,6 +35,7 @@ import TestingParamSubmitter from './component/testing-param-submitter'
 import GcodeUploader from './component/gcode-uploader'
 
 import imgMachineLogoSrc from '../assets/img/machine-render-logo.png'
+import imgUtilityLabLogoSrc from '../assets/img/utility-research-web-logo-500x75.png'
 
 import './index.css';
 import { GcodeBuilder } from './lib/machine-control/gcode-builder';
@@ -373,7 +375,8 @@ class BaseMachineControlApp extends React.Component {
 		const selectedPortName = this.state.serialPort;
 		const serialCommIsConnected = (this.props.serialCommunication) ? this.props.serialCommunication.isConnected() : false;
 		const serialCommIsDisconnected = !serialCommIsConnected;
-		const githubUrl = "https://github.com/utilityresearchlab/desktop-biofibers-spinning";
+		const githubUrl = APP_SETTINGS.BIOFIBERS_GITHUB_URL;
+		const currentYear = new Date().getFullYear();
 		return (
 			<Box component="div" className="App center-page" sx={{paddingTop: 2, paddingBottom: 2}}>
 				<Box component="header">
@@ -420,9 +423,7 @@ class BaseMachineControlApp extends React.Component {
 					</Box>
 
 				</Box>
-				
-				<Divider sx={{width: "100%", margin: "0 auto"}}/>
-
+				<Divider sx={{width: "100%", margin: "0 auto"}} />
 				<Box variant="div">
 					<Box variant="div">
 							<Typography gutterBottom variant="h6" component="div" sx={{paddingTop: '1em'}} >
@@ -473,7 +474,7 @@ class BaseMachineControlApp extends React.Component {
 							</Stack>
 					</Box>
 
-					<Divider sx={{marginTop: 4, marginBottom: 2}}/>
+					<Divider sx={{marginTop: 4, marginBottom: 2}} />
 
 					<Box variant="div">
 						<Typography gutterBottom variant="h6" component="div">
@@ -484,7 +485,7 @@ class BaseMachineControlApp extends React.Component {
 							onSubmitCallback={this.handleSendCommandClick} />
 					</Box>
 
-					<Divider sx={{marginTop: 4, marginBottom: 2}}/>
+					<Divider sx={{marginTop: 4, marginBottom: 2}} />
 
 					<Box variant="div">
 						<Typography gutterBottom variant="h6" component="div">
@@ -515,6 +516,33 @@ class BaseMachineControlApp extends React.Component {
 								<Console data={consoleData} />
 							</Box>
 						</Box>
+					</Box>
+				</Box>
+				<Divider sx={{marginTop: 4, marginBottom: 4}} />
+				<Box component="footer">
+					<Box variant="div">
+						{/* footer */}
+						<Stack
+							direction="row"
+							justifyContent="center"
+							alignItems="center"
+							spacing={2}
+							p={1}>
+							<Stack
+								direction="column"
+								justifyContent="center"
+								alignItems="center"
+								spacing={1}
+								p={1}
+								>
+									<a href={APP_SETTINGS.UTILITY_RESEARCH_LAB_URL} target="_blank">
+										<img width={310} src={imgUtilityLabLogoSrc} alt="Utility Research Lab Logo" />
+									</a>
+									<Typography color="gray"> © 2021-{currentYear}, Utility Research Lab. 
+										All rights reserved.
+									</Typography> 
+								</Stack>
+						</Stack>
 					</Box>
 				</Box>
 			</Box>
