@@ -183,7 +183,7 @@ class TestingParamSubmitter extends React.Component {
                     >
                     <TextField
                             name="numCommands"
-                            label="number of commands to send"
+                            label="Number of Commands to Send"
                             type="number"
                             size="small"
                             color="primary"
