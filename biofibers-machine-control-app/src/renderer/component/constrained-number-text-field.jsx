@@ -14,22 +14,25 @@ class ConstrainedNumberTextField extends React.Component {
 
     }
 
-    handleOnChange(evt) {
-        const constrainedValue = MathUtil.constrain(Number(evt.target.value), this.props.min, this.props.max);
-        if (!this.props.onChange) {
+    enforceConstraints(value, event=null, callback=null) {
+        const constrainedValue = MathUtil.constrain(parseFloat(value), this.props.min, this.props.max);
+        if (!callback) {
             return;
         }
-        evt.target.value = constrainedValue;
-        this.props.onChange(evt);
+        if (event) {
+            event.target.value = constrainedValue;
+            callback(event);
+        } else {
+            callback(constrainedValue);
+        }
     }
 
-    handleOnKeyUp(evt) {
-        const constrainedValue = MathUtil.constrain(Number(evt.target.value), this.props.min, this.props.max);
-        if (!this.props.onKeyUp) {
-            return;
-        }
-        evt.target.value = constrainedValue;
-        this.props.onKeyUp(evt);
+    handleOnChange(event) {
+        this.enforceConstraints(event.target.value, event, this.props.onChange);
+    }
+ 
+    handleOnKeyUp(event) {
+        this.enforceConstraints(event.target.value, event, this.props.onKeyUp);
     }
 
     render() {
@@ -49,19 +52,6 @@ class ConstrainedNumberTextField extends React.Component {
                 inputProps={{min: this.props.min, max: this.props.max}} />
         );
     }
-// <!-- <TextField
-//                             label="Nozzle Temp. [ºC]"
-//                             name="nozzleTemperature"
-//                             type="number"
-//                             size="small"
-//                             color="primary"
-//                             sx={{minWidth: 150, maxWidth: 150}}
-//                             value={this.state.nozzleTemperature}
-//                             disabled={!this.props.isEnabled}
-//                             onChange={this.handleOnChange}
-//                             onKeyUp={this.handleOnKeyUp}
-//                             inputProps={{min: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN, max: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MAX}}
-//                             /> -->
 }
 
 export default ConstrainedNumberTextField;
