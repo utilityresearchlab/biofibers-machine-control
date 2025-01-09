@@ -1,5 +1,6 @@
-import { ThreeSixty } from '@mui/icons-material';
 import { SerialPort } from 'serialport';
+
+import * as LOGGER from '../logger-util';
 
 const noPortSelected = '';
 const defaultSerialPort = noPortSelected;
@@ -20,7 +21,7 @@ class SerialCommunication {
 			return false;
 		}
 		if (!this.serialPort || !this.serialPort.isOpen) {
-			this.log("can't send command; serial port is closed");
+			LOGGER.logD("can't send command; serial port is closed");
 			if (onSentCallback) {
 				onSentCallback(cmd, "Serial port is not open.");
 			}
@@ -28,16 +29,16 @@ class SerialCommunication {
 		}
 		// todo: replace placeholder 5 with actual buffer size
 		// if (this.nackline > 5) {
-		// 	this.log("too many commands sent, wait and resend");
+		// 	LOGGER.logE("too many commands sent, wait and resend");
 		// 	return false;
 		// }
 		this.serialPort.write(cmd + endOfCommand, (err) => {
 			if (err) {
-				this.log("Error on write: ", err.message);
+				LOGGER.logE("Error on write: ", err.message);
 			} else {
 				const numCmd = cmd.split(endOfCommand).length;
 				this.nackline += numCmd;
-				this.log("Command Sent: ", cmd);
+				LOGGER.log("Command Sent: ", cmd);
 			}
 			if (onSentCallback) {
 				onSentCallback(cmd, err);
@@ -53,23 +54,23 @@ class SerialCommunication {
 		// })
 		// Switches the port into "flowing mode"
 		if (!this.serialPort || !this.serialPort.isOpen) {
-			this.log("Can't receive data; serial port is closed.");
+			LOGGER.logD("Can't receive data; serial port is closed.");
 			return;
 		}
 		if (this.isReceiving) {
-			this.log("already receiving data");
+			LOGGER.logD("Already receiving serial data");
 			return;
 		}
-		this.log("starting receiving");
+		LOGGER.logD("Starting receiving serial data");
 		const that = this;
 		const receivingCallback = dataReceivedCallback;
 		this.serialPort.on('data', function (data) {
-  		that.log('Received Data:', data.toString());
+		LOGGER.logD('Received Data:', data.toString());
 			const receivedData = data.toString().trim().split('\n');
 			for (const line of receivedData) {
 				if (line === 'ok') {
 					that.nackline -= 1;
-					that.log("Unack Lines ", that.nackline);
+					LOGGER.logD("Serial Unack Lines ", that.nackline);
 				}
 			}
 			if (receivingCallback) {
@@ -101,11 +102,11 @@ class SerialCommunication {
 	connect(onConnectCallback) {
 		// Disconnect old port
 		if (this.serialPort && this.isConnected()) {
-			this.log("disconnecting previous port");
+			LOGGER.logD("Disconnecting from previous serial port");
 			this.disconnect();
 		}
 		if (this.serialPortPath == noPortSelected) {
-			this.log("error - can't connect with no port selected");
+			LOGGER.logE("Can't connect to serial with no port selected");
 			if (onConnectCallback) {
 				onConnectCallback("No port selected!");
 			}
@@ -118,36 +119,32 @@ class SerialCommunication {
 			//autoOpen: false,
 		}, (err) => {
 			if (err) {
-				console.log("SerialPort Error: ", err.message);
+				LOGGER.logE(`SerialPort`, err.message);
 			}
 			if (onConnectCallback) {
 				onConnectCallback(err);
 			}
 		});
-		this.log("connected to ", this.serialPortPath, " / rate:", this.baudRate);
+		LOGGER.log("Connected to ", this.serialPortPath, "/", "rate:", this.baudRate);
 		this.isReceiving = false;
 	}
 
 	disconnect(onDisconnectCallback) {
 		if (!this.serialPort || !this.serialPort.isOpen) {
-			this.log("Cannot disconnect - port is not open.");
+			LOGGER.logW("Cannot disconnect - port is not open.");
 			return true;
 		}
 		this.serialPort.close((err) => {
 			if (err) {
-				this.log("error - ", err.message);
+				LOGGER.logE(err.message);
 			}
 			if (onDisconnectCallback) {
 				onDisconnectCallback(err);
 			}
 		});
-		this.log("disconnected from:", this.serialPortPath);
+		LOGGER.log("Disconnected from:", this.serialPortPath);
 		this.isReceiving = false;
 		return true;
-	}
-
-	log(...info) {
-		console.log("SerialCommunication: ", ...info);
 	}
 }
 

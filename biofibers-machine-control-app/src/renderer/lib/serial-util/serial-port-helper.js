@@ -5,9 +5,12 @@ import { SerialPort } from 'serialport';
 const SerialPortHelper = {};
 
 SerialPortHelper.serialPortPathNone = () => { return ''};
-SerialPortHelper.nonePort = {
-	path: SerialPortHelper.serialPortPathNone()
+SerialPortHelper.nonePort = () => {
+	return {
+		path: SerialPortHelper.serialPortPathNone()
+	};
 };
+
 SerialPortHelper.defaultBaudRate = () => { return 250000}
 SerialPortHelper.availableBaudRates = () => {
 	return [
@@ -34,10 +37,11 @@ SerialPortHelper.availableBaudRates = () => {
 				if (ports.length === 0) {
 					console.log("No ports discovered!");
 				}
-
+				// Append a null-state serial port
+				let outPorts = [SerialPortHelper.nonePort(), ...ports]
 				return {
-					ports,
-					err
+					ports: outPorts,
+					err: err
 				};
 			});
 	}
