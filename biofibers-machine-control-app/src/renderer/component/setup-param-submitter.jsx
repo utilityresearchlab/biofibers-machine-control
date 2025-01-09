@@ -34,7 +34,8 @@ class SetupParamSubmitter extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            adjustPump: 2,
+            adjustPumpDistance: 2,
+            adjustPumpFeedRate: BF_CONSTANTS.EXTRUSION_FEED_RATE_DEFAULT,
             nozzleTemperature: 32,
             wrapperTemperature: 52,
             collectorSpeed: 100,
@@ -49,7 +50,6 @@ class SetupParamSubmitter extends React.Component {
         this.handleRetractPumpClick = this.handleRetractPumpClick.bind(this);
         this.handlePurgeClick = this.handlePurgeClick.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
-        this.handleOnChangeAdjustPump = this.handleOnChangeAdjustPump.bind(this);
         this.handleOnDirectionChange = this.handleOnDirectionChange.bind(this);
         this.handleStartPullDownClick = this.handleStartPullDownClick.bind(this);
         this.handleStopPullDownClick = this.handleStopPullDownClick.bind(this);
@@ -82,13 +82,13 @@ class SetupParamSubmitter extends React.Component {
 
     handleExtrudePumpClick(event) {
         let gcodeBuilder = new GcodeBuilder();
-        gcodeBuilder.extrude(this.state.adjustPump, 20);
+        gcodeBuilder.extrude(this.state.adjustPumpDistance, this.state.adjustPumpFeedRate);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
     handleRetractPumpClick(event) {
         let gcodeBuilder = new GcodeBuilder();
-        gcodeBuilder.extrude(this.state.adjustPump * (-1), 4);
+        gcodeBuilder.retract(this.state.adjustPumpDistance, this.state.adjustPumpFeedRate);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
@@ -148,13 +148,6 @@ class SetupParamSubmitter extends React.Component {
         });
     }
 
-    handleOnChangeAdjustPump(event) {
-        const { name, value } = event.target;
-        this.setState({
-            ...this.state,
-            'adjustPump': Number(value)
-        });
-    }
 
     handleOnDirectionChange(event, newDirection) {
         if (newDirection !== null 
@@ -268,13 +261,26 @@ class SetupParamSubmitter extends React.Component {
                         margin="normal"
                         sx={{minWidth: 250, maxWidth: 250}}
                         label="Adjust Syringe Shuttle Position [mm]"                       
-                        name="adjustPump"
-                        value={this.state.adjustPump}
+                        name="adjustPumpDistance"
+                        value={this.state.adjustPumpDistance}
                         min={BF_CONSTANTS.EXTRUSION_AMOUNT_MIN}
                         max={BF_CONSTANTS.EXTRUSION_AMOUNT_MAX}
                         onChange={this.handleOnChange}                        
                         disabled={!this.props.isEnabled}
                         />
+                    <ConstrainedNumberTextField
+                        name="adjustPumpFeedRate"
+                        label="Syringe Feed Rate [mm/min]"
+                        type="number"
+                        size="small"
+                        color="primary"
+                        margin="dense"
+                        sx={{minWidth: 200, maxWidth: 200}}
+                        min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
+                        value={this.state.adjustPumpFeedRate}
+                        disabled={!this.props.isEnabled}
+                        onChange={this.handleOnChange}
+                        />  
                     <Button
                         size="medium"
                         variant="outlined"

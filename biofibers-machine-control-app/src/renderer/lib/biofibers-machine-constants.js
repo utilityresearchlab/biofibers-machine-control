@@ -17,7 +17,7 @@ export const EXTRUDER_TEMPERATURE_MAX = 100;
 export const HEATER_SYRINGE_WRAP_TOOL_ID = 0;
 export const HEATER_NOZZLE_TOOL_ID = 1;
 
-
+export const EXTRUSION_FEED_RATE_DEFAULT = 16;
 export const EXTRUSION_FEED_RATE_MIN = 0;
 
 export const EXTRUSION_AMOUNT_MAX = 100;
