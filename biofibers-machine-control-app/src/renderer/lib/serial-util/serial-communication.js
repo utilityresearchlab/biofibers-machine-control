@@ -130,7 +130,12 @@ class SerialCommunication {
 	}
 
 	disconnect(onDisconnectCallback) {
-		if (!this.serialPort || !this.serialPort.isOpen) {
+		if (!this.serialPort) {
+			// can't disconnect if nothing is connected
+			return true;
+		}
+			
+		if (!this.serialPort.isOpen) {
 			LOGGER.logW("Cannot disconnect - port is not open.");
 			return true;
 		}
