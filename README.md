@@ -4,15 +4,19 @@ Desktop App to Control the Biofibers Spinning Machine
 
 ## On MacOS (>= Sonoma 14.5)
 ### Installing the App on MacOS
-1. Go to the project directory and run the following to setup a python virtual enviroment (this is required for MacOS Sonoma + Python 3.12 due to the removal of setuptools) 
+0. Install NVM, Node and NPM using directions on (Nodejs.org)[https://nodejs.org/en/download]
+1. Go to the project directory, and run the following to setup a python virtual enviroment (this is required for MacOS Sonoma + Python 3.12 due to the removal of setuptools) 
     - `python3 -m venv .venv`
     - `source .venv/bin/activate`
     - `python3 -m pip install -r requirements.txt`
-2. Run `npm install`
-3. Alternatively, `npm run reinstall` will clear all node_modules and install them again
+2. Run `nvm install` to install the node version
+3. Run `nvm use` to activate the node version
+4. Run `npm install` to install the packages
+5. Alternatively, `npm run reinstall` will clear all node_modules and install them again
 
 ### Running / Debugging the App on MacOS
-1. Run `source .venv/bin/activate`
+0. Run `nvm use` to activate the proper node version
+1. Run `source .venv/bin/activate` to activate the python Venv
 2. Run `npm run start`
 #### Build Errors
 - Build doesn't compile on MacOS Sonoma + Python 3.12 because node-gyp fails to compile serialport bindings:
@@ -26,7 +30,7 @@ Desktop App to Control the Biofibers Spinning Machine
 
 ### Packaging App for Different Platforms on MacOS
 #### Packaging MacOS Apps on MacOS
-1. First run `source .venv/bin/activate`, then run one of the following commands:
+1. First run `nvm use && source .venv/bin/activate`, then run one of the following commands:
 2. If you want a MacOS Universal app, run `npm run pack-mac-unv`.
 3. If you want a MacOS x64 app, run `npm run pack-mac-x64`
 4. If you want a MacOS arm64 app, run `npm run pack-mac-arm64`

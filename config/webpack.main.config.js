@@ -7,11 +7,12 @@ module.exports = {
    * The reference of this should be relative to the app folder 
    */
   entry: './biofibers-machine-control-app/src/main/main.js',
-  output: {
-    // this is how the file is output
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, '../biofibers-machine-control-app/src/dist/')
-  },
+  // output: {
+  //   // this is how the file is output
+  //   filename: 'main.js',
+  //   path: path.resolve(__dirname, '../../.webpack/'),
+  //   assetModuleFilename: '[name][ext]'
+  // },
   // Put your normal webpack config below here
   module: {
     rules: [
@@ -70,8 +71,14 @@ module.exports = {
       // See also: https://www.linkedin.com/pulse/easy-to-understand-guide-asset-module-webpack-5-prasenjit-sutradhar/
       {
         test: /\.(svg|png|jpg|gif)$/,
-        type: "asset/inline"
+        type: "asset",
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8 * 1024, // 8kb images
+          }
         }
+        
+      }
     ] 
   },
 	externals: {

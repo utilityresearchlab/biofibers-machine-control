@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "description": "Application to control a machine over serial",
   "private": true,
-  "main": "./biofibers-machine-control-app/src/dist/bundle.js",
+  "main": ".webpack/main",
   "build": {
     "appId": "org.utilityresearchlab.biofiberscontrol",
     "icon": "./icon/utility-icon-512x512.jpg",
@@ -20,21 +20,22 @@
     "extends": null
   },
   "scripts": {
+    "setup-dev": "source .venv/bin/activate && source $NVM_DIR/nvm.sh && nvm use",
     "clean": "rm -rf node_modules",
-    "reinstall": "source .venv/bin/activate && npm run clean && npm install",
-    "rebuild": "source .venv/bin/activate && electron-rebuild",
-    "start": "source .venv/bin/activate && electron-forge start",
-    "package": "source .venv/bin/activate && electron-forge package",
-    "pack-mac-unv": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-darwin-universal && electron-forge package --platform='darwin' --arch='universal'",
-    "pack-mac-x64": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-darwin-x64 && electron-forge package --platform='darwin' --arch='x64'",
-    "pack-mac-arm64": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-darwin-arm64 && electron-forge package --platform='darwin' --arch='arm64'",
-    "pack-win-x64": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-win32-x64 && electron-forge package --platform='win32' --arch='x64'",
-    "make-mac-unv": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-darwin-universal && electron-forge make --platform='darwin' --arch='universal'",
-    "make-mac-x64": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-darwin-x64 && electron-forge make --platform='darwin' --arch='x64'",
-    "make-mac-arm64": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-darwin-arm64 && electron-forge make --platform='darwin' --arch='arm64'",
-    "make-win-x64": "source .venv/bin/activate && rm -rf ./out/biofibers-machine-control-win32-x64 && electron-forge make --platform='win32' --arch='x64'",
-    "make": "source .venv/bin/activate && electron-forge make",
-    "publish": "source .venv/bin/activate && electron-forge publish",
+    "reinstall": "npm run setup-dev && npm run clean && npm install",
+    "rebuild": "npm run setup-dev && && electron-rebuild",
+    "start": "npm run setup-dev && electron-forge start",
+    "package": "npm run setup-dev && && electron-forge package",
+    "pack-mac-unv": "npm run setup-dev && rm -rf ./out/biofibers-machine-control-darwin-universal && electron-forge package --platform='darwin' --arch='universal'",
+    "pack-mac-x64": "npm run setup-dev && rm -rf ./out/biofibers-machine-control-darwin-x64 && electron-forge package --platform='darwin' --arch='x64'",
+    "pack-mac-arm64": "npm run setup-dev && rm -rf ./out/biofibers-machine-control-darwin-arm64 && electron-forge package --platform='darwin' --arch='arm64'",
+    "pack-win-x64": "npm run setup-dev && rm -rf ./out/biofibers-machine-control-win32-x64 && electron-forge package --platform='win32' --arch='x64'",
+    "make-mac-unv": "npm run setup-dev && rm -rf ./out/biofibers-machine-control-darwin-universal && electron-forge make --platform='darwin' --arch='universal'",
+    "make-mac-x64": "npm run setup-dev && rm -rf ./out/biofibers-machine-control-darwin-x64 && electron-forge make --platform='darwin' --arch='x64'",
+    "make-mac-arm64": "npm run setup-dev && rm -rf ./out/biofibers-machine-control-darwin-arm64 && electron-forge make --platform='darwin' --arch='arm64'",
+    "make-win-x64": "npm run setup-dev && rm -rf ./out/biofibers-machine-control-win32-x64 && electron-forge make --platform='win32' --arch='x64'",
+    "make": "npm run setup-dev && electron-forge make",
+    "publish": "npm run setup-dev && electron-forge publish",
     "lint": "echo \"No linting configured\""
   },
   "keywords": [],
@@ -51,8 +52,8 @@
     "@babel/preset-env": "^7.24.6",
     "@babel/preset-react": "^7.24.6",
     "@electron-forge/cli": "^7.4.0",
-    "@electron-forge/maker-dmg": "^7.4.0",
     "@electron-forge/maker-deb": "^7.4.0",
+    "@electron-forge/maker-dmg": "^7.4.0",
     "@electron-forge/maker-rpm": "^7.4.0",
     "@electron-forge/maker-squirrel": "^7.4.0",
     "@electron-forge/maker-zip": "^7.4.0",
@@ -62,7 +63,7 @@
     "css-loader": "^6.7.1",
     "electron": "^30.0.9",
     "fs-extra": "^11.2.0",
-    "node-gyp": "^10.1.0",
+    "node-gyp": "^11.0.0",
     "node-loader": "^2.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -76,10 +77,10 @@
     "@mui/icons-material": "^5.10.9",
     "@mui/material": "^5.10.9",
     "electron-squirrel-startup": "^1.0.0",
-    "serialport": "^12.0.0",
+    "serialport": "^13.0.0",
     "tableify": "1.1.1"
   },
   "resolutions": {
-    "serialport": "^12.0.0"
+    "serialport": "^13.0.0"
   }
 }
