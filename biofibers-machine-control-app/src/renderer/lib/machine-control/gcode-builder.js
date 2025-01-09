@@ -132,7 +132,7 @@ export class GcodeBuilder {
 
 
     _concatComment(comment) {
-        return '' + GCODE_CONSTANTS.COMMENT_PREFIX + ' ' + comment.toString();
+        return ' ' + GCODE_CONSTANTS.COMMENT_PREFIX + ' ' + comment.toString();
     }
 
     _appendCommand(cmd, params=null, comment=null) {
