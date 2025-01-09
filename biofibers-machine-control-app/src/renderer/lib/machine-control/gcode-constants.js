@@ -54,3 +54,8 @@ export const COMMENT_PREFIX = ';';
 export const PARAMETER_SEPARATOR = ' ';
 
 export const NEW_LINE = '\r\n';
+
+export const PARAM_XYZ_FLOAT_PRECISION = 3;
+export const PARAM_F_FLOAT_PRECISION = 4;
+export const PARAM_T_FLOAT_PRECISION = 2;
+export const PARAM_E_FLOAT_PRECISION = 5;
