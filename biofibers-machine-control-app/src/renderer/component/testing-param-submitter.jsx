@@ -91,17 +91,21 @@ class TestingParamSubmitter extends React.Component {
     }
 
     handleSendMultipleCommands(event) {
-        let gcodeBuilder = new GcodeBuilder();
+        const spinningCommand = getSpinningCommand();
         for (let i = 0; i < this.state.numCommands; i ++) {
-            gcodeBuilder.reset();
-            gcodeBuilder.move({
-                [GCODE_CONSTANTS.PARAM_E]: this.state.eValue,
-                [GCODE_CONSTANTS.PARAM_X]: this.state.xValue,
-                [GCODE_CONSTANTS.PARAM_F]: this.getCompositeFeedrate(),
-                }, 
-                'extrude and move X'); 
-            this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+            this.handleSubmitCommand(event, spinningCommand);
         }
+    }
+
+    getSpinningCommand() {
+        let gcodeBuilder = new GcodeBuilder();
+        gcodeBuilder.move({
+            [GCODE_CONSTANTS.PARAM_E]: this.state.eValue,
+            [GCODE_CONSTANTS.PARAM_X]: this.state.xValue,
+            [GCODE_CONSTANTS.PARAM_F]: this.getCompositeFeedrate(),
+            }, 
+            'extrude and move X'); 
+        return gcodeBuilder.toGcodeString();
     }
 
     getCompositeFeedrate() {
@@ -129,6 +133,17 @@ class TestingParamSubmitter extends React.Component {
         const preciseCompositeFeedRate = MathUtil.toMinimumPrecision(
             this.getCompositeFeedrate(), 
             GCODE_CONSTANTS.PARAM_F_FLOAT_PRECISION);
+
+        const commandStyle = {
+            display: 'inline-block',
+            background: "#f4f4f4",
+            fontSize: '0.95rem',
+            fontFamily: 'monospace',
+            whiteSpace: 'pre',
+            unicodeBidi: 'isolate'
+        };
+
+        const spinningCommandText = this.getSpinningCommand();
         return (
             <Box
             component="form"
@@ -194,12 +209,25 @@ class TestingParamSubmitter extends React.Component {
                     spacing={1}
                     padding={2}
                     >
-                    <Typography gutterBottom variant="body1" component="div">
+                    <Typography gutterBottom variant="body1" sx={{fontStyle: 'italic'}} component="div">
                         Calculated X-Axis Feed Rate [mm/min]: {preciseXFeedrate}
                     </Typography>
-                    <Typography gutterBottom variant="body1" component="div">
+                    <Typography gutterBottom variant="body1" sx={{fontStyle: 'italic'}} component="div">
                         Calculated Composite Feed Rate [mm/min]: {preciseCompositeFeedRate}
                     </Typography>
+                    <Stack
+                        direction="row"
+                        alignItems="left"
+                        alignContent="left"
+                        justifySelf={true}
+                        spacing={1}
+                    >
+
+                        <Typography gutterBottom variant="body1" sx={{fontStyle: 'italic', fontWeight: 500}} component="div">
+                            Generated Spinning Command: 
+                        </Typography>
+                        <span style={commandStyle}>{spinningCommandText}</span>
+                    </Stack>
                 </Stack>
                 <Stack
                         direction="row"
