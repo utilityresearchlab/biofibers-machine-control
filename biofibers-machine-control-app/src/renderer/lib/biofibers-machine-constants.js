@@ -2,11 +2,17 @@
 
 export const COLLECTOR_DIRECTION_CLOCKWISE = 1;
 export const COLLECTOR_DIRECTION_COUNTERCLOCKWISE = 0;
-export const COLLECTOR_MAX_SPEED_RPM = 255;
-export const COLLECTOR_MIN_SPEED_RPM = 0;
+export const COLLECTOR_DIRECTION_STOPPED = -1;
+
+export const COLLECTOR_PWM_SPEED_MIN = 0;
+export const COLLECTOR_PWM_SPEED_MAX = 255;
 
 export const HEATER_WRAP_TEMPERATURE_MIN = 0;
 export const HEATER_WRAP_TEMPERATURE_MAX = 100;
 
 export const EXTRUDER_TEMPERATURE_MIN = 0;
 export const EXTRUDER_TEMPERATURE_MAX = 100;
+
+// Tool 0/1 for heaters and temp sensors
+export const HEATER_SYRINGE_WRAP_TOOL_ID = 0;
+export const HEATER_NOZZLE_TOOL_ID = 1;
