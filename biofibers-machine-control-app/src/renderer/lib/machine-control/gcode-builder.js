@@ -339,4 +339,8 @@ export class GcodeBuilder {
         this._appendCommand(cmd, speedParams, (clockwise) ? 'set spindle rotation clockwise' : 'set spindle rotation counterclockwise');
         return this;
     }
+
+    stopSpindle() {
+        this._appendCommand(GCODE_CONSTANTS.CMD_SET_SPINDLE_SPEED_OFF, null, 'stop spindle');
+    }
 }
