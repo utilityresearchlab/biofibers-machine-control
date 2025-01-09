@@ -16,7 +16,6 @@ class ConstrainedNumberTextField extends React.Component {
 
     handleOnChange(evt) {
         const constrainedValue = MathUtil.constrain(Number(evt.target.value), this.props.min, this.props.max);
-        console.log(constrainedValue);
         if (!this.props.onChange) {
             return;
         }
@@ -25,7 +24,7 @@ class ConstrainedNumberTextField extends React.Component {
     }
 
     handleOnKeyUp(evt) {
-        const constrainedValue = MathUtil.constrain(evt.target, this.props.min, this.props.max);
+        const constrainedValue = MathUtil.constrain(Number(evt.target.value), this.props.min, this.props.max);
         if (!this.props.onKeyUp) {
             return;
         }
@@ -37,6 +36,7 @@ class ConstrainedNumberTextField extends React.Component {
         return (
             <TextField
                 type='number'
+                sx={{...this.props.sx}}
                 name={this.props.name}
                 label={this.props.label}
                 value={this.props.value}
@@ -44,7 +44,9 @@ class ConstrainedNumberTextField extends React.Component {
                 min={this.props.min}
                 max={this.props.max}
                 onKeyUp={this.handleOnKeyUp}
-                onChange={this.handleOnChange} />
+                onChange={this.handleOnChange}
+                disabled={this.props.disabled}
+                inputProps={{min: this.props.min, max: this.props.max}} />
         );
     }
 // <!-- <TextField

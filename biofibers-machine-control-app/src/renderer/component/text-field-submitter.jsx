@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import SendIcon from '@mui/icons-material/Send';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 
@@ -77,7 +76,7 @@ class TextFieldSubmitter extends React.Component {
 				>	
 					<Box variant="div" sx={{minWidth: 300}}>
 					<TextField
-						label="Send Command"
+						label={this.props.fieldLabel}
 						size="small"
 						color="primary"
 						margin="dense"
@@ -90,10 +89,10 @@ class TextFieldSubmitter extends React.Component {
 					<Button
 						variant="outlined"
 						size="medium"
-						endIcon={<SendIcon />}
+						endIcon={this.props.buttonIcon}
 						type='submit'
 						disabled={!this.props.isEnabled}>
-						Send
+						{this.props.buttonLabel}
 					</Button>
 				</Stack>
 			</Box>

@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
@@ -14,7 +13,6 @@ import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
 
 import HomeIcon from '@mui/icons-material/Home';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
@@ -24,6 +22,8 @@ import RotateRightIcon from '@mui/icons-material/RotateRight';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import SwipeDownAltIcon from '@mui/icons-material/SwipeDownAlt';
 
+
+import ConstrainedNumberTextField from './constrained-number-text-field'
 import * as BF_CONSTANTS from '../lib/biofibers-machine-constants'
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
 import MaterialHelper from '../lib/material-util/material-helper';
@@ -49,6 +49,7 @@ class SetupParamSubmitter extends React.Component {
         this.handleRetractPumpClick = this.handleRetractPumpClick.bind(this);
         this.handlePurgeClick = this.handlePurgeClick.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
+        this.handleOnChangeAdjustPump = this.handleOnChangeAdjustPump.bind(this);
         this.handleOnDirectionChange = this.handleOnDirectionChange.bind(this);
         this.handleStartPullDownClick = this.handleStartPullDownClick.bind(this);
         this.handleStopPullDownClick = this.handleStopPullDownClick.bind(this);
@@ -87,7 +88,6 @@ class SetupParamSubmitter extends React.Component {
 
     handleRetractPumpClick(event) {
         let gcodeBuilder = new GcodeBuilder();
-        console.log(this.state.adjustPump);
         gcodeBuilder.extrude(this.state.adjustPump * (-1), 4);
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
@@ -118,6 +118,7 @@ class SetupParamSubmitter extends React.Component {
             this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString());
         }, 28000);
         this.setState({
+            ...this.state,
             nIntervalId: intervalId,
             pullDownInProgress: true
         });
@@ -125,6 +126,7 @@ class SetupParamSubmitter extends React.Component {
 
     handleStopPullDownClick(event) {
         this.setState({
+            ...this.state,
             pullDownInProgress: false
         });
         clearInterval(this.state.nIntervalId);
@@ -137,7 +139,15 @@ class SetupParamSubmitter extends React.Component {
         const { name, value } = event.target;
         this.setState({
             ...this.state,
-            [name]: name == 'adjustPump' ? Number(value) : value
+            [name]: value ? Number(value) : 0
+        });
+    }
+
+    handleOnChangeAdjustPump(event) {
+        const { name, value } = event.target;
+        this.setState({
+            ...this.state,
+            'adjustPump': Number(value)
         });
     }
 
@@ -149,6 +159,7 @@ class SetupParamSubmitter extends React.Component {
                 ? newDirection 
                 : BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED
             this.setState({
+                ...this.state,
                 collectorDirection: newDirection
             });
             let gcodeBuilder = new GcodeBuilder();
@@ -167,9 +178,10 @@ class SetupParamSubmitter extends React.Component {
     }
 
     handleOnSelectMaterial(event) {
-        console.log("select material", event.target.value);
         const material = String(event.target.value);
-        this.setState({ selectedMaterial: material });
+        this.setState({ 
+            ...this.state,
+            selectedMaterial: material });
     }
 
     getRenderedMaterialItems() {
@@ -202,17 +214,13 @@ class SetupParamSubmitter extends React.Component {
                 // Set wrapper temperature: tool 0
                 gcodeBuilder.setTemperature(this.state.wrapperTemperature, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
             } else if (name == 'collectorSpeed') {
-                // Set collector speed 
-                const constrainedSpeed = MathUtil.constrain(value, BF_CONSTANTS.COLLECTOR_PWM_SPEED_MIN, BF_CONSTANTS.COLLECTOR_PWM_SPEED_MAX)
-                this.setState({collectorSpeed: constrainedSpeed});
-                
                 // Don't change live speed when collector is stopped
                 if (this.state.collectorDirection == BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED) {
                     return;
                 }
                 // Otherwise update speed
                 gcodeBuilder.setSpindleSpeed(
-                    constrainedSpeed, 
+                    this.state.collectorSpeed, 
                     this.state.collectorDirection == BF_CONSTANTS.COLLECTOR_DIRECTION_CLOCKWISE 
                         ? true 
                         : false);
@@ -249,18 +257,18 @@ class SetupParamSubmitter extends React.Component {
                     alignItems="left"
                     spacing={1}
                     p={1}>
-                    <TextField
-                        label="Adjust Syringe Shuttle Position [mm]"
-                        name="adjustPump"
-                        type="number"
+                    <ConstrainedNumberTextField 
                         size="small"
                         color="primary"
                         margin="normal"
                         sx={{minWidth: 250, maxWidth: 250}}
+                        label="Adjust Syringe Shuttle Position [mm]"                       
+                        name="adjustPump"
                         value={this.state.adjustPump}
+                        min={0}
+                        onChange={this.handleOnChange}                        
                         disabled={!this.props.isEnabled}
-                        onChange={this.handleOnChange}
-                    />
+                        />
                     <Button
                         size="medium"
                         variant="outlined"
@@ -284,7 +292,8 @@ class SetupParamSubmitter extends React.Component {
                     spacing={1}
                     p={1}>
                     <Box variant="div">
-                        <TextField
+ 
+                        <ConstrainedNumberTextField
                             label="Syringe Wrap Temp. [ºC]"
                             name="wrapperTemperature"
                             type="number"
@@ -295,11 +304,12 @@ class SetupParamSubmitter extends React.Component {
                             disabled={!this.props.isEnabled}
                             onChange={this.handleOnChange}
                             onKeyUp={this.handleOnKeyUp}
-                            inputProps={{min: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN, max: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MAX}}
+                            min={BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN}
+                            max={BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MAX}
                             />
                     </Box>
                     <Box variant="div">
-                        <TextField
+                        <ConstrainedNumberTextField
                             label="Nozzle Temp. [ºC]"
                             name="nozzleTemperature"
                             type="number"
@@ -310,7 +320,8 @@ class SetupParamSubmitter extends React.Component {
                             disabled={!this.props.isEnabled}
                             onChange={this.handleOnChange}
                             onKeyUp={this.handleOnKeyUp}
-                            inputProps={{min: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN, max: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MAX}}
+                            min={BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN} 
+                            max={BF_CONSTANTS.EXTRUDER_TEMPERATURE_MAX}
                             />
                         </Box>
 
@@ -330,7 +341,7 @@ class SetupParamSubmitter extends React.Component {
                     <Box 
                         variant="div"
                         sx={{minWidth: 300, maxWidth: 300}}>
-                        <TextField
+                        <ConstrainedNumberTextField                            
                             name="collectorSpeed"
                             label="Collector Speed PWM [from 0 to 255]"
                             size="small"

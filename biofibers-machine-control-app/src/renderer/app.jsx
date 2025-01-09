@@ -17,6 +17,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import InfoIcon from '@mui/icons-material/Info';
+import SendIcon from '@mui/icons-material/Send';
 import UsbIcon from '@mui/icons-material/Usb';
 import UsbOffIcon from '@mui/icons-material/UsbOff';
 
@@ -414,10 +415,12 @@ class BaseMachineControlApp extends React.Component {
 							This app is in beta testing and likely has bugs!
 						</ListItem>
 						<ListItem>
+							<Box variant="div">
 							If you run into issues, please reach out with your version number in 
-							<Box variant="span" sx={{fontWeight: "600"}}>
+							<span sx={{fontWeight: "600"}}>
 							&nbsp;<em>#software-control</em>&nbsp;
-							</Box> on Discord.
+							</span> on Discord.
+							</Box>
 						</ListItem>
 					</List>
 					</Box>
@@ -508,6 +511,9 @@ class BaseMachineControlApp extends React.Component {
 							sx={{minWidth: 700, maxWidth: 700}}
 							p={1}>
 							<TextFieldSubmitter	
+								fieldLabel="Send Command"
+								buttonLabel="Send"
+								buttonIcon={<SendIcon />}
 								isEnabled={true}
 								onSubmitCallback={this.handleSendCommandClick} />
 							<Box 
