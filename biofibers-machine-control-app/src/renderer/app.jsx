@@ -1,15 +1,22 @@
 import * as React from 'react';
 
-import { Box, Button } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 
-import { Stack } from '@mui/material';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
+import InfoIcon from '@mui/icons-material/Info';
 import UsbIcon from '@mui/icons-material/Usb';
 import UsbOffIcon from '@mui/icons-material/UsbOff';
 
@@ -19,7 +26,6 @@ import SerialPortHelper from './lib/serial-util/serial-port-helper';
 import {MachineCommandInterpreter} from './lib/machine-control/command-interpreter';
 import {parseLine} from './lib/machine-control/command-parser';
 import {MACHINE_COMMANDS, MACHINE_ERROR_CODES} from './lib/machine-control/machine-protocol';
-import { CMD_HOME_AXES } from './lib/machine-control/gcode-constants';
 
 import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
@@ -30,6 +36,7 @@ import GcodeUploader from './component/gcode-uploader'
 import imgMachineLogoSrc from '../assets/img/machine-render-logo.png'
 
 import './index.css';
+import { GcodeBuilder } from './lib/machine-control/gcode-builder';
 
 const ScanPortsRefreshTimeInMs = 3000;
 
@@ -54,7 +61,6 @@ class BaseMachineControlApp extends React.Component {
 		this.handleConnectClick = this.handleConnectClick.bind(this);
 		this.handleSendCommandClick = this.handleSendCommandClick.bind(this);
 		this.handleDisconnectClick = this.handleDisconnectClick.bind(this);
-		this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
 		this.handleOnReceivedConsoleData = this.handleOnReceivedConsoleData.bind(this);
 
 		// set-up machine protocol handler for commands
@@ -282,11 +288,6 @@ class BaseMachineControlApp extends React.Component {
 		this.props.serialCommunication.disconnect(onDisconnectCallback);
 	}
 
-	handleHomeAllClick() {
-		const command = CMD_HOME_AXES;
-		this.handleSendCommandClick(command);
-	}
-
 	handleSendCommandClick(cmdText) {
 		if (!cmdText || cmdText.length == 0) {
 			return;
@@ -372,6 +373,7 @@ class BaseMachineControlApp extends React.Component {
 		const selectedPortName = this.state.serialPort;
 		const serialCommIsConnected = (this.props.serialCommunication) ? this.props.serialCommunication.isConnected() : false;
 		const serialCommIsDisconnected = !serialCommIsConnected;
+		const githubUrl = "https://github.com/utilityresearchlab/desktop-biofibers-spinning";
 		return (
 			<Box component="div" className="App center-page" sx={{paddingTop: 2, paddingBottom: 2}}>
 				<Box component="header">
@@ -382,97 +384,139 @@ class BaseMachineControlApp extends React.Component {
 						spacing={2}
 						p={1}>
 						<img className={"app-logo"} src={imgMachineLogoSrc} alt="Biofibers Machine Logo" />
-						<Typography gutterBottom variant="h4">
-							Biofibers Machine Control 
+						<Stack
+							direction="column"
+							justifyContent="left"
+							alignItems="left">
+							<Typography gutterBottom variant="h4" style={{marginBottom: 0}}>
+								Biofibers Machine Control 
+							</Typography>
 							<Typography  variant="h5">
-								Beta-Release v0.1.0
+								v0.1.0-beta
 							</Typography>
 							<Typography  variant="body1">
-								<a style={{textColor: 'gray', textDecoration: 'none'}} href="https://github.com/utilityresearchlab/desktop-biofibers-spinning" target='_blank'>https://github.com/utilityresearchlab/desktop-biofibers-spinning</a>
+									<a style={{textColor: 'gray', textDecoration: 'none'}} href={githubUrl} target='_blank'>{githubUrl}</a>
 							</Typography>
-						</Typography>
-						
+						</Stack>
 					</Stack>
-					<Divider />
+					<Divider sx={{marginTop: 2}}/>
 
 					<Box component="div">
-					<ul>
-						<li style={{fontWeight: "600"}}> This app is in beta testing and likely has bugs!</li>
-						<li>If you run into issues, please reach out with your version number in <span style={{fontWeight: "600"}}><em>#software-control</em></span> on Discord.</li>
-					</ul>
+					<List sx={{listStyleType: 'disc'}} >
+						<ListItem sx={{fontWeight: "600"}}> 
+							<ListItemIcon 
+								sx={{minWidth: 40}}>
+								<InfoIcon color="warning" />
+							</ListItemIcon>
+							This app is in beta testing and likely has bugs!
+						</ListItem>
+						<ListItem>
+							If you run into issues, please reach out with your version number in 
+							<Box variant="span" sx={{fontWeight: "600"}}>
+							&nbsp;<em>#software-control</em>&nbsp;
+							</Box> on Discord.
+						</ListItem>
+					</List>
 					</Box>
 
-				<Divider />
 				</Box>
-				<div>
-					<div>
-						<h2>Connect</h2>
-						<FormControl size="small" sx={{mb:1, mr: 1, minWidth: 300 }}>
-								<InputLabel id="available-serial-ports-label">Serial Port</InputLabel>
-								<Select
-									labelId="available-serial-ports"
-									id="available-serial-ports-select"
-									label="Serial Port"
-									value={this.state.selectedSerialPort}
-									onChange={this.handleOnSelectSerialPort}>
-									{renderedSerialPortsItems}
-								</Select>
-							</FormControl>
-							<FormControl size="small" sx={{mb: 1, minWidth: 120 }} >
-								<InputLabel id="available-serial-baud-rates-label">Baud Rate</InputLabel>
-								<Select
-									labelId="serial-port-baud-rate"
-									id="serial-port-baud-rate-select"
-									label="Baud Rate"
-									value={this.state.baudRate}
-									onChange={this.handleOnSelectBaudRate}>
-									{renderedBaudRateItems}
-								</Select>
-							</FormControl>
-							<Button
-									size="medium"
-									variant="outlined"
-									color={(serialCommIsDisconnected) ? "success" : "error"}
-									startIcon={(serialCommIsDisconnected)
-										? <UsbIcon/>
-										: <UsbOffIcon />}
-									onClick={(serialCommIsDisconnected)
-										? this.handleConnectClick
-										: this.handleDisconnectClick} >
-											{(!serialCommIsConnected)
-												? "Connect"
-												: "Disconnect"}
-							</Button>
-							<br/>
-					</div>
-					<br/>
-					<div>
+				
+				<Divider sx={{width: "100%", margin: "0 auto"}}/>
+
+				<Box variant="div">
+					<Box variant="div">
+							<Typography gutterBottom variant="h6" component="div" sx={{paddingTop: '1em'}} >
+								Connect
+							</Typography>
+							<Stack
+								direction="row"
+								justifyContent="left"
+								alignItems="left"
+								spacing={1}
+								p={1}>
+									<FormControl size="small" sx={{minWidth: 350 }}>
+										<InputLabel id="available-serial-ports-label">Serial Port</InputLabel>
+										<Select
+											labelId="available-serial-ports"
+											id="available-serial-ports-select"
+											label="Serial Port"
+											value={this.state.selectedSerialPort}
+											onChange={this.handleOnSelectSerialPort}>
+											{renderedSerialPortsItems}
+										</Select>
+									</FormControl>
+									<FormControl size="small" sx={{mb: 1, minWidth: 120 }} >
+										<InputLabel id="available-serial-baud-rates-label">Baud Rate</InputLabel>
+										<Select
+											labelId="serial-port-baud-rate"
+											id="serial-port-baud-rate-select"
+											label="Baud Rate"
+											value={this.state.baudRate}
+											onChange={this.handleOnSelectBaudRate}>
+											{renderedBaudRateItems}
+										</Select>
+									</FormControl>
+									<Button
+											size="medium"
+											variant="outlined"
+											color={(serialCommIsDisconnected) ? "success" : "error"}
+											startIcon={(serialCommIsDisconnected)
+												? <UsbIcon/>
+												: <UsbOffIcon />}
+											onClick={(serialCommIsDisconnected)
+												? this.handleConnectClick
+												: this.handleDisconnectClick} >
+													{(!serialCommIsConnected)
+														? "Connect"
+														: "Disconnect"}
+									</Button>
+							</Stack>
+					</Box>
+
+					<Divider sx={{marginTop: 4, marginBottom: 2}}/>
+
+					<Box variant="div">
+						<Typography gutterBottom variant="h6" component="div">
+                    		Setup
+                		</Typography>         
 						<SetupParamSubmitter
 							isEnabled={true}
 							onSubmitCallback={this.handleSendCommandClick} />
-					</div>
-					<div>
+					</Box>
+
+					<Divider sx={{marginTop: 4, marginBottom: 2}}/>
+
+					<Box variant="div">
+						<Typography gutterBottom variant="h6" component="div">
+                   			Spinning
+                		</Typography>
+
 						<TestingParamSubmitter
 							isEnabled={true}
 							onSubmitCallback={this.handleSendCommandClick} />
-					</div>
-					<br/>
-					<div className="col">
-						<h2>Testing</h2>
-						<GcodeUploader
-							isEnabled={true}
-							onSubmitCallback={this.handleSendCommandClick}/>
-					</div>
-					<br/>
-					<div className="col">
-						<TextFieldSubmitter
-							isEnabled={true}
-							onSubmitCallback={this.handleSendCommandClick} />
-						<br/>
-						<Console data={consoleData} />
-					<br/>
-					</div>
-				</div>
+					</Box>
+
+					<Divider sx={{marginTop: 4, marginBottom: 2}}/>
+					
+					<Box variant="div">
+						<Typography gutterBottom variant="h6" component="div">
+								Command Console
+						</Typography>
+						<Box 
+							variant="div"
+							sx={{minWidth: 700, maxWidth: 700}}
+							p={1}>
+							<TextFieldSubmitter	
+								isEnabled={true}
+								onSubmitCallback={this.handleSendCommandClick} />
+							<Box 
+								variant="div"
+								sx={{paddingTop: 1}}>
+								<Console data={consoleData} />
+							</Box>
+						</Box>
+					</Box>
+				</Box>
 			</Box>
 		);
 	}

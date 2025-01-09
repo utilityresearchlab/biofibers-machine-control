@@ -2,20 +2,33 @@ import * as React from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-import { Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
+
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+
+import HomeIcon from '@mui/icons-material/Home';
+import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
+import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
-import Tooltip from '@mui/material/Tooltip';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
+import SwipeDownAltIcon from '@mui/icons-material/SwipeDownAlt';
 
 import * as BF_CONSTANTS from '../lib/biofibers-machine-constants'
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
 import MaterialHelper from '../lib/material-util/material-helper';
+import MathUtil from '../lib/math-util'
 import MiscUtil from '../lib/machine-control/misc-util';
-import Typography from '@mui/material/Typography';
 
 class SetupParamSubmitter extends React.Component {
     constructor(props) {
@@ -25,7 +38,7 @@ class SetupParamSubmitter extends React.Component {
             nozzleTemperature: 32,
             wrapperTemperature: 52,
             collectorSpeed: 100,
-            collectorDirection: BF_CONSTANTS.COLLECTOR_DIRECTION_CLOCKWISE, // clockwise by default
+            collectorDirection: BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED, // stopped by default
             pullDownInProgress: false,
             nIntervalId: null,
             selectedMaterial: MaterialHelper.availableMaterials()[0]
@@ -129,12 +142,28 @@ class SetupParamSubmitter extends React.Component {
     }
 
     handleOnDirectionChange(event, newDirection) {
-        this.setState({
-            collectorDirection: newDirection
-        });
-        let gcodeBuilder = new GcodeBuilder();
-        gcodeBuilder.setSpindleSpeed(this.state.collectorSpeed, this.state.collectorDirection);
-        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+        if (newDirection !== null 
+                || (this.state.collectorDirection == BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED)) {
+                // Don't change if we tried to deselect, otherwise let us stop
+            newDirection = (newDirection != null) 
+                ? newDirection 
+                : BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED
+            this.setState({
+                collectorDirection: newDirection
+            });
+            let gcodeBuilder = new GcodeBuilder();
+            if (newDirection == BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED) {
+                gcodeBuilder.stopSpindle();
+            } else {            
+                gcodeBuilder.setSpindleSpeed(
+                    this.state.collectorSpeed, 
+                    newDirection === BF_CONSTANTS.COLLECTOR_DIRECTION_CLOCKWISE 
+                        ? true 
+                        : false);
+            }
+            this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+        }
+
     }
 
     handleOnSelectMaterial(event) {
@@ -168,13 +197,25 @@ class SetupParamSubmitter extends React.Component {
             const { name, value } = event.target;
             // Set extruder temperature: tool 1
             if (name == 'nozzleTemperature') {
-                gcodeBuilder.setTemperature(this.state.nozzleTemperature, false, 1);
+                gcodeBuilder.setTemperature(this.state.nozzleTemperature, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
             } else if (name == 'wrapperTemperature') {
                 // Set wrapper temperature: tool 0
-                gcodeBuilder.setTemperature(this.state.wrapperTemperature, false, 0);
+                gcodeBuilder.setTemperature(this.state.wrapperTemperature, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
             } else if (name == 'collectorSpeed') {
                 // Set collector speed 
-                gcodeBuilder.setSpindleSpeed(value, this.state.collectorDirection);
+                const constrainedSpeed = MathUtil.constrain(value, BF_CONSTANTS.COLLECTOR_PWM_SPEED_MIN, BF_CONSTANTS.COLLECTOR_PWM_SPEED_MAX)
+                this.setState({collectorSpeed: constrainedSpeed});
+                
+                // Don't change live speed when collector is stopped
+                if (this.state.collectorDirection == BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED) {
+                    return;
+                }
+                // Otherwise update speed
+                gcodeBuilder.setSpindleSpeed(
+                    constrainedSpeed, 
+                    this.state.collectorDirection == BF_CONSTANTS.COLLECTOR_DIRECTION_CLOCKWISE 
+                        ? true 
+                        : false);
             }
             this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
         }
@@ -185,22 +226,18 @@ class SetupParamSubmitter extends React.Component {
         return (
             <Box
                 component="form"
-                sx={{'& .MuiTextField-root': { m: 0, width: '100%' }}}
                 noValidate
-                autoComplete="off"
-            >
-                <Typography gutterBottom variant="h6" component="div">
-                    Setup
-                </Typography>
+                autoComplete="off">       
                 <Stack
                     direction="row"
                     justifyContent="left"
                     alignItems="center"
-                    spacing={2}
+                    spacing={1}
                     p={1}>
                     <Button
                         size="medium"
                         variant="outlined"
+                        startIcon={<HomeIcon/>}
                         onClick={this.handleHomeAllClick} >
                         Home All & Set Axes to Relative
                     </Button>
@@ -219,6 +256,7 @@ class SetupParamSubmitter extends React.Component {
                         size="small"
                         color="primary"
                         margin="normal"
+                        sx={{minWidth: 250, maxWidth: 250}}
                         value={this.state.adjustPump}
                         disabled={!this.props.isEnabled}
                         onChange={this.handleOnChange}
@@ -226,12 +264,14 @@ class SetupParamSubmitter extends React.Component {
                     <Button
                         size="medium"
                         variant="outlined"
+                        startIcon={<KeyboardDoubleArrowUpIcon />}
                         onClick={this.handleRetractPumpClick} >
                         Retract
                     </Button>
                     <Button
                         size="medium"
                         variant="outlined"
+                        startIcon={<KeyboardDoubleArrowDownIcon />}
                         onClick={this.handleExtrudePumpClick} >
                         Extrude
                     </Button>
@@ -241,33 +281,39 @@ class SetupParamSubmitter extends React.Component {
                     direction="row"
                     justifyContent="left"
                     alignItems="left"
-                    spacing={2}
+                    spacing={1}
                     p={1}>
-                    <TextField
-                        label="Nozzle Temperature ºC"
-                        name="nozzleTemperature"
-                        type="number"
-                        size="small"
-                        color="primary"
-                        value={this.state.nozzleTemperature}
-                        disabled={!this.props.isEnabled}
-                        onChange={this.handleOnChange}
-                        onKeyUp={this.handleOnKeyUp}
-                        inputProps={{min: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN, max: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MAX}}
-                    />
-                    
-                    <TextField
-                        label="Heat Wrap Temperature ºC"
-                        name="wrapperTemperature"
-                        type="number"
-                        size="small"
-                        color="primary"
-                        value={this.state.wrapperTemperature}
-                        disabled={!this.props.isEnabled}
-                        onChange={this.handleOnChange}
-                        onKeyUp={this.handleOnKeyUp}
-                        inputProps={{min: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN, max: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MAX}}
-                    />
+                    <Box variant="div">
+                        <TextField
+                            label="Syringe Wrap Temp. [ºC]"
+                            name="wrapperTemperature"
+                            type="number"
+                            size="small"
+                            color="primary"
+                            sx={{minWidth: 180, maxWidth: 180}}
+                            value={this.state.wrapperTemperature}
+                            disabled={!this.props.isEnabled}
+                            onChange={this.handleOnChange}
+                            onKeyUp={this.handleOnKeyUp}
+                            inputProps={{min: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN, max: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MAX}}
+                            />
+                    </Box>
+                    <Box variant="div">
+                        <TextField
+                            label="Nozzle Temp. [ºC]"
+                            name="nozzleTemperature"
+                            type="number"
+                            size="small"
+                            color="primary"
+                            sx={{minWidth: 150, maxWidth: 150}}
+                            value={this.state.nozzleTemperature}
+                            disabled={!this.props.isEnabled}
+                            onChange={this.handleOnChange}
+                            onKeyUp={this.handleOnKeyUp}
+                            inputProps={{min: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN, max: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MAX}}
+                            />
+                        </Box>
+
                     <Button
                         size="small"
                         variant="outlined"
@@ -275,40 +321,56 @@ class SetupParamSubmitter extends React.Component {
                         Purge material
                     </Button>
                 </Stack>
-                <Stack
+                <Stack  
                     direction="row"
                     justifyContent="left"
                     alignItems="left"
                     spacing={1}
                     p={1}>
-                    <TextField
-                        name="collectorSpeed"
-                        label="Collector Speed PWM [from 0 to 255]"
-                        size="small"
-                        type="number"
-                        color="primary"
-                        margin="dense"
-                        value={this.state.collectorSpeed}
-                        disabled={!this.props.isEnabled}
-                        onChange={this.handleOnChange}
-                        onKeyUp={this.handleOnKeyUp}
-                    />
+                    <Box 
+                        variant="div"
+                        sx={{minWidth: 300, maxWidth: 300}}>
+                        <TextField
+                            name="collectorSpeed"
+                            label="Collector Speed PWM [from 0 to 255]"
+                            size="small"
+                            type="number"
+                            color="primary"
+                            sx={{width: '100%'}}
+                            min={BF_CONSTANTS.COLLECTOR_PWM_SPEED_MIN}
+                            max={BF_CONSTANTS.COLLECTOR_PWM_SPEED_MAX}
+                            value={this.state.collectorSpeed}
+                            disabled={!this.props.isEnabled}
+                            onChange={this.handleOnChange}
+                            onKeyUp={this.handleOnKeyUp} />
+                    </Box>
                     <ToggleButtonGroup
                         name="collectorDirection"
                         label="Direction"
                         value={this.state.collectorDirection}
                         color="primary"
-                        size={"small"}
+                        size="small"
                         onChange={this.handleOnDirectionChange}
                         disabled={!this.props.isEnabled}
                         exclusive>
-                        <Tooltip title="Clockwise Rotation">
-                            <ToggleButton aria-label="clockwise rotation" value={BF_CONSTANTS.COLLECTOR_DIRECTION_CLOCKWISE}>
+                        <Tooltip title="Stop Collector">
+                            <ToggleButton 
+                                aria-label="Stop collector" 
+                                value={BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED}>
+                                <StopCircleIcon />
+                            </ToggleButton>
+                        </Tooltip>
+                        <Tooltip title="Start Clockwise Rotation">
+                            <ToggleButton 
+                                aria-label="clockwise rotation" 
+                                value={BF_CONSTANTS.COLLECTOR_DIRECTION_CLOCKWISE}>
                                 <RotateRightIcon />
                             </ToggleButton>
                         </Tooltip>
-                        <Tooltip title="Counterclockwise Rotation">
-                            <ToggleButton aria-label="counterclockwise rotation" value={BF_CONSTANTS.COLLECTOR_DIRECTION_COUNTERCLOCKWISE}>
+                        <Tooltip title="Start Counterclockwise Rotation">
+                            <ToggleButton 
+                                aria-label="counterclockwise rotation" 
+                                value={BF_CONSTANTS.COLLECTOR_DIRECTION_COUNTERCLOCKWISE}>
                                 <RotateLeftIcon />
                             </ToggleButton>
                         </Tooltip>
@@ -336,6 +398,7 @@ class SetupParamSubmitter extends React.Component {
                         size="small"
                         disabled={!this.props.isEnabled}
                         color={(this.state.pullDownInProgress) ? "error" : "success"}
+                        startIcon={<SwipeDownAltIcon />}
                         onClick={(this.state.pullDownInProgress)
                             ? this.handleStopPullDownClick
                             : this.handleStartPullDownClick} >

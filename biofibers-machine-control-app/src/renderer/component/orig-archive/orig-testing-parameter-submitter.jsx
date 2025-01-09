@@ -108,13 +108,16 @@ class TestingParamSubmitter extends React.Component {
         return (
             <Box
             component="form"
+            sx={{
+                '& .MuiTextField-root': {m: 0, width: '100%' },
+            }}
             noValidate
             autoComplete="off">   
                 <Stack
                     direction="row"
                     justifyContent="left"
                     alignItems="left"
-                    spacing={1}
+                    spacing={2}
                     padding={1}
                 >
                     <Box variant="div">

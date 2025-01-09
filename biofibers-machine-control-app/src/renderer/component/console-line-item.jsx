@@ -1,9 +1,7 @@
 import * as React from "react";
 
-import Divider from '@mui/material/Divider';
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
-import Paper from '@mui/material/Paper';
 import Typography from "@mui/material/Typography";
 
 import getReadableTimeOfDay from "../lib/time"
@@ -45,20 +43,20 @@ class ConsoleLineItem extends React.Component {
 
 	render() {
 		const props = this.props;
-		const {text, timestamp, id, dataType} = props;
-		const formattedTime = getReadableTimeOfDay(timestamp);
+		const {text, timestamp, id, dataType, fontSize} = props;
+		const formattedTime = getReadableTimeOfDay(timestamp, true);
 		const colorStyle = this.getColorStyle(dataType);
 		return (
 			<ListItem
 				alignItems="flex-start"
 				key={id}
 				sx={{paddingTop: '0', paddingBottom: '0'}}>
-        <ListItemText
+				<ListItemText
 					key={id + "-1"}
 					disableTypography
 					primary={
 						<Typography
-							style={{fontFamily: 'monospace', fontSize: '0.9rem'}}
+							style={{fontFamily: 'monospace', fontSize: fontSize}}
 							color={colorStyle}>
 								{"[" + formattedTime + "] > " + text }
 						</Typography>}

@@ -2,11 +2,9 @@ import * as React from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid'; // Grid version 1
 import SendIcon from '@mui/icons-material/Send';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-
 
 class TextFieldSubmitter extends React.Component {
 	constructor(props) {
@@ -33,7 +31,6 @@ class TextFieldSubmitter extends React.Component {
 			this.handleOnSubmit(event);
 		}
 	}
-
 
 	handleOnSubmit(event) {
 		// prevent page refresh on submit
@@ -74,10 +71,11 @@ class TextFieldSubmitter extends React.Component {
 			>
 				<Stack
 					direction="row"
-					justifyContent="center"
-					alignItems="center"
+					justifyContent="left"
+					alignItems="left"
 					spacing={1}
-				>
+				>	
+					<Box variant="div" sx={{minWidth: 300}}>
 					<TextField
 						label="Send Command"
 						size="small"
@@ -88,6 +86,7 @@ class TextFieldSubmitter extends React.Component {
 						onChange={this.handleOnTextChange}
 						disabled={!this.props.isEnabled}
 						/>
+					</Box>
 					<Button
 						variant="outlined"
 						size="medium"

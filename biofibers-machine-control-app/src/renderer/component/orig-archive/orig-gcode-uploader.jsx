@@ -30,6 +30,14 @@ class GcodeUploader extends React.Component {
         }
     }
 
+    handleOnTextChange(event) {
+		this.setState({ dataInput: event.target.value });
+	}
+
+    validateDataInput() {
+        return /[^01]/.test(this.state.dataInput);
+    }
+
     handleOnKeyUp(event) {
         if (event) {
 			event.preventDefault();
@@ -86,6 +94,27 @@ class GcodeUploader extends React.Component {
     }
 
     render() {
+        const listItems = this.state.commandBuilder.toGcode().map((item, index) => {
+			return (
+				<React.Fragment key={index+'-f'}>
+                    <ListItem
+                        alignItems="flex-start"
+                        key={index}
+                        sx={{paddingTop: '0', paddingBottom: '0'}}>
+                        <ListItemText
+                            key={index + "-1"}
+                            disableTypography
+                            primary={
+                                <Typography
+                                    style={{fontFamily: 'monospace', fontSize: '0.9rem'}}
+                                >
+                                    { item }
+                                </Typography>}
+                        />
+			        </ListItem>
+					<Divider component="li" key={index + "-div"}/>
+				</React.Fragment>);
+	    });
         return (
             <Box
             component="form"
@@ -96,7 +125,35 @@ class GcodeUploader extends React.Component {
             autoComplete="off"
             onSubmit={e => { e.preventDefault();}}
             >
-        
+                <p><b>Data Encoding</b></p>
+                <Stack>
+                    <TextField
+                            label="binary input"
+                            name="input"
+                            size="small"
+                            color="primary"
+                            margin="normal"
+                            fullWidth
+                            value={this.state.dataInput}
+                            onKeyUp={this.handleOnKeyUp}
+                            disabled={!this.props.isEnabled}
+                            error={this.validateDataInput()}
+                            onChange={this.handleOnTextChange}
+                            /> 
+                    <List
+					sx={{
+						width: "100%",
+						maxWidth: 560,
+						bgcolor: "background.paper",
+						border: "1px solid gray",
+						overflow: "auto",
+						fontFamily: 'monotype',
+						fontSize: '0.9rem',
+					}}>
+					{listItems}
+					<div></div>
+				</List>
+                </Stack>
                 <Button
                         variant="outlined"
                         size="medium"
