@@ -33,7 +33,6 @@ import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
 import SetupParamSubmitter from './component/setup-param-submitter'
 import TestingParamSubmitter from './component/testing-param-submitter'
-import GcodeUploader from './component/gcode-uploader'
 
 import imgMachineLogoSrc from '../assets/img/machine-render-logo.png'
 import imgUtilityLabLogoSrc from '../assets/img/utility-research-web-logo-500x75.png'
