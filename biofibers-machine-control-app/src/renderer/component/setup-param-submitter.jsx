@@ -14,6 +14,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
 
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import HomeIcon from '@mui/icons-material/Home';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
@@ -36,6 +37,8 @@ class SetupParamSubmitter extends React.Component {
         this.state = {
             adjustPumpDistance: 2,
             adjustPumpFeedRate: BF_CONSTANTS.EXTRUSION_FEED_RATE_DEFAULT,
+            purgeAmount: BF_CONSTANTS.EXTRUSION_AMOUNT_PURGE,
+            purgeFeedRate: BF_CONSTANTS.EXTRUSION_FEED_RATE_PURGE,
             nozzleTemperature: 32,
             wrapperTemperature: 52,
             collectorSpeed: 100,
@@ -94,7 +97,7 @@ class SetupParamSubmitter extends React.Component {
 
     handlePurgeClick(event) {
         let gcodeBuilder = new GcodeBuilder();
-        gcodeBuilder.extrude(0.1, 1, "Purge 0.1 mm material");
+        gcodeBuilder.extrude(this.state.purgeAmount, this.state.purgeFeedRate, "Purge material");
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
@@ -259,7 +262,7 @@ class SetupParamSubmitter extends React.Component {
                         size="small"
                         color="primary"
                         margin="normal"
-                        sx={{minWidth: 250, maxWidth: 250}}
+                        sx={{minWidth: 245, maxWidth: 245}}
                         label="Adjust Syringe Shuttle Position [mm]"                       
                         name="adjustPumpDistance"
                         value={this.state.adjustPumpDistance}
@@ -303,15 +306,13 @@ class SetupParamSubmitter extends React.Component {
                     alignItems="left"
                     spacing={1}
                     p={1}>
-                    <Box variant="div">
- 
                         <ConstrainedNumberTextField
                             label="Syringe Wrap Temp. [ºC]"
                             name="wrapperTemperature"
                             type="number"
                             size="small"
                             color="primary"
-                            sx={{minWidth: 180, maxWidth: 180}}
+                            sx={{minWidth: 175, maxWidth: 175}}
                             value={this.state.wrapperTemperature}
                             disabled={!this.props.isEnabled}
                             onChange={this.handleOnChange}
@@ -319,15 +320,13 @@ class SetupParamSubmitter extends React.Component {
                             min={BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN}
                             max={BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MAX}
                             />
-                    </Box>
-                    <Box variant="div">
                         <ConstrainedNumberTextField
                             label="Nozzle Temp. [ºC]"
                             name="nozzleTemperature"
                             type="number"
                             size="small"
                             color="primary"
-                            sx={{minWidth: 150, maxWidth: 150}}
+                            sx={{minWidth: 145, maxWidth: 145}}
                             value={this.state.nozzleTemperature}
                             disabled={!this.props.isEnabled}
                             onChange={this.handleOnChange}
@@ -335,15 +334,47 @@ class SetupParamSubmitter extends React.Component {
                             min={BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN} 
                             max={BF_CONSTANTS.EXTRUDER_TEMPERATURE_MAX}
                             />
-                        </Box>
-
-                    <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={this.handlePurgeClick}>
-                        Purge material
-                    </Button>
                 </Stack>
+                <Stack  
+                    direction="row"
+                    justifyContent="left"
+                    alignItems="left"
+                    spacing={1}
+                    p={1}>
+                        <ConstrainedNumberTextField 
+                            size="small"
+                            color="primary"
+                            margin="normal"
+                            sx={{minWidth: 150, maxWidth: 150}}
+                            label="Purge Amount [mm]"                       
+                            name="purgeAmount"
+                            value={this.state.purgeAmount}
+                            min={BF_CONSTANTS.EXTRUSION_AMOUNT_MIN}
+                            max={BF_CONSTANTS.EXTRUSION_AMOUNT_MAX}
+                            onChange={this.handleOnChange}                        
+                            disabled={!this.props.isEnabled}
+                            />
+                        <ConstrainedNumberTextField
+                            name="purgeFeedRate"
+                            label="Purge Feed Rate [mm/min]"
+                            type="number"
+                            size="small"
+                            color="primary"
+                            margin="dense"
+                            sx={{minWidth: 190, maxWidth: 190}}
+                            min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
+                            value={this.state.purgeFeedRate}
+                            disabled={!this.props.isEnabled}
+                            onChange={this.handleOnChange}
+                            /> 
+                        <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<DeleteOutlineIcon />}
+                            onClick={this.handlePurgeClick}>
+                            Purge material
+                        </Button>
+                    </Stack>
                 <Stack  
                     direction="row"
                     justifyContent="left"

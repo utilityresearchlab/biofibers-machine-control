@@ -20,6 +20,11 @@ export const HEATER_NOZZLE_TOOL_ID = 1;
 export const EXTRUSION_FEED_RATE_DEFAULT = 16;
 export const EXTRUSION_FEED_RATE_MIN = 0;
 
+
+export const EXTRUSION_FEED_RATE_PURGE = 1;
+export const EXTRUSION_AMOUNT_PURGE = 0.1;
+
+
 export const EXTRUSION_AMOUNT_MAX = 100;
 export const EXTRUSION_AMOUNT_MIN = 0;
 
