@@ -10,6 +10,8 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
 import ConstrainedNumberTextField from './constrained-number-text-field'
 
+import MathUtil from '../lib/math-util'
+
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
 import * as GCODE_CONSTANTS from '../lib/machine-control/gcode-constants'
 
@@ -38,7 +40,7 @@ class TestingParamSubmitter extends React.Component {
         console.log(name);
         this.setState({
             ...this.state,
-            [name]: parseFloat(value)
+            [name]: value
         });
     }
 
@@ -120,6 +122,13 @@ class TestingParamSubmitter extends React.Component {
     }
 
     render() {
+        const preciseXFeedrate = MathUtil.toMinimumPrecision(
+            this.calculateXFeedrate(), 
+            GCODE_CONSTANTS.PARAM_F_FLOAT_PRECISION);
+            
+        const preciseCompositeFeedRate = MathUtil.toMinimumPrecision(
+            this.getCompositeFeedrate(), 
+            GCODE_CONSTANTS.PARAM_F_FLOAT_PRECISION);
         return (
             <Box
             component="form"
@@ -184,12 +193,12 @@ class TestingParamSubmitter extends React.Component {
                     alignContent="left"
                     spacing={1}
                     padding={2}
-                >
+                    >
                     <Typography gutterBottom variant="body1" component="div">
-                        X Axis Feed Rate [mm/min]: {this.calculateXFeedrate()}
+                        Calculated X-Axis Feed Rate [mm/min]: {preciseXFeedrate}
                     </Typography>
                     <Typography gutterBottom variant="body1" component="div">
-                    Composite Feed Rate [mm/min]: {this.getCompositeFeedrate().toFixed(4)}
+                        Calculated Composite Feed Rate [mm/min]: {preciseCompositeFeedRate}
                     </Typography>
                 </Stack>
                 <Stack
