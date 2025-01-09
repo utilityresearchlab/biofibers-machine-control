@@ -9,7 +9,8 @@ MaterialHelper.defaultParams = () => {
         Gelatin: {
             E: 0.1, 
             X: 0, 
-            F: 0.2}
+            F: 0.2
+        }
     };
     return materialParamsDict;
 }
