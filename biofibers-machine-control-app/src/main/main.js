@@ -1,17 +1,11 @@
 const { app, BrowserWindow, shell } = require('electron');
 const path = require('path');
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-// eslint-disable-next-line global-require
-if (require('electron-squirrel-startup')) {
-  app.quit();
-}
+let window;
 
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    //width: 800,
-    //height: 800,
     width: 800,
     height: 600,
     minWidth: 800,
@@ -21,6 +15,7 @@ const createWindow = () => {
 			contextIsolation: false
     },
   });
+
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
@@ -34,12 +29,16 @@ const createWindow = () => {
   if (!app.isPackaged) {
     mainWindow.webContents.openDevTools();
   }
+
+  return mainWindow;
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+app.on('ready', () => {
+  window = createWindow();
+});
 
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -51,11 +50,16 @@ app.on('window-all-closed', () => {
   }
 });
 
+// Todo handle any other operations needed quiting
+app.on('will-quit', () => {
+    // Todo
+});
+
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+    window = createWindow();
   }
 });
 
