@@ -245,7 +245,7 @@ export class GcodeBuilder {
     }
 
     extrude(value, feedrate=null, comment='') {
-        this.moveE(value.toFixed(4), feedrate, comment);
+        this.moveE(value, feedrate, comment);
         return this;
     }
     
