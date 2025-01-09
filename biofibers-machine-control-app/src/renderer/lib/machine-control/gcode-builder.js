@@ -252,7 +252,7 @@ export class GcodeBuilder {
     retract(value, feedrate=null, comment='retract') {
         value = (value > 0) ? -1 * value : value;
         this.moveE(value, feedrate, comment);
-        return this
+        return this;
     }
 
     unretract(value, feedrate=null, comment='unretract') {
