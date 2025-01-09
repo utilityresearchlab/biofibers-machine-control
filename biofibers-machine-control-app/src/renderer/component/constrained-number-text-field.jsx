@@ -15,7 +15,8 @@ class ConstrainedNumberTextField extends React.Component {
     }
 
     enforceConstraints(value, event=null, callback=null) {
-        const constrainedValue = MathUtil.constrain(parseFloat(value), this.props.min, this.props.max);
+        value =  (value == null || value.length == 0) ? 0 : parseFloat(value);
+        const constrainedValue = MathUtil.constrain(value, this.props.min, this.props.max);
         if (!callback) {
             return;
         }
