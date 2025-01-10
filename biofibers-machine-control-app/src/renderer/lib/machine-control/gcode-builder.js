@@ -145,12 +145,10 @@ export class GcodeBuilder {
         return this;
     }
 
-
     set debugOutput(value=true) {
         this._debugOutput = value;
         return this;
     }
-
 
     endSection() {
         this._appendCommand('', null, '-------------');
@@ -218,7 +216,7 @@ export class GcodeBuilder {
 
     homeXY(comment='home xy') {
         this._home([GCODE_CONSTANTS.PARAM_X, GCODE_CONSTANTS.PARAM_Y], comment);
-        return ;
+        return this;
     }
 
     homeAll(comment='home all') {
@@ -374,5 +372,20 @@ export class GcodeBuilder {
 
     stopSpindle() {
         this._appendCommand(GCODE_CONSTANTS.CMD_SET_SPINDLE_SPEED_OFF, null, 'stop spindle');
+        return this;
+    }
+
+    reportTemperaturesImmediately() {
+        this._appendCommand(GCODE_CONSTANTS.CMD_REPORT_TEMPERATURES_IMMEDIATELY, null, 'report temps immediately');
+        return this;
+    }
+
+    reportTemperaturesInterval(timeInSeconds=GCODE_CONSTANTS.DEFAULT_REPORT_TEMPERATURE_INTERVAL) {
+        let secondsParams = {[GCODE_CONSTANTS.PARAM_S]: timeInSeconds};
+        this._appendCommand(
+            GCODE_CONSTANTS.CMD_REPORT_TEMPERATURES_INTERVAL, 
+            secondsParams, 
+            `report temps every ${timeInSeconds} seconds`);
+        return this;
     }
 }
