@@ -75,12 +75,16 @@ class SetupParamSubmitter extends React.Component {
 
     handleHomeAllClick(event) {
         let gcodeBuilder = new GcodeBuilder();
-        gcodeBuilder
+        const gcodeLines = gcodeBuilder
+            .comment('home all and set relative')
             .homeAll()
             .useRelativeCoordinates()
             .useRelativeExtrusionDistances()
-            .resetExtrusionDistance();
-        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+            .resetExtrusionDistance()
+            .toGcode();
+        gcodeLines.map((line, index) => {
+            this.handleSubmitCommand(event, line);
+        });
     }
 
     handleExtrudePumpClick(event) {
