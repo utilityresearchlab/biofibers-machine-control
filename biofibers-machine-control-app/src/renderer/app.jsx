@@ -38,6 +38,7 @@ import imgMachineLogoSrc from '../assets/img/machine-render-logo.png'
 import imgUtilityLabLogoSrc from '../assets/img/utility-research-web-logo-500x75.png'
 
 import * as LOGGER from './lib/logger-util';
+import { GcodeBuilder } from './lib/machine-control/gcode-builder';
 
 
 const ScanPortsRefreshTimeInMs = 3000;
@@ -209,6 +210,21 @@ class BaseMachineControlApp extends React.Component {
 		}, ScanPortsRefreshTimeInMs);
 	}
 
+	// Sends the start g-code for our machine
+	initMachineConnection() {
+		const initMachineGcodeLines = new GcodeBuilder()
+			.comment('Machine Init G-Code')
+			.reportTemperaturesImmediately()
+			.reportTemperaturesInterval()
+			.useRelativeCoordinates()
+			.useRelativeExtrusionDistances()
+			.resetExtrusionDistance()
+			.toGcode();
+		initMachineGcodeLines.map((line, index) => {
+			this.handleSendCommandClick(line);
+		});
+	}
+
 	handleUpdateAvailableSerialPorts(updatedPortsInfo, err) {
 		if (err) {
 			LOGGER.logE(err);
@@ -249,6 +265,7 @@ class BaseMachineControlApp extends React.Component {
 				// Prep connected console message
 				consoleMessage = `Connected to '${portPath}' (Baud: ${baudRate}).`;
 				messageDataType = ConsoleDataType.INFO;
+				that.initMachineConnection();
 			}
 			that.addConsoleData(consoleMessage, messageDataType);
 			that.forceUpdate();
