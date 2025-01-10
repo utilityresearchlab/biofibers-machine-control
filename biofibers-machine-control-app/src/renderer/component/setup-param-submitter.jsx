@@ -285,22 +285,29 @@ class SetupParamSubmitter extends React.Component {
                         disabled={this.props.disabled}
                         onChange={this.handleOnChange}
                         />  
-                    <Button
-                        size="medium"
-                        variant="outlined"
-                        startIcon={<KeyboardDoubleArrowUpIcon />}
-                        disabled={this.props.disabled}
-                        onClick={this.handleRetractPumpClick} >
-                        Retract
-                    </Button>
-                    <Button
-                        size="medium"
-                        variant="outlined"
-                        startIcon={<KeyboardDoubleArrowDownIcon />}
-                        disabled={this.props.disabled}
-                        onClick={this.handleExtrudePumpClick} >
-                        Extrude
-                    </Button>
+
+                    <Box variant="div" sx={{display: 'flex'}}>
+                        <Button
+                            size="medium"
+                            variant="outlined"
+                            width="100%"
+                            startIcon={<KeyboardDoubleArrowUpIcon />}
+                            disabled={this.props.disabled}
+                            onClick={this.handleRetractPumpClick} >
+                            Retract
+                        </Button>
+                    </Box>
+                    <Box variant="div" sx={{display: 'flex'}}>
+                        <Button
+                            size="medium"
+                            variant="outlined"
+                            width="100%"
+                            startIcon={<KeyboardDoubleArrowDownIcon />}
+                            disabled={this.props.disabled}
+                            onClick={this.handleExtrudePumpClick} >
+                            Extrude
+                        </Button>
+                    </Box>
                 </Stack>
   
                 <Stack
@@ -370,14 +377,16 @@ class SetupParamSubmitter extends React.Component {
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             /> 
-                        <Button
-                            size="small"
-                            variant="outlined"
-                            startIcon={<DeleteOutlineIcon />}
-                            disabled={this.props.disabled}
-                            onClick={this.handlePurgeClick}>
-                            Purge material
-                        </Button>
+                            <Box variant="div" sx={{display: 'flex'}}>
+                                <Button
+                                    size="medium"
+                                    variant="outlined"
+                                    startIcon={<DeleteOutlineIcon />}
+                                    disabled={this.props.disabled}
+                                    onClick={this.handlePurgeClick}>
+                                    Purge material
+                                </Button>
+                            </Box>
                     </Stack>
                 <Stack  
                     direction="row"
@@ -463,19 +472,21 @@ class SetupParamSubmitter extends React.Component {
                             {renderedMaterialItems}
                         </Select>
                     </FormControl>
-                    <Button
-                        variant="outlined"
-                        size="small"
-                        disabled={this.props.disabled}
-                        color={(this.state.pullDownInProgress) ? "error" : "success"}
-                        startIcon={<SwipeDownAltIcon />}
-                        onClick={(this.state.pullDownInProgress)
-                            ? this.handleStopPullDownClick
-                            : this.handleStartPullDownClick} >
-                        {this.state.pullDownInProgress
-                            ? 'Stop pull-down'
-                            : 'Start pull-down'}
-                    </Button>
+                    <Box variant="div" sx={{display: 'flex'}}>
+                        <Button
+                            variant="outlined"
+                            size="medium"
+                            disabled={this.props.disabled}
+                            color={(this.state.pullDownInProgress) ? "error" : "success"}
+                            startIcon={<SwipeDownAltIcon />}
+                            onClick={(this.state.pullDownInProgress)
+                                ? this.handleStopPullDownClick
+                                : this.handleStartPullDownClick} >
+                            {this.state.pullDownInProgress
+                                ? 'Stop pull-down'
+                                : 'Start pull-down'}
+                        </Button>
+                    </Box>
                 </Stack>
             </Box>
         );

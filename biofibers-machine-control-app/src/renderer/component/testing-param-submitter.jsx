@@ -135,12 +135,12 @@ class TestingParamSubmitter extends React.Component {
             GCODE_CONSTANTS.PARAM_F_FLOAT_PRECISION);
 
         const commandStyle = {
-            display: 'inline-block',
             background: "#f4f4f4",
             fontSize: '0.95rem',
             fontFamily: 'monospace',
             whiteSpace: 'pre',
-            unicodeBidi: 'isolate'
+            unicodeBidi: 'isolate',
+            wordWrap: 'no-wrap'
         };
 
         const spinningCommandText = this.getSpinningCommand();
@@ -156,8 +156,8 @@ class TestingParamSubmitter extends React.Component {
                     spacing={1}
                     padding={1}
                 >
-                    <Box variant="div">
-                        <ConstrainedNumberTextField
+                    <Box variant="div" sx={{display: 'flex'}}>
+                    <ConstrainedNumberTextField
                             name="eValue"
                             label="Extrusion Amount [mm]"
                             type="number"
@@ -172,22 +172,22 @@ class TestingParamSubmitter extends React.Component {
                             onChange={this.handleOnChange}
                             />
                     </Box>
-                    <Box variant="div">
-                    <ConstrainedNumberTextField
-                        name="eFeedrate"
-                        label="Extrusion Feedrate [mm/min]"
-                        type="number"
-                        size="small"
-                        color="primary"
-                        margin="dense"
-                        sx={{minWidth: 200, maxWidth: 200}}
-                        min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
-                        value={this.state.eFeedrate}
-                        disabled={this.props.disabled}
-                        onChange={this.handleOnChange}
-                        />  
+                    <Box variant="div" sx={{display: 'flex'}}>
+                        <ConstrainedNumberTextField
+                            name="eFeedrate"
+                            label="Extrusion Feedrate [mm/min]"
+                            type="number"
+                            size="small"
+                            color="primary"
+                            margin="dense"
+                            sx={{minWidth: 200, maxWidth: 200}}
+                            min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
+                            value={this.state.eFeedrate}
+                            disabled={this.props.disabled}
+                            onChange={this.handleOnChange}
+                            />  
                     </Box>
-                    <Box variant="div">
+                    <Box variant="div" sx={{display: 'flex'}}>
                         <ConstrainedNumberTextField
                             name="xValue"
                             label="X-Axis Movement [mm]"
@@ -209,44 +209,44 @@ class TestingParamSubmitter extends React.Component {
                     spacing={1}
                     padding={2}
                     >
-                    <Typography gutterBottom variant="body1" sx={{fontStyle: 'italic'}} component="div">
+                    <Typography gutterBottom variant="span" sx={{fontStyle: 'italic'}} component="div">
                         Calculated X-Axis Feed Rate [mm/min]: {preciseXFeedrate}
                     </Typography>
-                    <Typography gutterBottom variant="body1" sx={{fontStyle: 'italic'}} component="div">
+                    <Typography gutterBottom variant="span" sx={{fontStyle: 'italic'}} component="div">
                         Calculated Composite Feed Rate [mm/min]: {preciseCompositeFeedRate}
                     </Typography>
                     <Stack
                         direction="row"
                         alignItems="left"
                         alignContent="left"
-                        justifySelf={true}
                         spacing={1}
-                    >
-
-                        <Typography gutterBottom variant="body1" sx={{fontStyle: 'italic', fontWeight: 500}} component="div">
-                            Generated Spinning Command: 
-                        </Typography>
-                        <span style={commandStyle}>{spinningCommandText}</span>
+                        width="100%"
+                        >
+                            <Typography variant="div" gutterBottom sx={{wordWrap: 'no-wrap', fontStyle: 'italic', fontWeight: 500}}>
+                                Generated Spinning Command: 
+                            </Typography>
+                            <Typography variant="span" sx={commandStyle}>
+                                {spinningCommandText}
+                            </Typography>                        
                     </Stack>
                 </Stack>
                 <Stack
-                        direction="row"
-                        alignItems="left"
-                        alignContent="left"
-                        justifySelf={true}
-                        spacing={1}
-                    >
+                    direction="row"
+                    alignItems="left"
+                    alignContent="left"
+                    justifyContent="left"
+                    spacing={1}>
                     <ConstrainedNumberTextField
-                            name="numCommands"
-                            label="Number of Commands to Send"
-                            type="number"
-                            size="small"
-                            color="primary"
-                            value={this.state.numCommands}
-                            disabled={this.props.disabled}
-                            onChange={this.handleOnChange}
-                            sx={{maxWidth: '30%'}}
-                            /> 
+                        name="numCommands"
+                        label="Number of Commands to Send"
+                        type="number"
+                        size="small"
+                        color="primary"
+                        value={this.state.numCommands}
+                        disabled={this.props.disabled}
+                        onChange={this.handleOnChange}
+                        sx={{minWidth: 220, maxWidth: 220}}
+                        /> 
                     {/* <Button
                         variant="outlined"
                         size="medium"
@@ -259,15 +259,17 @@ class TestingParamSubmitter extends React.Component {
                             ? 'Stop spinning'
                             : 'Start spinning'}
                     </Button> */}
-                    <Button
-                        variant="outlined"
-                        size="medium"
-                        disabled={this.props.disabled}
-                        color="success"
-                        startIcon={<PlayCircleOutlineIcon/>}
-                        onClick={this.handleSendMultipleCommands} > 
-                        Send Commands
-                    </Button>
+                    <Box variant="div" sx={{display: 'flex'}}>
+                        <Button
+                            variant="outlined"
+                            size="medium"
+                            disabled={this.props.disabled}
+                            color="success"
+                            startIcon={<PlayCircleOutlineIcon/>}
+                            onClick={this.handleSendMultipleCommands} > 
+                            Send Commands
+                        </Button>
+                    </Box>
                 </Stack>
             </Box>
         );

@@ -60,14 +60,11 @@ class TextFieldSubmitter extends React.Component {
 		return (
 			<Box
 				component="form"
-				sx={{
-					'& .MuiTextField-root': {m: 0, width: '100%' },
-				}}
+				sx={{'& .MuiTextField-root': {m: 0, width: '100%' }}}
 				noValidate
 				autoComplete="off"
 				onSubmit={this.handleOnSubmit}
-
-			>
+				>
 				<Stack
 					direction="row"
 					justifyContent="left"
@@ -86,14 +83,16 @@ class TextFieldSubmitter extends React.Component {
 						disabled={!this.props.isEnabled}
 						/>
 					</Box>
-					<Button
-						variant="outlined"
-						size="medium"
-						endIcon={this.props.buttonIcon}
-						type='submit'
-						disabled={!this.props.isEnabled}>
-						{this.props.buttonLabel}
-					</Button>
+                    <Box variant="div" sx={{display: 'flex'}}>
+						<Button
+							variant="outlined"
+							size="medium"
+							endIcon={this.props.buttonIcon}
+							type='submit'
+							disabled={!this.props.isEnabled}>
+							{this.props.buttonLabel}
+						</Button>
+					</Box>
 				</Stack>
 			</Box>
 		);

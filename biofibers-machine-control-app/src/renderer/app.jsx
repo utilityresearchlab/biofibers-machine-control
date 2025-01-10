@@ -454,7 +454,8 @@ class BaseMachineControlApp extends React.Component {
 											{renderedBaudRateItems}
 										</Select>
 									</FormControl>
-									<Button
+                    				<Box variant="div" sx={{display: 'flex'}}>
+										<Button
 											size="medium"
 											variant="outlined"
 											color={(serialCommIsDisconnected) ? "success" : "error"}
@@ -467,7 +468,8 @@ class BaseMachineControlApp extends React.Component {
 													{(!serialCommIsConnected)
 														? "Connect"
 														: "Disconnect"}
-									</Button>
+										</Button>
+									</Box>
 							</Stack>
 					</Box>
 
@@ -510,8 +512,8 @@ class BaseMachineControlApp extends React.Component {
 								buttonIcon={<SendIcon />}
 								disabled={isInputDisabled}
 								onSubmitCallback={this.handleSendCommandClick} />
-							<Box 
-								variant="div"
+                    		<Box
+								variant="div" 
 								sx={{paddingTop: 1}}>
 								<Console data={consoleData} />
 							</Box>
