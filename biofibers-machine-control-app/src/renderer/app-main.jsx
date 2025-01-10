@@ -6,6 +6,7 @@ import applyTheme from './style/theme'
 
 import * as APP_SETTINGS from './app-settings'
 import BaseMachineControlApp from './app';
+import * as LOGGER from './lib/logger-util'
 
 import {SerialCommunication, defaultBaudRate, defaultSerialPort} from './lib/serial-util/serial-communication';
 
@@ -27,7 +28,7 @@ window.addEventListener('beforeunload', function(event) {
 let appStarted = false;
 // Set-up react app here; see: https://reactjs.org/docs/hello-world.html
 function initApp() {
-	console.log("InitApp");
+	LOGGER.logD("InitApp");
 	if (appStarted) {
 		return;
 	}
