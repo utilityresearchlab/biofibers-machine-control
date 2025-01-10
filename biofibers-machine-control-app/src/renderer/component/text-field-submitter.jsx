@@ -80,7 +80,7 @@ class TextFieldSubmitter extends React.Component {
 						value={this.state.inputText}
 						onKeyUp={this.handleOnKeyUp}
 						onChange={this.handleOnTextChange}
-						disabled={!this.props.isEnabled}
+						disabled={this.props.disabled}
 						/>
 					</Box>
                     <Box variant="div" sx={{display: 'flex'}}>
@@ -89,7 +89,7 @@ class TextFieldSubmitter extends React.Component {
 							size="medium"
 							endIcon={this.props.buttonIcon}
 							type='submit'
-							disabled={!this.props.isEnabled}>
+							disabled={this.props.disabled}>
 							{this.props.buttonLabel}
 						</Button>
 					</Box>
