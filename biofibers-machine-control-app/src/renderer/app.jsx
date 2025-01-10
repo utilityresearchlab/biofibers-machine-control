@@ -212,9 +212,10 @@ class BaseMachineControlApp extends React.Component {
 
 	// Sends the start g-code for our machine
 	initMachineConnection() {
-		const initMachineGcodeLines = new GcodeBuilder()
+		const that = this;
+		setTimeout(() => {
+			const initMachineGcodeLines = new GcodeBuilder()
 			.comment('Machine Init G-Code')
-			.reportTemperaturesImmediately()
 			.reportTemperaturesInterval()
 			.useRelativeCoordinates()
 			.useRelativeExtrusionDistances()
@@ -223,6 +224,8 @@ class BaseMachineControlApp extends React.Component {
 		initMachineGcodeLines.map((line, index) => {
 			this.handleSendCommandClick(line);
 		});
+		}, APP_SETTINGS.MACHINE_INIT_TIMEOUT);
+		
 	}
 
 	handleUpdateAvailableSerialPorts(updatedPortsInfo, err) {
@@ -326,7 +329,7 @@ class BaseMachineControlApp extends React.Component {
 			that.addConsoleData(consoleMessage, messageDataType);
 		};
 		// Trigger sending command
-		this.props.serialCommunication.sendCommand(cmdText, onSentCallback);
+		this.props.serialCommunication.sendBufferedCommand(cmdText, onSentCallback);
 	}
 
 	handleOnReceivedConsoleData(data, timestamp) {

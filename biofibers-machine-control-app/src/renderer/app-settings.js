@@ -5,3 +5,5 @@ export const BIOFIBERS_GITHUB_URL = "https://github.com/utilityresearchlab/deskt
 
 // Toggles logging for debug mode
 export const DEBUG_MODE = true;
+
+export const MACHINE_INIT_TIMEOUT = 2000;
