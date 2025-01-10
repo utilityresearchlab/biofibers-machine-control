@@ -107,12 +107,15 @@ class SetupParamSubmitter extends React.Component {
 
     handleStartPullDownClick(event) {
         let gcodeBuilder = new GcodeBuilder();
-        gcodeBuilder
+        const gcodeLines = gcodeBuilder
+            .comment('start pull down')
             .useRelativeCoordinates()
             .useRelativeExtrusionDistances()
-            .resetExtrusionDistance();
-
-        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+            .resetExtrusionDistance()
+            .toGcode();
+        gcodeLines.forEach((line, index) => {
+            this.handleSubmitCommand(event, line);
+        });
 
         // keep sending command to extrude until pull-down is stopped
         // TODO: Determine proper interval timing instead of hard-coding 5000 ms

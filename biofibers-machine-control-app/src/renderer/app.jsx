@@ -221,7 +221,7 @@ class BaseMachineControlApp extends React.Component {
 			.useRelativeExtrusionDistances()
 			.resetExtrusionDistance()
 			.toGcode();
-		initMachineGcodeLines.map((line, index) => {
+		initMachineGcodeLines.forEach((line, index) => {
 			this.handleSendCommandClick(line);
 		});
 		}, APP_SETTINGS.MACHINE_INIT_TIMEOUT);
