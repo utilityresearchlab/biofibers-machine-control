@@ -1,4 +1,6 @@
 import * as React from 'react';
+
+import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
 import MathUtil from '../lib/math-util'
@@ -38,19 +40,21 @@ class ConstrainedNumberTextField extends React.Component {
 
     render() {
         return (
-            <TextField
-                type='number'
-                sx={{...this.props.sx}}
-                name={this.props.name}
-                label={this.props.label}
-                value={this.props.value}
-                size={this.props.size}
-                min={this.props.min}
-                max={this.props.max}
-                onKeyUp={this.handleOnKeyUp}
-                onChange={this.handleOnChange}
-                disabled={this.props.disabled}
-                inputProps={{min: this.props.min, max: this.props.max}} />
+            <Box variant="div" sx={{display: 'flex'}}>
+                <TextField
+                    type='number'
+                    sx={{...this.props.sx}}
+                    name={this.props.name}
+                    label={this.props.label}
+                    value={this.props.value}
+                    size={this.props.size}
+                    min={this.props.min}
+                    max={this.props.max}
+                    onKeyUp={this.handleOnKeyUp}
+                    onChange={this.handleOnChange}
+                    disabled={this.props.disabled}
+                    inputProps={{min: this.props.min, max: this.props.max}} />
+                </Box>
         );
     }
 }
