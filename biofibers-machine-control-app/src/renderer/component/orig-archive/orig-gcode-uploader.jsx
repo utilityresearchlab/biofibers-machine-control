@@ -31,7 +31,7 @@ class GcodeUploader extends React.Component {
     }
 
     handleOnTextChange(event) {
-		this.setState({ dataInput: event.target.value });
+		this.setState({dataInput: event.target.value});
 	}
 
     validateDataInput() {

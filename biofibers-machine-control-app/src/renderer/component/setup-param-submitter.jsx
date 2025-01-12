@@ -25,7 +25,7 @@ import StopCircleIcon from '@mui/icons-material/StopCircle';
 import SwipeDownAltIcon from '@mui/icons-material/SwipeDownAlt';
 
 import ConstrainedNumberTextField from './constrained-number-text-field'
-import * as BF_CONSTANTS from '../lib/biofibers-machine-constants'
+import * as BF_CONSTANTS from '../lib/biofibers-machine/biofibers-machine-constants'
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
 import * as GCODE_CONSTANTS from '../lib/machine-control/gcode-constants'
 import MaterialHelper from '../lib/material-util/material-helper';
@@ -134,7 +134,6 @@ class SetupParamSubmitter extends React.Component {
             this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString());
         }, 100);
         this.setState({
-            ...this.state,
             nIntervalId: intervalId,
             pullDownInProgress: true
         });
@@ -142,7 +141,6 @@ class SetupParamSubmitter extends React.Component {
 
     handleStopPullDownClick(event) {
         this.setState({
-            ...this.state,
             pullDownInProgress: false
         });
         clearInterval(this.state.nIntervalId);
@@ -154,7 +152,6 @@ class SetupParamSubmitter extends React.Component {
     handleOnChange(event) {
         const { name, value } = event.target;
         this.setState({
-            ...this.state,
             [name]: value ? Number(value) : 0
         });
     }
@@ -168,7 +165,6 @@ class SetupParamSubmitter extends React.Component {
                 ? newDirection 
                 : BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED
             this.setState({
-                ...this.state,
                 collectorDirection: newDirection
             });
             let gcodeBuilder = new GcodeBuilder();
@@ -189,8 +185,8 @@ class SetupParamSubmitter extends React.Component {
     handleOnSelectMaterial(event) {
         const material = String(event.target.value);
         this.setState({ 
-            ...this.state,
-            selectedMaterial: material });
+            selectedMaterial: material 
+        });
     }
 
     getRenderedMaterialItems() {

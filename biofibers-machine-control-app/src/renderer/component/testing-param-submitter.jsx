@@ -15,7 +15,7 @@ import MathUtil from '../lib/math-util'
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
 import * as GCODE_CONSTANTS from '../lib/machine-control/gcode-constants'
 
-import * as BF_CONSTANTS from '../lib/biofibers-machine-constants'
+import * as BF_CONSTANTS from '../lib/biofibers-machine/biofibers-machine-constants'
 
 class TestingParamSubmitter extends React.Component {
     constructor(props) {
@@ -39,7 +39,6 @@ class TestingParamSubmitter extends React.Component {
         const {name, value} = event.target;
         console.log(name);
         this.setState({
-            ...this.state,
             [name]: value
         });
     }
@@ -71,7 +70,6 @@ class TestingParamSubmitter extends React.Component {
             this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
         }, 1000);
         this.setState({
-            ...this.state,
             nIntervalId: intervalId,
             spinningInProgress: true
         });
@@ -80,7 +78,6 @@ class TestingParamSubmitter extends React.Component {
      handleStopSpinningClick(event) {
         let intervalId = this.state.nIntervalId;
         this.setState({
-            ...this.state,
             spinningInProgress: false,
             nIntervalId: null
         });

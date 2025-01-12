@@ -33,7 +33,6 @@ class TestingParamSubmitter extends React.Component {
         const {name, value} = event.target;
         console.log(name);
         this.setState({
-            ...this.state,
             [name]: Number(value)
         });
     }
