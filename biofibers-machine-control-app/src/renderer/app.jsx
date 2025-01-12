@@ -467,7 +467,7 @@ class BaseMachineControlApp extends React.Component {
 		// const serialCommIsConnected = (this.props.serialCommunication) ? this.props.serialCommunication.isConnected() : false;
 		// const serialCommIsDisconnected = !serialCommIsConnected;
 		//const isInputDisabled = serialCommIsDisconnected && !this.props.isDebugging;
-		const isInputDisabled = serialCommIsDisconnected ;//&& !this.props.isDebugging;
+		const isInputDisabled = serialCommIsDisconnected && !this.props.isDebugging;
 		const githubUrl = APP_SETTINGS.BIOFIBERS_GITHUB_URL;
 		const currentYear = new Date().getFullYear();
 		return (
