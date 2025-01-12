@@ -13,6 +13,7 @@ import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import HomeIcon from '@mui/icons-material/Home';
@@ -39,8 +40,8 @@ class SetupParamSubmitter extends React.Component {
             adjustPumpFeedRate: BF_CONSTANTS.EXTRUSION_FEED_RATE_DEFAULT,
             purgeAmount: BF_CONSTANTS.EXTRUSION_AMOUNT_PURGE,
             purgeFeedRate: BF_CONSTANTS.EXTRUSION_FEED_RATE_PURGE,
-            nozzleTemperature: 32,
-            wrapperTemperature: 52,
+            nozzleTemperatureSetPoint: 32,
+            wrapperTemperatureSetPoint: 52,
             collectorSpeed: 100,
             collectorDirection: BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED, // stopped by default
             pullDownInProgress: false,
@@ -82,7 +83,7 @@ class SetupParamSubmitter extends React.Component {
             .useRelativeExtrusionDistances()
             .resetExtrusionDistance()
             .toGcode();
-        gcodeLines.map((line, index) => {
+        gcodeLines.forEach((line, index) => {
             this.handleSubmitCommand(event, line);
         });
     }
@@ -216,11 +217,11 @@ class SetupParamSubmitter extends React.Component {
             // Enter pressed so trigger submit
             const { name, value } = event.target;
             // Set extruder temperature: tool 1
-            if (name == 'nozzleTemperature') {
-                gcodeBuilder.setTemperature(this.state.nozzleTemperature, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
-            } else if (name == 'wrapperTemperature') {
+            if (name == 'nozzleTemperatureSetPoint') {
+                gcodeBuilder.setTemperature(this.state.nozzleTemperatureSetPoint, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
+            } else if (name == 'wrapperTemperatureSetPoint') {
                 // Set wrapper temperature: tool 0
-                gcodeBuilder.setTemperature(this.state.wrapperTemperature, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
+                gcodeBuilder.setTemperature(this.state.wrapperTemperatureSetPoint, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
             } else if (name == 'collectorSpeed') {
                 // Don't change live speed when collector is stopped
                 if (this.state.collectorDirection == BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED) {
@@ -324,27 +325,49 @@ class SetupParamSubmitter extends React.Component {
                     spacing={1}
                     p={1}>
                         <ConstrainedNumberTextField
-                            label="Syringe Wrap Temp. [ºC]"
-                            name="wrapperTemperature"
+                            label="Set Syringe Wrap Temp. [ºC]"
+                            name="wrapperTemperatureSetPoint"
                             type="number"
                             size="small"
                             color="primary"
-                            sx={{minWidth: 175, maxWidth: 175}}
-                            value={this.state.wrapperTemperature}
+                            sx={{minWidth: 195, maxWidth: 195}}
+                            value={this.state.wrapperTemperatureSetPoint}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             onKeyUp={this.handleOnKeyUp}
                             min={BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN}
                             max={BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MAX}
                             />
+                        <Stack
+                            direction="column"
+                            justifyContent="left"
+                            alignContent="left"
+                            spacing={1}
+                            padding={2}
+                            >
+                            <Typography gutterBottom variant="span" sx={{fontStyle: 'italic'}} component="div">
+                                Syringe Wrap Temp [ºC]: {this.props.currentSyringeWrapTemperature}
+                            </Typography>
+                        </Stack>
+                        <Stack
+                            direction="column"
+                            justifyContent="left"
+                            alignContent="left"
+                            spacing={1}
+                            padding={2}
+                            >
+                            <Typography gutterBottom variant="span" sx={{fontStyle: 'italic'}} component="div">
+                                Nozzle Temp. [ºC]: {this.props.currentNozzleTemperature}
+                            </Typography>
+                        </Stack>
                         <ConstrainedNumberTextField
-                            label="Nozzle Temp. [ºC]"
-                            name="nozzleTemperature"
+                            label="Set Nozzle Temp. [ºC]"
+                            name="nozzleTemperatureSetPoint"
                             type="number"
                             size="small"
                             color="primary"
-                            sx={{minWidth: 145, maxWidth: 145}}
-                            value={this.state.nozzleTemperature}
+                            sx={{minWidth: 160, maxWidth: 160}}
+                            value={this.state.nozzleTemperatureSetPoint}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             onKeyUp={this.handleOnKeyUp}

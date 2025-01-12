@@ -29,6 +29,7 @@ import {parseLine} from './lib/machine-control/command-parser';
 import {MACHINE_COMMANDS, MACHINE_ERROR_CODES} from './lib/machine-control/machine-protocol';
 
 import * as APP_SETTINGS from './app-settings';
+
 import Console from './component/console';
 import TextFieldSubmitter from './component/text-field-submitter'
 import SetupParamSubmitter from './component/setup-param-submitter'
@@ -39,6 +40,7 @@ import imgUtilityLabLogoSrc from '../assets/img/utility-research-web-logo-500x75
 
 import * as LOGGER from './lib/logger-util';
 import { GcodeBuilder } from './lib/machine-control/gcode-builder';
+import * as BF_CONSTANTS from './lib/biofibers-machine-constants'
 
 
 const ScanPortsRefreshTimeInMs = 3000;
@@ -53,6 +55,8 @@ class BaseMachineControlApp extends React.Component {
 			baudRate: this.props.serialCommunication.baudRate,
 			consoleData: [],
 			availableSerialPorts: [SerialPortHelper.nonePort()],
+			currentNozzleTemperature: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN,
+			currentSyringeWrapTemperature: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN,
 		};
 
 		// init serialport listening
@@ -501,6 +505,8 @@ class BaseMachineControlApp extends React.Component {
                 		</Typography>         
 						<SetupParamSubmitter
 							disabled={isInputDisabled}
+							currentNozzleTemperature={this.state.currentNozzleTemperature}
+							currentSyringeWrapTemperature={this.state.currentSyringeWrapTemperature}
 							onSubmitCallback={this.handleSendCommandClick} />
 					</Box>
 
