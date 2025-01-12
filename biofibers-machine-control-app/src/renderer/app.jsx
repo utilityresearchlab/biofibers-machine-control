@@ -40,7 +40,8 @@ import imgUtilityLabLogoSrc from '../assets/img/utility-research-web-logo-500x75
 
 import * as LOGGER from './lib/logger-util';
 import { GcodeBuilder } from './lib/machine-control/gcode-builder';
-import * as BF_CONSTANTS from './lib/biofibers-machine-constants'
+import * as BF_CONSTANTS from './lib/biofibers-machine/biofibers-machine-constants'
+import {BiofibersMachineState} from './lib/biofibers-machine/biofibers-machine-state'
 
 
 const ScanPortsRefreshTimeInMs = 3000;
@@ -55,6 +56,7 @@ class BaseMachineControlApp extends React.Component {
 			baudRate: this.props.serialCommunication.baudRate,
 			consoleData: [],
 			availableSerialPorts: [SerialPortHelper.nonePort()],
+			machineState: new BiofibersMachineState(),
 			currentNozzleTemperature: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN,
 			currentSyringeWrapTemperature: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN,
 		};
@@ -75,6 +77,16 @@ class BaseMachineControlApp extends React.Component {
 			this.createCommandResponseHandler(),
 			MACHINE_COMMANDS.ALL_COMMANDS,
 			this.createCommandInterpreterErrorCallback());
+	}
+
+	_getMachineState() {
+		return this.state.machineState;
+	}
+
+	_setMachineState(state) {
+		this.setState({
+			machineState: state
+		});
 	}
 
 	createCommandResponseHandler() {
@@ -214,8 +226,14 @@ class BaseMachineControlApp extends React.Component {
 		}, ScanPortsRefreshTimeInMs);
 	}
 
-	// Sends the start g-code for our machine
+	// Sends the start g-code for our machine and updates machine state
 	initMachineConnection() {
+		// Update machine state variable to connected
+		let currentState = this._getMachineState();
+		currentState.setMachineConnected();
+		this._setMachineState(currentState);
+
+		// Send start g-code
 		const that = this;
 		setTimeout(() => {
 			const initMachineGcodeLines = new GcodeBuilder()
@@ -225,9 +243,9 @@ class BaseMachineControlApp extends React.Component {
 			.useRelativeExtrusionDistances()
 			.resetExtrusionDistance()
 			.toGcode();
-		initMachineGcodeLines.forEach((line, index) => {
-			this.handleSendCommandClick(line);
-		});
+			initMachineGcodeLines.forEach((line, index) => {
+				this.handleSendCommandClick(line);
+			});
 		}, APP_SETTINGS.MACHINE_INIT_TIMEOUT);
 		
 	}
@@ -242,6 +260,16 @@ class BaseMachineControlApp extends React.Component {
 			: updatedPortsInfo;
 		this.setState({availableSerialPorts: updatedPorts});
 		LOGGER.log("Serial Ports - ", updatedPorts);
+
+		// If our serial port disappears, we have a forced disconnect
+		let isPortStillActive = false;
+		updatedPorts.forEach((port, index) => {
+			isPortStillActive ||= (port.path == this.state.selectedSerialPort);
+		});
+		if (!isPortStillActive) {
+			// Port is no longer active, so process disconnect to reset machine state
+			this.handleLostSerialPortConnection();
+		}
 	}
 
 	handleOnSelectSerialPort(event) {
@@ -273,7 +301,14 @@ class BaseMachineControlApp extends React.Component {
 				consoleMessage = `Connected to '${portPath}' (Baud: ${baudRate}).`;
 				messageDataType = ConsoleDataType.INFO;
 				that.initMachineConnection();
+
+				// Update machine state to connected
+				let machineState = that._getMachineState();
+				machineState.setMachineConnected();
+				that._setMachineState(machineState);
 			}
+
+			// Update app
 			that.addConsoleData(consoleMessage, messageDataType);
 			that.forceUpdate();
 		};
@@ -284,6 +319,30 @@ class BaseMachineControlApp extends React.Component {
 		// Set current port and baud
 		this.props.serialCommunication.setSerialPort(this.state.selectedSerialPort, this.state.baudRate);
 		this.props.serialCommunication.connect(onConnectCallback);
+	}
+
+	handleLostSerialPortConnection() {
+		// Build Lost Connection Message
+		const portPath = this.props.serialCommunication.getSerialPortPath();
+		const baudRate = this.props.serialCommunication.getBaudRate();
+		let consoleMessage = `Connection Lost to '${portPath}' (Baud: ${baudRate}).`;
+		let messageDataType = ConsoleDataType.ERROR;
+		
+		// Update console log
+		this.addConsoleData(consoleMessage, messageDataType);
+		this.forceUpdate();
+
+
+		// Start Disconnect;
+		this.props.serialCommunication.disconnect();
+
+		// Update machine state
+		let machineState = this._getMachineState();
+		machineState.setMachineDisconnected();
+		this._setMachineState(machineState);
+
+		// Deselect name of serial port
+		this.setState({selectedSerialPort: SerialPortHelper.serialPortPathNone()});
 	}
 
 	handleDisconnectClick() {
@@ -309,6 +368,11 @@ class BaseMachineControlApp extends React.Component {
 		};
 		// Start Disconnect;
 		this.props.serialCommunication.disconnect(onDisconnectCallback);
+
+		// Update machine state
+		let machineState = that._getMachineState();
+		machineState.setMachineDisconnected();
+		that._setMachineState(machineState);
 	}
 
 	handleSendCommandClick(cmdText) {
@@ -352,7 +416,7 @@ class BaseMachineControlApp extends React.Component {
 	addConsoleData(data, dataType=ConsoleDataType.INFO, timestamp=Date.now()) {
 		const dataString = data.toString();
 		const newData = new ConsoleDataItem(dataString, timestamp, dataType);
-		this.setState(prevState => ({
+		this.setState((prevState, props) => ({
 			consoleData: [...prevState.consoleData, newData]
 		}));
 	}
@@ -387,13 +451,23 @@ class BaseMachineControlApp extends React.Component {
 	}
 
 	render() {
+		// Machine state
+		const currentState = this._getMachineState();
+		const isConnected = currentState.isMachineConnected();
+		const isDisconnected = currentState.isMachineDisconnected();
+		const isSpinning = currentState.isMachineSpinning();
+		const isPullingDown = currentState.isMachinePullingDown();
+
 		const consoleData = this.state.consoleData;
 		const renderedSerialPortsItems = this.getRenderedSerialPortItems();
 		const renderedBaudRateItems = this.getRenderedBaudRateItems();
 		const selectedPortName = this.state.serialPort;
-		const serialCommIsConnected = (this.props.serialCommunication) ? this.props.serialCommunication.isConnected() : false;
+		const serialCommIsConnected = isConnected;
 		const serialCommIsDisconnected = !serialCommIsConnected;
-		const isInputDisabled = serialCommIsDisconnected && !this.props.isDebugging;
+		// const serialCommIsConnected = (this.props.serialCommunication) ? this.props.serialCommunication.isConnected() : false;
+		// const serialCommIsDisconnected = !serialCommIsConnected;
+		//const isInputDisabled = serialCommIsDisconnected && !this.props.isDebugging;
+		const isInputDisabled = serialCommIsDisconnected ;//&& !this.props.isDebugging;
 		const githubUrl = APP_SETTINGS.BIOFIBERS_GITHUB_URL;
 		const currentYear = new Date().getFullYear();
 		return (

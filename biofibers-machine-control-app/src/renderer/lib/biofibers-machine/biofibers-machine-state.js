@@ -1,0 +1,89 @@
+
+import * as BF_CONSTANTS from './biofibers-machine-constants'
+
+const MACHINE_STATE_IS_DISCONNECTED = 0x00;
+const MACHINE_STATE_IS_CONNECTED = 0x01;
+const MACHINE_STATE_IS_SPINNING = 0x02 | MACHINE_STATE_IS_CONNECTED;
+const MACHINE_STATE_IS_PULLING_DOWN = 0x04 | MACHINE_STATE_IS_CONNECTED; 
+
+export class BiofibersMachineState {
+   
+    constructor() {
+        this._state = MACHINE_STATE_IS_DISCONNECTED;
+        this._currentHeaterWrapTemperature = BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN
+        this._currentNozzleTemperature = BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN;
+    }
+
+
+    setCurrentNozzleTemp(temp=BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN) {
+        this._currentNozzleTemperature = temp;
+    }
+
+    getCurrentNozzleTemp() {
+        return this._currentNozzleTemperature;
+    }
+
+    setCurrentHeaterWrapTemp(temp=BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN) {
+        this._currentHeaterWrapTemperature = temp;
+    }
+
+    getCurrentHeaterWrapTemp() {
+        return this._currentHeaterWrapTemperature;
+    }
+
+    setMachineDisconnected() {
+        this._state = MACHINE_STATE_IS_DISCONNECTED;
+    }
+
+    setMachineConnected() {
+        this._state = MACHINE_STATE_IS_CONNECTED;
+    }
+    
+    setMachineIsSpinning() {
+        this._setBitOff(MACHINE_STATE_IS_PULLING_DOWN);
+        this._setBitOn(MACHINE_STATE_IS_SPINNING);
+    }
+
+    setMachineIsPullingDown() {
+        this._setBitOff(MACHINE_STATE_IS_SPINNING);
+        this._setBitOn(MACHINE_STATE_IS_PULLING_DOWN);
+    }
+
+    isMachineSpinning() {
+        return this._isBitOn(MACHINE_STATE_IS_SPINNING);
+    }
+
+    isMachinePullingDown() {
+        return this._isBitOn(MACHINE_STATE_IS_PULLING_DOWN);
+    }
+
+    isMachineConnected() {
+        return this._isBitOn(MACHINE_STATE_IS_CONNECTED);
+    }
+
+    isMachineDisconnected() {
+        return !this.isMachineConnected();
+    }
+
+    // Internal methods
+    _setBitOn(s) {
+        // Bitwise OR
+        this._state |= s;
+    }
+
+    _setBitOff(s) {
+        // Bitwise AND with NOT(S)
+        this._state &= ~s;
+    }
+
+    _isBitOn(s) {
+        // Bitwise AND and comparison
+        return (this._state & s) == s;
+    }
+
+    _isBitOff(s) {
+        // Bitwise AND and comparison
+        return !this._isBitOn(s);
+    }
+
+}

@@ -253,20 +253,25 @@ class SerialCommunication {
 		// Start the send command loop
 		this._initSendCommandLoop();
 	}
+	
+	// Returns true if the disconnect was handled, false if there was nothing to disconnect
+	disconnect(onDisconnectCallback) {	
+		// Clear the command loop interval 
+		this._clearSendCommandInterval();
 
-	disconnect(onDisconnectCallback) {
+		// Clear port name
+		const oldPortName = this.serialPortPath;
+		this.serialPortPath = noPortSelected;
+
 		if (!this.serialPort) {
 			// can't disconnect if nothing is connected
-			return true;
+			return false;
 		}
 			
 		if (!this.serialPort.isOpen) {
 			LOGGER.logW("Cannot disconnect - port is not open.");
-			return true;
+			return false;
 		}
-
-		// Clear the command loop interval
-		this._clearSendCommandInterval();
 
 		this.serialPort.close((err) => {
 			if (err) {
@@ -276,7 +281,7 @@ class SerialCommunication {
 				onDisconnectCallback(err);
 			}
 		});
-		LOGGER.log("Disconnected from:", this.serialPortPath);
+		LOGGER.log("Disconnected from:", oldPortName);
 		this.isReceiving = false;
 		return true;
 	}
