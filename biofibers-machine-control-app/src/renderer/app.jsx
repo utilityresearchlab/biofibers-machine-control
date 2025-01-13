@@ -62,7 +62,7 @@ class BaseMachineControlApp extends React.Component {
 		};
 
 		// init serialport listening
-		this.refreshSerialPortsTimeout = null;
+		this.refreshSerialPortsInterval = null;
 
 		// Bind events to use "this" in callback
 		this.handleOnSelectSerialPort = this.handleOnSelectSerialPort.bind(this);
@@ -210,19 +210,28 @@ class BaseMachineControlApp extends React.Component {
 
 	componentWillUnmount() {
 		this.props.serialCommunication.disconnect();
-		if (this.refreshSerialPortsTimeout) {
-			clearTimeout(this.refreshSerialPortsTimeout);
+		if (this.refreshSerialPortsInterval) {
+			clearTimeout(this.refreshSerialPortsInterval);
 		}
 	}
 
 	listenForAvailableSerialPorts() {
 		const that = this;
-		this.refreshSerialPortsTimeout = setTimeout(() => {
-			// Get the updated ports
+		if (this.refreshSerialPortsInterval) {
+			clearInterval(this.refreshSerialPortsInterval);
+		}
+		// updates serial ports
+		const triggerUpdateSerialPortsList = () => {
 			SerialPortHelper.listSerialPorts().then((result) => {
 				that.handleUpdateAvailableSerialPorts(result.ports, result.err);
-				that.listenForAvailableSerialPorts();
 			});
+		}
+		// Run immediately
+		triggerUpdateSerialPortsList();
+
+		// Then set interval
+		this.refreshSerialPortsInterval = setInterval(() => {
+			triggerUpdateSerialPortsList();
 		}, ScanPortsRefreshTimeInMs);
 	}
 
