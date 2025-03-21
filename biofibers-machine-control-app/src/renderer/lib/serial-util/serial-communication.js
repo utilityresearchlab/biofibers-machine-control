@@ -8,14 +8,14 @@ import * as LOGGER from '../logger-util';
 const noPortSelected = '';
 const defaultSerialPort = noPortSelected;
 const defaultBaudRate = 250000;
-const defaultSendCommandIntervalTime = 100;
+const defaultSendCommandIntervalTimeMs = 5; // 3/21/2025 orig: 100
 
 const endOfCommand = '\r\n';
 
 
 class SerialCommunication {
 
-	constructor(serialPortPath=defaultSerialPort, baudRate=defaultBaudRate, sendCommandIntervalTime=defaultSendCommandIntervalTime) {
+	constructor(serialPortPath=defaultSerialPort, baudRate=defaultBaudRate, sendCommandIntervalTime=defaultSendCommandIntervalTimeMs) {
 		this.setSerialPort(serialPortPath, baudRate);
 		this.isReceiving = false;
 		this.nackline = 0; // number of lines that did not receive ok
