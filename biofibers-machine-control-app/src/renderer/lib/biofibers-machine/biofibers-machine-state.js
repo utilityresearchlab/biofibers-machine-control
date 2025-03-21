@@ -39,14 +39,22 @@ export class BiofibersMachineState {
         this._state = MACHINE_STATE_IS_CONNECTED;
     }
     
-    setMachineIsSpinning() {
-        this._setBitOff(MACHINE_STATE_IS_PULLING_DOWN);
-        this._setBitOn(MACHINE_STATE_IS_SPINNING);
+    setMachineIsSpinning(isOn) {
+        if (isOn) {
+            this._setBitOff(MACHINE_STATE_IS_PULLING_DOWN);
+            this._setBitOn(MACHINE_STATE_IS_SPINNING);
+        } else {
+            this._setBitOff(MACHINE_STATE_IS_SPINNING);
+        }
     }
 
-    setMachineIsPullingDown() {
-        this._setBitOff(MACHINE_STATE_IS_SPINNING);
-        this._setBitOn(MACHINE_STATE_IS_PULLING_DOWN);
+    setMachineIsPullingDown(isOn) {
+        if (isOn) {
+            this._setBitOff(MACHINE_STATE_IS_SPINNING);
+            this._setBitOn(MACHINE_STATE_IS_PULLING_DOWN);
+        } else {
+            this._setBitOff(MACHINE_STATE_IS_PULLING_DOWN);
+        }
     }
 
     isMachineSpinning() {
