@@ -8,23 +8,32 @@ import CssBaseline from '@mui/material/CssBaseline';
 // Creating custom themes can be done with:https://bareynol.github.io/mui-theme-creator/
 // Color Palette generator: https://material.io/inline-tools/color/
 
+let theme = createTheme({
+	// Theme customization goes here as usual, including tonalOffset and/or
+	// contrastThreshold as the augmentColor() function relies on these
+  });
+
+
 // https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=7c1ea3&secondary.color=2E7D32&primary.text.color=ffffff
-const customPurpleTheme = createTheme({
+const customPurpleTheme = createTheme(theme, {
 	palette: {
 		primary: {
-			light: '#af52d5',
-			main: '#7c1ea3',
-			dark: '#4a0073',
-			contrastText: '#fff',
-			text: '#ffffff'
+			main: '#7c1ea3'
 		},
 		secondary: {
-			light: '#60ad5e',
-			main: '#2e7d32',
-			dark: '#005005',
-			contrastText: '#000',
-			text: '#ffffff'
+			main: '#2e7d32'
 		},
+		tertiary: {
+			main: '#f44336'
+		},
+		special: {
+			// values from: https://v5-0-6.mui.com/customization/palette/
+			info: '#006064',
+			info2: '29b6f6',
+			success: '#66bb6a',
+			warning: '#ffa726',
+			error: '#f44336',
+		}
 	},
 });
 
