@@ -8,14 +8,18 @@ export const COLLECTOR_PWM_SPEED_MIN = 0;
 export const COLLECTOR_PWM_SPEED_MAX = 255;
 
 export const HEATER_WRAP_TEMPERATURE_MIN = 0;
-export const HEATER_WRAP_TEMPERATURE_MAX = 100
+export const HEATER_WRAP_TEMPERATURE_MAX = 85
 
 export const EXTRUDER_TEMPERATURE_MIN = 0;
-export const EXTRUDER_TEMPERATURE_MAX = 100;
+export const EXTRUDER_TEMPERATURE_MAX = 85;
 
 // Tool 0/1 for heaters and temp sensors
 export const HEATER_SYRINGE_WRAP_TOOL_ID = 0;
 export const HEATER_NOZZLE_TOOL_ID = 1;
+
+export const TEMPERATURE_DECIMAL_PRECISION = 2;
+export const TEMPERATURE_DEVIATION_AMOUNT = 2;
+
 
 export const EXTRUSION_FEED_RATE_DEFAULT = 16;
 export const EXTRUSION_FEED_RATE_MIN = 0;
@@ -23,7 +27,6 @@ export const EXTRUSION_FEED_RATE_MIN = 0;
 
 export const EXTRUSION_FEED_RATE_PURGE = 1;
 export const EXTRUSION_AMOUNT_PURGE = 0.1;
-
 
 export const EXTRUSION_AMOUNT_MAX = 100;
 export const EXTRUSION_AMOUNT_MIN = 0;
