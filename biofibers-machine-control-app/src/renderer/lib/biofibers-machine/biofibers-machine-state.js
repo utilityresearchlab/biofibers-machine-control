@@ -10,25 +10,42 @@ export class BiofibersMachineState {
    
     constructor() {
         this._state = MACHINE_STATE_IS_DISCONNECTED;
-        this._currentHeaterWrapTemperature = BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN
-        this._currentNozzleTemperature = BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN;
+        this._currentHeaterWrapTemp = BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN;
+        this._setPointHeaterWrapTemp = 0;
+        
+        this._currentNozzleTemp = BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN;
+        this._setPointNozzleTemp = 0;
+
     }
 
-
-    setCurrentNozzleTemp(temp=BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN) {
-        this._currentNozzleTemperature = temp;
+    setCurrentNozzleTemp(temp=BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN, setPointTemp=null) {
+        this._currentNozzleTemp = temp;
+        if (setPointTemp != null) {
+            this._setPointNozzleTemp = setPointTemp;
+        }
     }
 
     getCurrentNozzleTemp() {
-        return this._currentNozzleTemperature;
+        return this._currentNozzleTemp;
     }
 
-    setCurrentHeaterWrapTemp(temp=BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN) {
-        this._currentHeaterWrapTemperature = temp;
+    getSetpointNozzleTemp() {
+        return this._setPointNozzleTemp;
+    }
+
+    setCurrentHeaterWrapTemp(temp=BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN, setPointTemp=null) {
+        this._currentHeaterWrapTemp = temp;
+        if (setPointTemp != null) {
+            this._setPointHeaterWrapTemp = setPointTemp;
+        }
     }
 
     getCurrentHeaterWrapTemp() {
-        return this._currentHeaterWrapTemperature;
+        return this._currentHeaterWrapTemp;
+    }
+
+    getSetpointHeaterWrapTemp() {
+        return this._setPointHeaterWrapTemp;
     }
 
     setMachineDisconnected() {
