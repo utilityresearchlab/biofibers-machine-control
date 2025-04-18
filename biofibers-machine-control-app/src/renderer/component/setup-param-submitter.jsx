@@ -114,7 +114,10 @@ class SetupParamSubmitter extends React.Component {
             gcodeBuilder.setTemperature(this.state.inputNozzleTempSetPoint, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
             gcodeBuilder.setTemperature(this.state.inputHeaterWrapSetPoint, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
         }
-        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+        const gcodeLines = gcodeBuilder.toGcode();
+        gcodeLines.forEach((line, index) => {
+            this.handleSubmitCommand(event, line);
+        });
     }
 
     handlePurgeClick(event) {
