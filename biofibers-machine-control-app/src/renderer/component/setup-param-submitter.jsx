@@ -27,7 +27,6 @@ import SwipeDownAltIcon from '@mui/icons-material/SwipeDownAlt';
 import ConstrainedNumberTextField from './constrained-number-text-field'
 import * as BF_CONSTANTS from '../lib/biofibers-machine/biofibers-machine-constants'
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
-import * as GCODE_CONSTANTS from '../lib/machine-control/gcode-constants'
 import MaterialHelper from '../lib/material-util/material-helper';
 import MathUtil from '../lib/math-util'
 import MiscUtil from '../lib/machine-control/misc-util';
@@ -40,8 +39,8 @@ class SetupParamSubmitter extends React.Component {
             adjustPumpFeedRate: BF_CONSTANTS.EXTRUSION_FEED_RATE_DEFAULT,
             purgeAmount: BF_CONSTANTS.EXTRUSION_AMOUNT_PURGE,
             purgeFeedRate: BF_CONSTANTS.EXTRUSION_FEED_RATE_PURGE,
-            nozzleTemperatureSetPoint: 32,
-            wrapperTemperatureSetPoint: 52,
+            inputNozzleTempSetPoint: 32,
+            inputHeaterWrapSetPoint: 52,
             collectorSpeed: 100,
             collectorDirection: BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED, // stopped by default
             pullDownInProgress: false,
@@ -107,46 +106,45 @@ class SetupParamSubmitter extends React.Component {
     }
 
     handleStartPullDownClick(event) {
-        let gcodeBuilder = new GcodeBuilder();
-        const gcodeLines = gcodeBuilder
-            .comment('start pull down')
-            .useRelativeCoordinates()
-            .useRelativeExtrusionDistances()
-            .resetExtrusionDistance()
-            .toGcode();
-        gcodeLines.forEach((line, index) => {
-            this.handleSubmitCommand(event, line);
-        });
+        if (this.props.onChangePullDownState) {
+            this.props.onChangePullDownState(true);
+        }
+        // let gcodeBuilder = new GcodeBuilder();
+        // const gcodeLines = gcodeBuilder
+        //     .comment('start pull down')
+        //     .useRelativeCoordinates()
+        //     .useRelativeExtrusionDistances()
+        //     .resetExtrusionDistance()
+        //     .toGcode();
+        // gcodeLines.forEach((line, index) => {
+        //     this.handleSubmitCommand(event, line);
+        // });
 
-        // keep sending command to extrude until pull-down is stopped
-        // TODO: Determine proper interval timing instead of hard-coding 5000 ms
-        // const commandTime = MiscUtil.calculateCommandTimeInMilliSec(params['E'], params['X'], params['F']);
-        // TODO (mrivera) - fix timeout interval 
-        let intervalId = setInterval(() => {
-            let pullDownGcodeBuilder = new GcodeBuilder();
-            const defaultParams = MaterialHelper.defaultParams()[this.state.selectedMaterial];
-            pullDownGcodeBuilder.move({
-                    [GCODE_CONSTANTS.PARAM_E]: defaultParams[GCODE_CONSTANTS.PARAM_E],
-                    [GCODE_CONSTANTS.PARAM_X]: defaultParams[GCODE_CONSTANTS.PARAM_X],
-                    [GCODE_CONSTANTS.PARAM_F]: defaultParams[GCODE_CONSTANTS.PARAM_F],
-                }, 
-                'extrude and move X'); // value from experiments
-            this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString());
-        }, 100);
-        this.setState({
-            nIntervalId: intervalId,
-            pullDownInProgress: true
-        });
+        // // keep sending command to extrude until pull-down is stopped
+        // // TODO: Determine proper interval timing instead of hard-coding 5000 ms
+        // // const commandTime = MiscUtil.calculateCommandTimeInMilliSec(params['E'], params['X'], params['F']);
+        // // TODO (mrivera) - fix timeout interval 
+        // let intervalId = setInterval(() => {
+        //     let pullDownGcodeBuilder = new GcodeBuilder();
+        //     const defaultParams = MaterialHelper.defaultParams()[this.state.selectedMaterial];
+        //     pullDownGcodeBuilder.move({
+        //             [GCODE_CONSTANTS.PARAM_E]: defaultParams[GCODE_CONSTANTS.PARAM_E],
+        //             [GCODE_CONSTANTS.PARAM_X]: defaultParams[GCODE_CONSTANTS.PARAM_X],
+        //             [GCODE_CONSTANTS.PARAM_F]: defaultParams[GCODE_CONSTANTS.PARAM_F],
+        //         }, 
+        //         'extrude and move X'); // value from experiments
+        //     this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString());
+        // }, 100);
+        // this.setState({
+        //     nIntervalId: intervalId,
+        //     pullDownInProgress: true
+        // });
     }
 
     handleStopPullDownClick(event) {
-        this.setState({
-            pullDownInProgress: false
-        });
-        clearInterval(this.state.nIntervalId);
-        let gcodeBuilder = new GcodeBuilder();
-        // gcodeBuilder.setSpindleSpeed(0, true);
-        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+        if (this.props.onChangePullDownState) {
+            this.props.onChangePullDownState(false);
+        }
     }
 
     handleOnChange(event) {
@@ -213,11 +211,11 @@ class SetupParamSubmitter extends React.Component {
             // Enter pressed so trigger submit
             const { name, value } = event.target;
             // Set extruder temperature: tool 1
-            if (name == 'nozzleTemperatureSetPoint') {
-                gcodeBuilder.setTemperature(this.state.nozzleTemperatureSetPoint, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
-            } else if (name == 'wrapperTemperatureSetPoint') {
+            if (name == 'inputNozzleTempSetPoint') {
+                gcodeBuilder.setTemperature(this.state.inputNozzleTempSetPoint, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
+            } else if (name == 'inputHeaterWrapSetPoint') {
                 // Set wrapper temperature: tool 0
-                gcodeBuilder.setTemperature(this.state.wrapperTemperatureSetPoint, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
+                gcodeBuilder.setTemperature(this.state.inputHeaterWrapSetPoint, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
             } else if (name == 'collectorSpeed') {
                 // Don't change live speed when collector is stopped
                 if (this.state.collectorDirection == BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED) {
@@ -236,6 +234,31 @@ class SetupParamSubmitter extends React.Component {
 
     render() {
         const renderedMaterialItems = this.getRenderedMaterialItems();
+        const isMachinePullingDown = this.props.isMachinePullingDown;
+        
+        const heaterWrapCurrentTemp = this.props.currentSyringeWrapTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
+        const heaterWrapSetPoint = this.props.setPointHeaterWrapTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
+        const isOnHeaterWrapTemp = heaterWrapSetPoint > BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN; 
+        const isHeaterWrapTempReached = Math.abs(heaterWrapCurrentTemp - heaterWrapSetPoint) <= BF_CONSTANTS.TEMPERATURE_DEVIATION_AMOUNT;
+        let heaterWrapStatusColor = "body";
+        if (isOnHeaterWrapTemp && isHeaterWrapTempReached) {
+            heaterWrapStatusColor = "special.success";
+        } else if (isOnHeaterWrapTemp) {
+            heaterWrapStatusColor = "special.warning";
+        }
+
+        const nozzleCurrentTemp = this.props.currentNozzleTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
+        const nozzleSetPoint = this.props.setPointNozzleTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
+        const isOnNozzleTemp = nozzleSetPoint > BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN; 
+        const isNozzleTempReached = Math.abs(nozzleCurrentTemp - nozzleSetPoint) <= BF_CONSTANTS.TEMPERATURE_DEVIATION_AMOUNT;
+
+        let nozzleTempStatusColor = "body";
+        if (isOnNozzleTemp && isNozzleTempReached) {
+            nozzleTempStatusColor = "special.success";
+        } else if (isOnNozzleTemp) {
+            nozzleTempStatusColor = "special.warning";
+        }
+
         return (
             <Box
                 component="form"
@@ -313,7 +336,6 @@ class SetupParamSubmitter extends React.Component {
                         </Button>
                     </Box>
                 </Stack>
-  
                 <Stack
                     direction="row"
                     justifyContent="left"
@@ -322,54 +344,48 @@ class SetupParamSubmitter extends React.Component {
                     p={1}>
                         <ConstrainedNumberTextField
                             label="Set Syringe Wrap Temp. [ºC]"
-                            name="wrapperTemperatureSetPoint"
+                            name="inputHeaterWrapSetPoint"
                             type="number"
                             size="small"
                             color="primary"
-                            sx={{minWidth: 195, maxWidth: 195}}
-                            value={this.state.wrapperTemperatureSetPoint}
+                            sx={{minWidth: 255, maxWidth: 255}}
+                            value={this.state.inputHeaterWrapSetPoint}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             onKeyUp={this.handleOnKeyUp}
                             min={BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN}
                             max={BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MAX}
+                            helperText={
+                                <Typography 
+                                    color={heaterWrapStatusColor} 
+                                    gutterBottom 
+                                    variant="span" 
+                                    sx={{fontSize: '1.1em', fontWeight: 600}}>
+                                    * Syringe Wrap: {heaterWrapCurrentTemp} ºC / {heaterWrapSetPoint} ºC
+                                </Typography>}
                             />
-                        <Stack
-                            direction="column"
-                            justifyContent="left"
-                            alignContent="left"
-                            spacing={1}
-                            padding={2}
-                            >
-                            <Typography gutterBottom variant="span" sx={{fontStyle: 'italic'}} component="div">
-                                Syringe Wrap Temp [ºC]: {this.props.currentSyringeWrapTemperature}
-                            </Typography>
-                        </Stack>
-                        <Stack
-                            direction="column"
-                            justifyContent="left"
-                            alignContent="left"
-                            spacing={1}
-                            padding={2}
-                            >
-                            <Typography gutterBottom variant="span" sx={{fontStyle: 'italic'}} component="div">
-                                Nozzle Temp. [ºC]: {this.props.currentNozzleTemperature}
-                            </Typography>
-                        </Stack>
-                        <ConstrainedNumberTextField
+                         <ConstrainedNumberTextField
                             label="Set Nozzle Temp. [ºC]"
-                            name="nozzleTemperatureSetPoint"
+                            name="inputNozzleTempSetPoint"
                             type="number"
                             size="small"
                             color="primary"
-                            sx={{minWidth: 160, maxWidth: 160}}
-                            value={this.state.nozzleTemperatureSetPoint}
+                            sx={{minWidth: 230, maxWidth: 230}}
+                            value={this.state.inputNozzleTempSetPoint}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             onKeyUp={this.handleOnKeyUp}
                             min={BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN} 
                             max={BF_CONSTANTS.EXTRUDER_TEMPERATURE_MAX}
-                            />
+                            helperText={
+                                <Typography 
+                                    color={nozzleTempStatusColor} 
+                                    gutterBottom 
+                                    variant="span" 
+                                    sx={{fontSize: '1.1em', fontWeight: 600}}>
+                                    * Nozzle: {nozzleCurrentTemp} ºC / {nozzleSetPoint} ºC
+                                </Typography>}
+                            />                
                 </Stack>
                 <Stack  
                     direction="row"
@@ -429,6 +445,7 @@ class SetupParamSubmitter extends React.Component {
                             size="small"
                             type="number"
                             color="primary"
+                            inputUnits="/ 255"
                             sx={{width: '100%'}}
                             min={BF_CONSTANTS.COLLECTOR_PWM_SPEED_MIN}
                             max={BF_CONSTANTS.COLLECTOR_PWM_SPEED_MAX}
@@ -503,14 +520,14 @@ class SetupParamSubmitter extends React.Component {
                             variant="outlined"
                             size="medium"
                             disabled={this.props.disabled}
-                            color={(this.state.pullDownInProgress) ? "error" : "success"}
+                            color={(isMachinePullingDown) ? "error" : "success"}
                             startIcon={<SwipeDownAltIcon />}
-                            onClick={(this.state.pullDownInProgress)
+                            onClick={(isMachinePullingDown)
                                 ? this.handleStopPullDownClick
                                 : this.handleStartPullDownClick} >
-                            {this.state.pullDownInProgress
-                                ? 'Stop pull-down'
-                                : 'Start pull-down'}
+                            {(isMachinePullingDown)
+                                ? 'Stop Pull-Down'
+                                : 'Start Pull-Down'}
                         </Button>
                     </Box>
                 </Stack>

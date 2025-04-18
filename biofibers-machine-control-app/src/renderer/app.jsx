@@ -25,7 +25,7 @@ import {ConsoleDataItem, ConsoleDataType} from './lib/console-data';
 import SerialPortHelper from './lib/serial-util/serial-port-helper';
 
 import {MachineCommandInterpreter} from './lib/machine-control/command-interpreter';
-import {parseLine} from './lib/machine-control/command-parser';
+import * as MachineResponseParser from './lib/machine-control/machine-response-parser';
 import {MACHINE_COMMANDS, MACHINE_ERROR_CODES} from './lib/machine-control/machine-protocol';
 
 import * as APP_SETTINGS from './app-settings';
@@ -40,8 +40,11 @@ import imgUtilityLabLogoSrc from '../assets/img/utility-research-web-logo-500x75
 
 import * as LOGGER from './lib/logger-util';
 import { GcodeBuilder } from './lib/machine-control/gcode-builder';
+import * as GCODE_CONSTANTS from './lib/machine-control/gcode-constants'
 import * as BF_CONSTANTS from './lib/biofibers-machine/biofibers-machine-constants'
 import {BiofibersMachineState} from './lib/biofibers-machine/biofibers-machine-state'
+import MaterialHelper from './lib/material-util/material-helper';
+
 
 
 const ScanPortsRefreshTimeInMs = 3000;
@@ -59,6 +62,7 @@ class BaseMachineControlApp extends React.Component {
 			machineState: new BiofibersMachineState(),
 			currentNozzleTemperature: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN,
 			currentSyringeWrapTemperature: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN,
+			selectedMaterial: MaterialHelper.availableMaterials()[0]
 		};
 
 		// init serialport listening
@@ -70,9 +74,13 @@ class BaseMachineControlApp extends React.Component {
 		this.handleConnectClick = this.handleConnectClick.bind(this);
 		this.handleSendCommandClick = this.handleSendCommandClick.bind(this);
 		this.handleDisconnectClick = this.handleDisconnectClick.bind(this);
-		this.handleOnReceivedConsoleData = this.handleOnReceivedConsoleData.bind(this);
+		this.handleOnReceivedSerialData = this.handleOnReceivedSerialData.bind(this);
+
+		this.handleOnChangeSpinningState = this.handleOnChangeSpinningState.bind(this);
+		this.handleOnChangePullDownState = this.handleOnChangePullDownState.bind(this);
 
 		// set-up machine protocol handler for commands
+		// TODO (mrivera): Remove
 		this.commandInterpreter = new MachineCommandInterpreter(
 			this.createCommandResponseHandler(),
 			MACHINE_COMMANDS.ALL_COMMANDS,
@@ -88,7 +96,7 @@ class BaseMachineControlApp extends React.Component {
 			machineState: state
 		});
 	}
-
+	// TODO (mrivera): handle removing hilo
 	createCommandResponseHandler() {
 		const that = this;
 		const handler = {};
@@ -187,7 +195,8 @@ class BaseMachineControlApp extends React.Component {
 
 		return handler;
 	}
-
+	
+	// TODO (mrivera): handle removing hilo
 	createCommandInterpreterErrorCallback() {
 		const that = this;
 		const errCallback = (cmd, err) => {
@@ -247,16 +256,25 @@ class BaseMachineControlApp extends React.Component {
 		setTimeout(() => {
 			const initMachineGcodeLines = new GcodeBuilder()
 			.comment('Machine Init G-Code')
+			.reportTemperaturesImmediately()
 			.reportTemperaturesInterval()
 			.useRelativeCoordinates()
 			.useRelativeExtrusionDistances()
 			.resetExtrusionDistance()
 			.toGcode();
-			initMachineGcodeLines.forEach((line, index) => {
-				this.handleSendCommandClick(line);
-			});
+			that._sendGcodeLines(initMachineGcodeLines);
 		}, APP_SETTINGS.MACHINE_INIT_TIMEOUT);
 		
+	}
+
+	_sendGcodeLines(gcodeLines) {
+		if (!gcodeLines || gcodeLines.length == 0) {
+			return;
+		}
+		gcodeLines.forEach((line, index) => {
+			this.handleSendCommandClick(line);
+		});
+
 	}
 
 	handleUpdateAvailableSerialPorts(updatedPortsInfo, err) {
@@ -304,8 +322,7 @@ class BaseMachineControlApp extends React.Component {
 				messageDataType  = ConsoleDataType.ERROR;
 			} else {
 				// set-up data receiving after connection
-				const dataReceivedCallback = that.handleOnReceivedConsoleData;
-				that.props.serialCommunication.startReceiving(that.handleOnReceivedConsoleData);
+				that.props.serialCommunication.startReceiving(that.handleOnReceivedSerialData);
 				// Prep connected console message
 				consoleMessage = `Connected to '${portPath}' (Baud: ${baudRate}).`;
 				messageDataType = ConsoleDataType.INFO;
@@ -409,17 +426,119 @@ class BaseMachineControlApp extends React.Component {
 		this.props.serialCommunication.sendBufferedCommand(cmdText, onSentCallback);
 	}
 
-	handleOnReceivedConsoleData(data, timestamp) {
+	handleOnChangeSpinningState(isOn) {
+		// todo
+	}
+
+
+	handleOnChangePullDownState(isOn) {
+		// TODO handle machine state and clean up vars
+		if (this._getMachineState().isMachinePullingDown() && isOn) {
+			// If we're already pulling down, then no need to restart
+			// just exit early 
+			return;
+		}
+		// Handle on or off for pull down
+		if (isOn) {
+			let gcodeBuilder = new GcodeBuilder();
+			const gcodeLines = gcodeBuilder
+				.comment('start pull down')
+				.useRelativeCoordinates()
+				.useRelativeExtrusionDistances()
+				.resetExtrusionDistance()
+				.toGcode();
+			this._sendGcodeLines(gcodeLines);
+			// keep sending command to extrude until pull-down is stopped
+			// TODO: Determine proper interval timing instead of hard-coding 5000 ms
+			// const commandTime = MiscUtil.calculateCommandTimeInMilliSec(params['E'], params['X'], params['F']);
+			// TODO (mrivera) - fix timeout interval 
+			const that = this;
+			let intervalId = setInterval(() => {
+				let pullDownGcodeBuilder = new GcodeBuilder();
+				const defaultParams = MaterialHelper.defaultParams()[this.state.selectedMaterial];
+				console.log(MaterialHelper.defaultParams['E'], "hello");
+				const pulldownGcodeLines = 
+					pullDownGcodeBuilder.move({
+							[GCODE_CONSTANTS.PARAM_E]: defaultParams[GCODE_CONSTANTS.PARAM_E],
+							[GCODE_CONSTANTS.PARAM_X]: defaultParams[GCODE_CONSTANTS.PARAM_X],
+							[GCODE_CONSTANTS.PARAM_F]: defaultParams[GCODE_CONSTANTS.PARAM_F],
+						}, 
+						'extrude and move X')
+						.toGcode(); // value from experiments
+				that._sendGcodeLines(pulldownGcodeLines);
+			}, 100);
+			this.setState({
+				nIntervalId: intervalId,
+				pullDownInProgress: true
+			});
+		} else {
+			// stop pull down
+			this.setState({
+				pullDownInProgress: false
+			});
+			clearInterval(this.state.nIntervalId);
+			let gcodeBuilder = new GcodeBuilder();
+			// gcodeBuilder.setSpindleSpeed(0, true);
+			this._sendGcodeLines(gcodeBuilder.toGcode());
+		}
+		// Update machine state
+		let machineState = this._getMachineState();
+		machineState.setMachineIsPullingDown(isOn);
+		this._setMachineState(machineState);
+	}
+
+
+	// Console Data //
+	handleOnReceivedSerialData(data, timestamp) {
 		// TODO use parser on serial data to figure out if it is a response, or error etc
 		const dataString = data.toString();
-		const parsedResult = parseLine(dataString);
-		const cmds = parsedResult && parsedResult.words ? parsedResult.words : [];
-		this.commandInterpreter.interpetCommandArray(cmds);
-		// const newData = new ConsoleDataItem(dataString, timestamp, ConsoleDataType.RECEIVED);
-		// this.setState(prevState => ({
-		// 	consoleData: [...prevState.consoleData, newData]
-		// }));
-		// LOGGER.logD("Received data:", newData, " // new state: ", this.state.consoleData);
+		const parsedResult = MachineResponseParser.parseResponse(dataString);
+		switch (parsedResult.responseType) {
+			case MachineResponseParser.RESPONSE_TYPE.TEMPERATURE_STATUS:
+				// update temps
+				let machineState = this._getMachineState();
+				const tempData = parsedResult.parsedData;  
+				for (let i = 0; i < tempData.length; i += 1) {
+					const item = tempData[i];
+					const tool = item.tool;
+					let toolId = parseInt(tool.substring(1));
+					if (isNaN(toolId)) {
+						// No Id means it is the "active" temp with key "T"
+						continue;
+					}
+					const currentTemp = parseFloat(item.currentTemp);
+					const setPointTemp = parseFloat(item.setPointTemp);
+					switch(toolId) {
+						case BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID:
+							machineState.setCurrentHeaterWrapTemp(currentTemp, setPointTemp);
+							break;
+						case BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID:
+							machineState.setCurrentNozzleTemp(currentTemp, setPointTemp);
+							break;
+						default:
+							LOGGER.logE(`Temperature status not defined for tool:,${toolId}`);
+					}
+				};
+				// Update state
+				this._setMachineState(machineState);
+				break;
+			case MachineResponseParser.RESPONSE_TYPE.ERROR:
+				// handle error
+				break;
+			case MachineResponseParser.RESPONSE_TYPE.UNKNOWN:
+			default: 
+				// todo: throw warning in console with response as message
+				break;
+		}
+
+		// const cmds = parsedResult && parsedResult.words ? parsedResult.words : [];
+		// this.commandInterpreter.interpetCommandArray(cmds);
+		// originally dataString for data item
+		const newData = new ConsoleDataItem(parsedResult.line, timestamp, ConsoleDataType.RECEIVED);
+		this.setState(prevState => ({
+			consoleData: [...prevState.consoleData, newData]
+		}));
+		LOGGER.logD("Received data:", newData);
 	}
 
 	addConsoleData(data, dataType=ConsoleDataType.INFO, timestamp=Date.now()) {
@@ -430,6 +549,7 @@ class BaseMachineControlApp extends React.Component {
 		}));
 	}
 
+	// Rendering //
 	getRenderedSerialPortItems() {
 		const availableSerialPorts = this.state.availableSerialPorts;
 		let renderedSerialPortsItems = availableSerialPorts.map((item, index) => {
@@ -466,6 +586,12 @@ class BaseMachineControlApp extends React.Component {
 		const isDisconnected = currentState.isMachineDisconnected();
 		const isSpinning = currentState.isMachineSpinning();
 		const isPullingDown = currentState.isMachinePullingDown();
+
+		const currentNozzleTemp = currentState.getCurrentNozzleTemp();
+		const setPointNozzleTemp = currentState.getSetpointNozzleTemp();
+
+		const currentHeaterWrapTemp = currentState.getCurrentHeaterWrapTemp();
+		const setPointHeaterWrapTemp = currentState.getSetpointHeaterWrapTemp();
 
 		const consoleData = this.state.consoleData;
 		const renderedSerialPortsItems = this.getRenderedSerialPortItems();
@@ -588,8 +714,12 @@ class BaseMachineControlApp extends React.Component {
                 		</Typography>         
 						<SetupParamSubmitter
 							disabled={isInputDisabled}
-							currentNozzleTemperature={this.state.currentNozzleTemperature}
-							currentSyringeWrapTemperature={this.state.currentSyringeWrapTemperature}
+							currentNozzleTemp={currentNozzleTemp}
+							currentSyringeWrapTemp={currentHeaterWrapTemp}
+							setPointNozzleTemp={setPointNozzleTemp}
+							setPointHeaterWrapTemp={setPointHeaterWrapTemp}
+							isMachinePullingDown={isPullingDown}
+							onChangePullDownState={this.handleOnChangePullDownState}
 							onSubmitCallback={this.handleSendCommandClick} />
 					</Box>
 
@@ -602,7 +732,8 @@ class BaseMachineControlApp extends React.Component {
 
 						<TestingParamSubmitter
 							disabled={isInputDisabled}
-							onSubmitCallback={this.handleSendCommandClick} />
+							onSubmitCallback={this.handleSendCommandClick}
+							onChangeSpinningState={this.handleOnChangeSpinningState} />
 					</Box>
 
 					<Divider sx={{marginTop: 4, marginBottom: 2}}/>
