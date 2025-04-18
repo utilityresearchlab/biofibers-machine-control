@@ -9,7 +9,6 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
@@ -23,6 +22,7 @@ import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import SwipeDownAltIcon from '@mui/icons-material/SwipeDownAlt';
+import ThermostatIcon from '@mui/icons-material/Thermostat';
 
 import ConstrainedNumberTextField from './constrained-number-text-field'
 import * as BF_CONSTANTS from '../lib/biofibers-machine/biofibers-machine-constants'
@@ -51,6 +51,8 @@ class SetupParamSubmitter extends React.Component {
         this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
         this.handleExtrudePumpClick = this.handleExtrudePumpClick.bind(this);
         this.handleRetractPumpClick = this.handleRetractPumpClick.bind(this);
+        this.handleToggleHeatersClick = this.handleToggleHeatersClick.bind(this);
+
         this.handlePurgeClick = this.handlePurgeClick.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
         this.handleOnDirectionChange = this.handleOnDirectionChange.bind(this);
@@ -96,6 +98,22 @@ class SetupParamSubmitter extends React.Component {
     handleRetractPumpClick(event) {
         let gcodeBuilder = new GcodeBuilder();
         gcodeBuilder.retract(this.state.adjustPumpDistance, this.state.adjustPumpFeedRate);
+        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+    }
+
+    handleToggleHeatersClick(event) {
+        event.preventDefault();
+        let gcodeBuilder = new GcodeBuilder();
+        //gcodeBuilder.retract(this.state.adjustPumpDistance, this.state.adjustPumpFeedRate);
+        if (this.props.isHeatingOn) {
+            // Turn heaters off
+            gcodeBuilder.setTemperature(0, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
+            gcodeBuilder.setTemperature(0, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
+        } else {
+            // Turn heaters on
+            gcodeBuilder.setTemperature(this.state.inputNozzleTempSetPoint, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
+            gcodeBuilder.setTemperature(this.state.inputHeaterWrapSetPoint, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
+        }
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
@@ -252,6 +270,8 @@ class SetupParamSubmitter extends React.Component {
         const isOnNozzleTemp = nozzleSetPoint > BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN; 
         const isNozzleTempReached = Math.abs(nozzleCurrentTemp - nozzleSetPoint) <= BF_CONSTANTS.TEMPERATURE_DEVIATION_AMOUNT;
 
+        const isHeatingOn = this.props.isHeatingOn;
+
         let nozzleTempStatusColor = "body";
         if (isOnNozzleTemp && isNozzleTempReached) {
             nozzleTempStatusColor = "special.success";
@@ -385,7 +405,19 @@ class SetupParamSubmitter extends React.Component {
                                     sx={{fontSize: '1.1em', fontWeight: 600}}>
                                     * Nozzle: {nozzleCurrentTemp} ºC / {nozzleSetPoint} ºC
                                 </Typography>}
-                            />                
+                            />
+                             <Box variant="div" sx={{display: 'flex'}}>
+                                <Button
+                                    size="medium"
+                                    variant="outlined"
+                                    sx={{marginBottom: "1.85em"}}
+                                    color={isHeatingOn ? "warning" : 'info'}
+                                    startIcon={isHeatingOn ? <ThermostatIcon /> : <ThermostatIcon />} 
+                                    disabled={this.props.disabled}
+                                    onClick={this.handleToggleHeatersClick}>
+                                    {!isHeatingOn ? "Enable Heat" : "Disable Heat"}
+                                </Button>
+                            </Box>          
                 </Stack>
                 <Stack  
                     direction="row"
