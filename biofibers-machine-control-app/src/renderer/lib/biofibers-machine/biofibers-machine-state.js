@@ -48,6 +48,10 @@ export class BiofibersMachineState {
         return this._setPointHeaterWrapTemp;
     }
 
+    isHeatingOn() {
+        return this._setPointHeaterWrapTemp > 0 || this._setPointNozzleTemp > 0;
+    }
+
     setMachineDisconnected() {
         this._state = MACHINE_STATE_IS_DISCONNECTED;
     }
