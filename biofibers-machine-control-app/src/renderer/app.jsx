@@ -586,6 +586,7 @@ class BaseMachineControlApp extends React.Component {
 		const isDisconnected = currentState.isMachineDisconnected();
 		const isSpinning = currentState.isMachineSpinning();
 		const isPullingDown = currentState.isMachinePullingDown();
+		const isHeatingOn = currentState.isHeatingOn();
 
 		const currentNozzleTemp = currentState.getCurrentNozzleTemp();
 		const setPointNozzleTemp = currentState.getSetpointNozzleTemp();
@@ -718,6 +719,7 @@ class BaseMachineControlApp extends React.Component {
 							currentSyringeWrapTemp={currentHeaterWrapTemp}
 							setPointNozzleTemp={setPointNozzleTemp}
 							setPointHeaterWrapTemp={setPointHeaterWrapTemp}
+							isHeatingOn={isHeatingOn}
 							isMachinePullingDown={isPullingDown}
 							onChangePullDownState={this.handleOnChangePullDownState}
 							onSubmitCallback={this.handleSendCommandClick} />
