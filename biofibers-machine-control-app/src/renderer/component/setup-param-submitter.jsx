@@ -130,36 +130,6 @@ class SetupParamSubmitter extends React.Component {
         if (this.props.onChangePullDownState) {
             this.props.onChangePullDownState(true);
         }
-        // let gcodeBuilder = new GcodeBuilder();
-        // const gcodeLines = gcodeBuilder
-        //     .comment('start pull down')
-        //     .useRelativeCoordinates()
-        //     .useRelativeExtrusionDistances()
-        //     .resetExtrusionDistance()
-        //     .toGcode();
-        // gcodeLines.forEach((line, index) => {
-        //     this.handleSubmitCommand(event, line);
-        // });
-
-        // // keep sending command to extrude until pull-down is stopped
-        // // TODO: Determine proper interval timing instead of hard-coding 5000 ms
-        // // const commandTime = MiscUtil.calculateCommandTimeInMilliSec(params['E'], params['X'], params['F']);
-        // // TODO (mrivera) - fix timeout interval 
-        // let intervalId = setInterval(() => {
-        //     let pullDownGcodeBuilder = new GcodeBuilder();
-        //     const defaultParams = MaterialHelper.defaultParams()[this.state.selectedMaterial];
-        //     pullDownGcodeBuilder.move({
-        //             [GCODE_CONSTANTS.PARAM_E]: defaultParams[GCODE_CONSTANTS.PARAM_E],
-        //             [GCODE_CONSTANTS.PARAM_X]: defaultParams[GCODE_CONSTANTS.PARAM_X],
-        //             [GCODE_CONSTANTS.PARAM_F]: defaultParams[GCODE_CONSTANTS.PARAM_F],
-        //         }, 
-        //         'extrude and move X'); // value from experiments
-        //     this.handleSubmitCommand(event, pullDownGcodeBuilder.toGcodeString());
-        // }, 100);
-        // this.setState({
-        //     nIntervalId: intervalId,
-        //     pullDownInProgress: true
-        // });
     }
 
     handleStopPullDownClick(event) {

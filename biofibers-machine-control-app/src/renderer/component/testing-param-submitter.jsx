@@ -89,7 +89,7 @@ class TestingParamSubmitter extends React.Component {
 
     handleSendMultipleCommands(event) {
         const spinningCommand = this.getSpinningCommand();
-        for (let i = 0; i < this.state.numCommands; i ++) {
+        for (let i = 0; i < this.state.numCommands; i++) {
             this.handleSubmitCommand(event, spinningCommand);
         }
     }
