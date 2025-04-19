@@ -22,11 +22,6 @@ import UsbIcon from '@mui/icons-material/Usb';
 import UsbOffIcon from '@mui/icons-material/UsbOff';
 
 import {ConsoleDataItem, ConsoleDataType} from './lib/console-data';
-import SerialPortHelper from './lib/serial-util/serial-port-helper';
-
-import {MachineCommandInterpreter} from './lib/machine-control/command-interpreter';
-import * as MachineResponseParser from './lib/machine-control/machine-response-parser';
-import {MACHINE_COMMANDS, MACHINE_ERROR_CODES} from './lib/machine-control/machine-protocol';
 
 import * as APP_SETTINGS from './app-settings';
 
@@ -38,13 +33,18 @@ import TestingParamSubmitter from './component/testing-param-submitter'
 import imgMachineLogoSrc from '../assets/img/machine-render-logo.png'
 import imgUtilityLabLogoSrc from '../assets/img/utility-research-web-logo-500x75.png'
 
-import * as LOGGER from './lib/logger-util';
-import { GcodeBuilder } from './lib/machine-control/gcode-builder';
-import * as GCODE_CONSTANTS from './lib/machine-control/gcode-constants'
 import * as BF_CONSTANTS from './lib/biofibers-machine/biofibers-machine-constants'
 import {BiofibersMachineState} from './lib/biofibers-machine/biofibers-machine-state'
+
+import * as LOGGER from './lib/logger-util';
+
+import { GcodeBuilder } from './lib/machine-control/gcode-builder';
+import * as GCODE_CONSTANTS from './lib/machine-control/gcode-constants'
+import * as MachineResponseParser from './lib/machine-control/machine-response-parser';
+
 import MaterialHelper from './lib/material-util/material-helper';
 
+import SerialPortHelper from './lib/serial-util/serial-port-helper';
 
 
 const ScanPortsRefreshTimeInMs = 3000;
@@ -78,13 +78,6 @@ class BaseMachineControlApp extends React.Component {
 
 		this.handleOnChangeSpinningState = this.handleOnChangeSpinningState.bind(this);
 		this.handleOnChangePullDownState = this.handleOnChangePullDownState.bind(this);
-
-		// set-up machine protocol handler for commands
-		// TODO (mrivera): Remove
-		this.commandInterpreter = new MachineCommandInterpreter(
-			this.createCommandResponseHandler(),
-			MACHINE_COMMANDS.ALL_COMMANDS,
-			this.createCommandInterpreterErrorCallback());
 	}
 
 	_getMachineState() {
@@ -95,114 +88,6 @@ class BaseMachineControlApp extends React.Component {
 		this.setState({
 			machineState: state
 		});
-	}
-	// TODO (mrivera): handle removing hilo
-	createCommandResponseHandler() {
-		const that = this;
-		const handler = {};
-		handler[MACHINE_COMMANDS.RUN] = (cmd, cmdParams, errCallback) => {
-			that.addConsoleData("Machine is running.", ConsoleDataType.RECEIVED);
-		};
-
-		handler[MACHINE_COMMANDS.STOP] = (cmd, cmdParams, errCallback) => {
-			that.addConsoleData("Machine is stopped.", ConsoleDataType.RECEIVED);
-		};
-
-		handler[MACHINE_COMMANDS.SET_DELIVERY_SPEED] = (cmd, cmdParams, errCallback) => {
-			that.addConsoleData("Delivery speed updated.", ConsoleDataType.RECEIVED);
-		};
-
-		handler[MACHINE_COMMANDS.SET_SPINDLE_SPEED] = (cmd, cmdParams, errCallback) => {
-			that.addConsoleData("Spindle speed updated.", ConsoleDataType.RECEIVED);
-		};
-
-		handler[MACHINE_COMMANDS.PING] = (cmd, cmdParams, errCallback) => {
-			that.addConsoleData("Ping Response - Machine is connected and responding.", ConsoleDataType.RECEIVED);
-		};
-
-		handler[MACHINE_COMMANDS.RESET_ELEVATOR] = (cmd, cmdParams, errCallback) => {
-			that.addConsoleData("Machine elevator is resetting.", ConsoleDataType.RECEIVED);
-		};
-
-		handler[MACHINE_COMMANDS.RESET_ELEVATOR] = (cmd, cmdParams, errCallback) => {
-			that.addConsoleData("Machine elevator is resetting.", ConsoleDataType.RECEIVED);
-		};
-
-		handler[MACHINE_COMMANDS.DEBUG] = (cmd, cmdParams, errCallback) => {
-			that.addConsoleData(`Debug Info / ${cmdParams.toString()} `, ConsoleDataType.INFO);
-		};
-
-		handler[MACHINE_COMMANDS.SUCCESS] = (cmd, cmdParams, errCallback) => {
-			that.addConsoleData("Previous command succeeded.", ConsoleDataType.RECEIVED);
-		}
-
-		handler[MACHINE_COMMANDS.ERROR] = (cmd, cmdParams, errCallback) => {
-			const errorCode = cmdParams && cmdParams.length >= 1 ? cmdParams[0] : MACHINE_ERROR_CODES.UNDEFINED;
-			let errMessage = '';
-			switch (errorCode) {
-				case MACHINE_ERROR_CODES.BUFFER_FULL:
-					// buffer is full
-					errMessage = "Buffer is full";
-					break;
-				case MACHINE_ERROR_CODES.BEGIN_MISSING:
-					// no begin delimiter
-					errMessage = "Command is missing begin delimiter '['";
-					break;
-				case MACHINE_ERROR_CODES.END_MISSING:
-					// no end delimiter
-					errMessage = "Command is missing end delimiter ']'";
-					break;
-				case MACHINE_ERROR_CODES.DATA_SIZE:
-					// command is too small (less than 3 bytes)
-					errMessage = "Command is incomplete";
-					break;
-				case MACHINE_ERROR_CODES.ERR_DELIM:
-					// unknown delimiter/character
-					errMessage = "Unknown character for delimiter";
-					break;
-				case MACHINE_ERROR_CODES.ERR_UNKNOWN_CMD:
-					// invalid command
-					errMessage = "Unknown command";
-					break;
-				case MACHINE_ERROR_CODES.ERR_PARAM_COUNT:
-					// wrong number of parameters
-					errMessage = "Command has wrong number of parameters";
-					break;
-				case MACHINE_ERROR_CODES.ERR_VALUE_SPEED:
-					// speed value invalid or speed value pair inconsistent
-					errMessage = "Speed value is invalid or inconsistent";
-					break;
-				case MACHINE_ERROR_CODES.ERR_BUSY:
-					// machine is busy (spinning or resetting)
-					errMessage = "Machine is busy - either spinning or resetting";
-					break;
-				case MACHINE_ERROR_CODES.ERR_NO_DEBUG:
-					// firmware isn't debug-able
-					errMessage = "Debug mode is disabled";
-					break;
-				case MACHINE_ERROR_CODES.UNDEFINED:
-					errMessage = "Error code is undefined";
-					errCallback(cmd, errMessage);
-					break;
-				default:
-					errMessage = `Error code ${errorCode} is unknown`;
-					errCallback(cmd, errMessage);
-					break;
-			}
-			//Create console data
-			that.addConsoleData( "Error: " + errMessage, ConsoleDataType.ERROR);
-		}
-
-		return handler;
-	}
-	
-	// TODO (mrivera): handle removing hilo
-	createCommandInterpreterErrorCallback() {
-		const that = this;
-		const errCallback = (cmd, err) => {
-			LOGGER.logE(`${err.toString()}: ${cmd}`);
-		};
-		return errCallback;
 	}
 
 	componentDidMount() {
