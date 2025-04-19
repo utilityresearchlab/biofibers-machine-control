@@ -312,6 +312,8 @@ class BaseMachineControlApp extends React.Component {
 	}
 
 	handleOnChangeSpinningState(isOn) {
+		// TODO cancel pulldown if running, the handle isOn state
+		//if 
 		// todo
 	}
 
@@ -357,14 +359,17 @@ class BaseMachineControlApp extends React.Component {
 				pullDownInProgress: true
 			});
 		} else {
+			if (this.state.nIntervalId) {
+				clearInterval(this.state.nIntervalId);
+			}
 			// stop pull down
 			this.setState({
-				pullDownInProgress: false
+				pullDownInProgress: false,
+				nIntervalId: null
 			});
-			clearInterval(this.state.nIntervalId);
-			let gcodeBuilder = new GcodeBuilder();
+			//let gcodeBuilder = new GcodeBuilder();
 			// gcodeBuilder.setSpindleSpeed(0, true);
-			this._sendGcodeLines(gcodeBuilder.toGcode());
+			//this._sendGcodeLines(gcodeBuilder.toGcode());
 		}
 		// Update machine state
 		let machineState = this._getMachineState();
