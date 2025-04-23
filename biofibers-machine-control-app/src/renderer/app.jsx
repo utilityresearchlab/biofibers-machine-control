@@ -40,6 +40,7 @@ import * as LOGGER from './lib/logger-util';
 
 import { GcodeBuilder } from './lib/machine-control/gcode-builder';
 import * as GCODE_CONSTANTS from './lib/machine-control/gcode-constants'
+import MiscUtils from './lib/machine-control/misc-util'
 import * as MachineResponseParser from './lib/machine-control/machine-response-parser';
 
 import MaterialHelper from './lib/material-util/material-helper';
@@ -335,25 +336,56 @@ class BaseMachineControlApp extends React.Component {
 				.resetExtrusionDistance()
 				.toGcode();
 			this._sendGcodeLines(gcodeLines);
-			// keep sending command to extrude until pull-down is stopped
-			// TODO: Determine proper interval timing instead of hard-coding 5000 ms
-			// const commandTime = MiscUtil.calculateCommandTimeInMilliSec(params['E'], params['X'], params['F']);
-			// TODO (mrivera) - fix timeout interval 
+			
+			// Prepare time tracking
+			// We use a min interval time of 50 ms to avoid overloading/blocking ui
+			// For normal printing this would be smaller, but with fibers it can be fairly large as
+			// the movements take a while
+			const minIntervalTimeMs = 100;
+			let timeKeeper = {
+				lastSendCommandTime: 0,
+				nextIntervalTimeMs: minIntervalTimeMs
+			};
+			// Set up interval for pull down
+			let isInitialRun = true;
 			const that = this;
 			let intervalId = setInterval(() => {
-				let pullDownGcodeBuilder = new GcodeBuilder();
 				const defaultParams = MaterialHelper.defaultParams()[this.state.selectedMaterial];
-				console.log(MaterialHelper.defaultParams['E'], "hello");
-				const pulldownGcodeLines = 
-					pullDownGcodeBuilder.move({
-							[GCODE_CONSTANTS.PARAM_E]: defaultParams[GCODE_CONSTANTS.PARAM_E],
-							[GCODE_CONSTANTS.PARAM_X]: defaultParams[GCODE_CONSTANTS.PARAM_X],
-							[GCODE_CONSTANTS.PARAM_F]: defaultParams[GCODE_CONSTANTS.PARAM_F],
-						}, 
-						'extrude and move X')
-						.toGcode(); // value from experiments
-				that._sendGcodeLines(pulldownGcodeLines);
-			}, 100);
+
+				// TODO (mrivera): replace with E, X, F for pull-down inputs in interface
+				let paramE = defaultParams[GCODE_CONSTANTS.PARAM_E];
+				let paramX = defaultParams[GCODE_CONSTANTS.PARAM_X];
+				let paramF = defaultParams[GCODE_CONSTANTS.PARAM_F];
+				if (isInitialRun) {
+					timeKeeper.nextIntervalTimeMs = MiscUtils.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
+					isInitialRun = false;
+				}
+
+
+				const timeDelta = Date.now() - timeKeeper.lastSendCommandTime;
+				let minCommandTime = Math.max(minIntervalTimeMs, timeKeeper.nextIntervalTimeMs - minIntervalTimeMs);
+				// Check if ready to send command
+				if (timeDelta >= minCommandTime) {
+					let pullDownGcodeBuilder = new GcodeBuilder();
+					const pulldownGcodeLines = 
+						pullDownGcodeBuilder.move({
+								[GCODE_CONSTANTS.PARAM_E]: paramE,
+								[GCODE_CONSTANTS.PARAM_X]: paramX,
+								[GCODE_CONSTANTS.PARAM_F]: paramF,
+							}, 
+							'extrude and move X')
+							.toGcode(); // value from experiments
+					that._sendGcodeLines(pulldownGcodeLines);
+
+					// Update time keeping
+					timeKeeper.nextIntervalTimeMs = MiscUtils.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
+					timeKeeper.lastSendCommandTime = Date.now();
+					
+					LOGGER.logD(`Sending command: ${pulldownGcodeLines} with interval time ${timeKeeper.nextIntervalTimeMs}`);
+				} else {
+					LOGGER.logD("Next command not ready.");
+				}
+			}, minIntervalTimeMs);
 			this.setState({
 				nIntervalId: intervalId,
 				pullDownInProgress: true
