@@ -79,7 +79,8 @@
     "@serialport/parser-readline": "^13.0.0",
     "electron-squirrel-startup": "^1.0.0",
     "serialport": "^13.0.0",
-    "tableify": "1.1.1"
+    "tableify": "1.1.1",
+    "uuid": "^11.1.0"
   },
   "resolutions": {
     "serialport": "^13.0.0"
