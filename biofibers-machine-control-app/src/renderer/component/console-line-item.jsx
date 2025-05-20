@@ -28,6 +28,9 @@ class ConsoleLineItem extends React.Component {
 			case ConsoleDataType.RECEIVED:
 				textColor = "success.main";
 				break;
+			case ConsoleDataType.RECEIVED_STATUS:
+				textColor = "success.main";
+				break;
 			case ConsoleDataType.INFO:
 				textColor = "info.main";
 				break;

@@ -423,9 +423,11 @@ class BaseMachineControlApp extends React.Component {
 		// TODO use parser on serial data to figure out if it is a response, or error etc
 		const dataString = data.toString();
 		const parsedResult = MachineResponseParser.parseResponse(dataString);
+		let consoleDataType = ConsoleDataType.RECEIVED;
 		switch (parsedResult.responseType) {
 			case MachineResponseParser.RESPONSE_TYPE.TEMPERATURE_STATUS:
 				// update temps
+				consoleDataType = ConsoleDataType.RECEIVED_STATUS;
 				let machineState = this._getMachineState();
 				const tempData = parsedResult.parsedData;  
 				for (let i = 0; i < tempData.length; i += 1) {
@@ -464,7 +466,7 @@ class BaseMachineControlApp extends React.Component {
 		// const cmds = parsedResult && parsedResult.words ? parsedResult.words : [];
 		// this.commandInterpreter.interpetCommandArray(cmds);
 		// originally dataString for data item
-		const newData = new ConsoleDataItem(parsedResult.line, timestamp, ConsoleDataType.RECEIVED);
+		const newData = new ConsoleDataItem(parsedResult.line, timestamp, consoleDataType);
 		this.setState(prevState => ({
 			consoleData: [...prevState.consoleData, newData]
 		}));

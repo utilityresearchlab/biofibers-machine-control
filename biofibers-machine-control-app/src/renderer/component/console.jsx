@@ -11,7 +11,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import Tooltip from "@mui/material/Tooltip";
 
 
-import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
+import InsightsIcon from '@mui/icons-material/Insights';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import OutboxIcon from '@mui/icons-material/Outbox';
 
@@ -26,10 +26,12 @@ class Console extends React.Component {
 		this.state = {
 			shouldScroll: true,
 			showSendEvents: true,
+			showReceivedStatusEvents: false,
 		};
 		this.refConsole = React.createRef();
 		this.toggleShouldScroll = this.toggleShouldScroll.bind(this);
 		this.toggleShowSendEvents = this.toggleShowSendEvents.bind(this);
+		this.toggleShowReceivedStatusEvents = this.toggleShowReceivedStatusEvents.bind(this);
 	}
 
 	componentDidMount() {
@@ -58,13 +60,21 @@ class Console extends React.Component {
 		this.setState({showSendEvents: showSend });
 	}
 
+	toggleShowReceivedStatusEvents() {
+		const showReceivedStatus = !this.state.showReceivedStatusEvents;
+		this.setState({showReceivedStatusEvents: showReceivedStatus });
+	}
+
 	render() {
 		const showSendEvents = this.state.showSendEvents;
+		const showReceivedStatusEvents = this.state.showReceivedStatusEvents;
 		const propsData = this.props.data;
 		const consoleFontSize = '0.8rem';
 		const filteredData = propsData.filter(item => {
 			if (item.dataType === ConsoleDataType.SENT) {
 				return showSendEvents;
+			} else if (item.dataType === ConsoleDataType.RECEIVED_STATUS) {
+				return showReceivedStatusEvents;
 			} else {
 				return true;
 			}
@@ -123,9 +133,19 @@ class Console extends React.Component {
 							value='showSendEvents'
 							size='small'
 							variant='contained'
-							selected={this.state.showSendEvents}
+							selected={showSendEvents}
 							onChange={this.toggleShowSendEvents}>
 							<OutboxIcon />
+						</ToggleButton>
+					</Tooltip>
+					<Tooltip title="Show Machine Status">
+						<ToggleButton
+							value='show'
+							size='small'
+							variant='contained'
+							selected={showReceivedStatusEvents}
+							onChange={this.toggleShowReceivedStatusEvents}>
+							<InsightsIcon />
 						</ToggleButton>
 					</Tooltip>
 				</Stack>

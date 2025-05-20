@@ -4,6 +4,7 @@ class ConsoleDataType {
 	static INFO = new ConsoleDataType('info');
 	static SENT = new ConsoleDataType('sent');
 	static RECEIVED = new ConsoleDataType('received');
+	static RECEIVED_STATUS = new ConsoleDataType('received_status');
 	static UNDEFINED = new ConsoleDataType('undefinded');
 
 	constructor(name) {
