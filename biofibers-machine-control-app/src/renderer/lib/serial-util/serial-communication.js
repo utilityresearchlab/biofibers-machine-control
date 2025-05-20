@@ -1,14 +1,20 @@
 import { SerialPort } from 'serialport';
 const { ReadlineParser } = require('@serialport/parser-readline')
 
+import { v4 as uuidv4 } from 'uuid';
 
-
+import { SafeCounter } from '../concurrency-util';
 import * as LOGGER from '../logger-util';
 
 const noPortSelected = '';
 const defaultSerialPort = noPortSelected;
 const defaultBaudRate = 250000;
-const defaultSendCommandIntervalTimeMs = 5; // 3/21/2025 orig: 100
+const defaultSendCommandIntervalTimeMs = 10; // 3/21/2025 orig: 100
+
+const responseSerialStart = 'start';
+const responseSerialUnknownCommand = 'echo:Unknown command:';
+const responseSerialBusyProcessing = 'echo:busy: processing';
+const responseSerialOk = 'ok';
 
 const endOfCommand = '\r\n';
 
@@ -18,11 +24,11 @@ class SerialCommunication {
 	constructor(serialPortPath=defaultSerialPort, baudRate=defaultBaudRate, sendCommandIntervalTime=defaultSendCommandIntervalTimeMs) {
 		this.setSerialPort(serialPortPath, baudRate);
 		this.isReceiving = false;
-		this.nackline = 0; // number of lines that did not receive ok
 		this.sendCommandIntervalTime = sendCommandIntervalTime;
-		this.sendCommandQueue = [];
-		this.sendCommandBufferIntervalId = null;		
-		this.nextSendCommandId = 0;
+		this.sendCommandBufferIntervalId = null;
+		this.sendCommandQueue = [];	
+		this.pendingCommandQueue = [];	
+		this.nackLineCounter = new SafeCounter(); // number of lines that did not receive ok
 	}
 
 	_clearSendCommandInterval() {
@@ -32,21 +38,28 @@ class SerialCommunication {
 		}
 	}
 
+	_resetSendCommandQueues() {
+		this.sendCommandQueue = [];	
+		this.pendingCommandQueue = [];	
+		this.nackLineCounter = new SafeCounter(); // number of lines that did not receive ok
+	}
+
 	_createSendCommand(cmd, callback) {
 		let sendCommand = {
 			'cmd': cmd,
 			'callback': callback,
-			'id': this.nextSendCommandId
+			'id': uuidv4(), 
+			'timestamp': Date.now() 
 		};
-		this.nextSendCommandId += 1;
 		return sendCommand;
 	}
 
 	// Initializes a periodic send command interval loop
 	// Writes the command to the port, if it is successful, it removes it from the buffer
 	_initSendCommandLoop() {
-		// clear previous interval
+		// clear previous interval and queues
 		this._clearSendCommandInterval();
+		this._resetSendCommandQueues();
 		
 		const that = this;
 		this.sendCommandBufferIntervalId = setInterval(() => {
@@ -57,20 +70,34 @@ class SerialCommunication {
 			if (queue.length == 0) {
 				return;
 			}  
-			const {cmd, callback, id} = queue.at(0);
+
+			// if (this.nackLineCounter.value > 5) {
+			// 	LOGGER.logE("too many commands sent, wait and resend");
+			// 	//return false;
+			// }
+
+			const {cmd, callback, id, timestamp} = queue.at(0);
 			this.serialPort.write(cmd + endOfCommand, (err) => {
 				if (err) {
 					LOGGER.logE("Error on write: ", err.message);
 				} else {
-					const numCmd = cmd.split(endOfCommand).length;
-					that.nackline += numCmd;
+					//const numCmd = cmd.split(endOfCommand).length;
+					that.nackLineCounter.increment();
 					LOGGER.log("Command Sent: ", cmd);
 
 					const cmdIds = that.sendCommandQueue.map((value) => { 
 						return value.id;
 					});
 					const itemIndex = cmdIds.indexOf(id);
-					console.log(that.sendCommandQueue.splice(itemIndex, 1));
+					const currentCommandObject = that.sendCommandQueue[itemIndex];
+					// Remove from the send command queue
+					that.sendCommandQueue.splice(itemIndex, 1);
+
+					// Add to the pending command queue
+					if (currentCommandObject) {
+						that.pendingCommandQueue.push(currentCommandObject);
+						LOGGER.logD("Sent command from send queue and put in pending:", currentCommandObject);
+					}
 				}
 				if (callback) {
 					callback(cmd, err);
@@ -99,37 +126,37 @@ class SerialCommunication {
 		this.sendCommandQueue.push(sendCmd);
 		return true;
 	}
-
-	sendCommand(cmd, onSentCallback) {
-		if (!cmd || cmd.length == 0 || cmd.trim().length == 0) {
-			return false;
-		}
-		if (!this.serialPort || !this.serialPort.isOpen) {
-			LOGGER.logD("can't send command; serial port is closed");
-			if (onSentCallback) {
-				onSentCallback(cmd, "Serial port is not open.");
-			}
-			return false;
-		}
-		// todo: replace placeholder 5 with actual buffer size
-		// if (this.nackline > 5) {
-		// 	LOGGER.logE("too many commands sent, wait and resend");
-		// 	return false;
-		// }
-		this.serialPort.write(cmd + endOfCommand, (err) => {
-			if (err) {
-				LOGGER.logE("Error on write: ", err.message);
-			} else {
-				const numCmd = cmd.split(endOfCommand).length;
-				this.nackline += numCmd;
-				LOGGER.log("Command Sent: ", cmd);
-			}
-			if (onSentCallback) {
-				onSentCallback(cmd, err);
-			}
-		});
-		return true;
-	}
+	// THIS IS THE ORIGINAL SEND COMMAND
+	// deprecatedSendCommand(cmd, onSentCallback) {
+	// 	if (!cmd || cmd.length == 0 || cmd.trim().length == 0) {
+	// 		return false;
+	// 	}
+	// 	if (!this.serialPort || !this.serialPort.isOpen) {
+	// 		LOGGER.logD("can't send command; serial port is closed");
+	// 		if (onSentCallback) {
+	// 			onSentCallback(cmd, "Serial port is not open.");
+	// 		}
+	// 		return false;
+	// 	}
+	// 	// todo: replace placeholder 5 with actual buffer size
+	// 	// if (this.nackline > 5) {
+	// 	// 	LOGGER.logE("too many commands sent, wait and resend");
+	// 	// 	return false;
+	// 	// }
+	// 	this.serialPort.write(cmd + endOfCommand, (err) => {
+	// 		if (err) {
+	// 			LOGGER.logE("Error on write: ", err.message);
+	// 		} else {
+	// 			const numCmd = cmd.split(endOfCommand).length;
+	// 			this.nackline += numCmd;
+	// 			LOGGER.log("Command Sent: ", cmd);
+	// 		}
+	// 		if (onSentCallback) {
+	// 			onSentCallback(cmd, err);
+	// 		}
+	// 	});
+	// 	return true;
+	// }
 
 	// startReceiving(dataReceivedCallback) {
 	// 	// https://serialport.io/docs/7.x.x/guide-usage#reading-data
@@ -184,18 +211,77 @@ class SerialCommunication {
 		// init parser
 		this.parser = this.serialPort.pipe(new ReadlineParser({delimiter: '\n'}));
 		this.parser.on('data', function (data) {
-		LOGGER.logD('Received Data:', data.toString());
+			// TODO: here is where we see a busy processing line, use this to determine when to add back to the queue
+			// and to wait.
+			// Line:
+			// 	"echo:busy: processing"
+			LOGGER.logD('Received Data:', data.toString());
 			LOGGER.log('parser', data.toString());
-			const receivedData = data.toString().trim().split('\n');
+			const trimmedData = data.toString().trim();
+			LOGGER.logD('Trimmed received Data:', trimmedData);
+
+			const receivedData = trimmedData.split(/(ok)|\n/);
+			// Sometimes the received data can actually be two responses (e.g., OK + temp response)
+			LOGGER.logD("Serial Unack Lines ", that.nackLineCounter.value);
+
 			for (const line of receivedData) {
-				if (line === 'ok') {
-					that.nackline -= 1;
-					LOGGER.logD("Serial Unack Lines ", that.nackline);
+				if (!line) {
+					continue;
 				}
+				let trimmedLine = line.trim();
+				if (line === '') {
+					continue;
+				}
+
+				LOGGER.logD(`Serial Response Line: ${trimmedLine}`);
+					let item = null;	
+
+					// If Acknowledged and we have pending commands, then we update the nackline 
+					if (trimmedLine == responseSerialOk 
+						|| trimmedLine.includes(responseSerialUnknownCommand)
+						|| trimmedLine.includes(responseSerialBusyProcessing)) {			
+						// Sometimes we may receive an 'ok' event if we didn't send a command
+						// for example, on printer startup. This can lead to negative NACK line values
+						// to avoid this, we simple ignore any acks that come in beyond what we send.
+						if (that.nackLineCounter.value > 0) {	
+							that.nackLineCounter.decrement();
+						}
+					}
+
+					// Depending on the response, we handle the command
+					if (trimmedLine === responseSerialOk || trimmedLine.includes(responseSerialUnknownCommand)) {
+						// Response is OK or unknown command
+						// So remove from pending queue and remove nackline
+						if (that.pendingCommandQueue.length > 0) {
+							item = that.pendingCommandQueue.shift();
+							LOGGER.logD("Removed command from pending queue", item);	
+						}
+					} else if (trimmedLine.includes(responseSerialBusyProcessing)) {
+						// If the command was received AND the buffer is full / busy processing
+						// We remove from pending queue at put back at the front of the send queue
+						// then it will be resent in the next send command loop interval
+						if (that.pendingCommandQueue.length > 0) {
+							const item = that.pendingCommandQueue.shift();
+							// Make sure we don't have undefined commands
+							if (item) { 
+								LOGGER.logD("Moving command from Pending to Send Queue", item);
+								// Put item back onto the send queue at the front
+								that.sendCommandQueue.unshift(item);
+							}
+						}
+				} 
+				// Below is for debugging serial responses
+				else {
+				// 	// Unhandled line response from the machine
+					LOGGER.logD(`Unhandled response line from machine: ${trimmedLine}`);
+				}		
+				if (receivingCallback) {
+					receivingCallback(line, Date.now());
+				}						
 			}
-			if (receivingCallback) {
-				receivingCallback(data, Date.now());
-			}
+			LOGGER.logD("Updated Serial Unack Lines ", that.nackLineCounter.value);
+
+
 		});
 		this.isReceiving = true;
 	}
@@ -256,8 +342,9 @@ class SerialCommunication {
 	
 	// Returns true if the disconnect was handled, false if there was nothing to disconnect
 	disconnect(onDisconnectCallback) {	
-		// Clear the command loop interval 
+		// Clear the command loop interval and queues
 		this._clearSendCommandInterval();
+		this._resetSendCommandQueues();
 
 		// Clear port name
 		const oldPortName = this.serialPortPath;
