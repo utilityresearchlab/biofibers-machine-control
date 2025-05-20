@@ -89,6 +89,16 @@ class BaseMachineControlApp extends React.Component {
 		this.setState({
 			machineState: state
 		});
+
+		if (state.isMachineDisconnected()) {
+			// clear interval for pull-down or spinning
+			if (this.state.nIntervalId) {
+				clearInterval(this.state.nIntervalId);
+			};
+			this.setState({
+				nIntervalId: null,
+			});
+		}
 	}
 
 	componentDidMount() {
@@ -388,7 +398,6 @@ class BaseMachineControlApp extends React.Component {
 			}, minIntervalTimeMs);
 			this.setState({
 				nIntervalId: intervalId,
-				pullDownInProgress: true
 			});
 		} else {
 			if (this.state.nIntervalId) {
@@ -396,7 +405,6 @@ class BaseMachineControlApp extends React.Component {
 			}
 			// stop pull down
 			this.setState({
-				pullDownInProgress: false,
 				nIntervalId: null
 			});
 			//let gcodeBuilder = new GcodeBuilder();
