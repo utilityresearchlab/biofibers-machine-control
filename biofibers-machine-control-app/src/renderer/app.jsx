@@ -40,7 +40,7 @@ import * as LOGGER from './lib/logger-util';
 
 import { GcodeBuilder } from './lib/machine-control/gcode-builder';
 import * as GCODE_CONSTANTS from './lib/machine-control/gcode-constants'
-import MiscUtils from './lib/machine-control/misc-util'
+import MiscUtil from './lib/machine-control/misc-util'
 import * as MachineResponseParser from './lib/machine-control/machine-response-parser';
 
 import MaterialHelper from './lib/material-util/material-helper';
@@ -367,7 +367,7 @@ class BaseMachineControlApp extends React.Component {
 				let paramX = defaultParams[GCODE_CONSTANTS.PARAM_X];
 				let paramF = defaultParams[GCODE_CONSTANTS.PARAM_F];
 				if (isInitialRun) {
-					timeKeeper.nextIntervalTimeMs = MiscUtils.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
+					timeKeeper.nextIntervalTimeMs = MiscUtil.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
 					isInitialRun = false;
 				}
 
@@ -388,7 +388,7 @@ class BaseMachineControlApp extends React.Component {
 					that._sendGcodeLines(pulldownGcodeLines);
 
 					// Update time keeping
-					timeKeeper.nextIntervalTimeMs = MiscUtils.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
+					timeKeeper.nextIntervalTimeMs = MiscUtil.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
 					timeKeeper.lastSendCommandTime = Date.now();
 					
 					LOGGER.logD(`Sending command: ${pulldownGcodeLines} with interval time ${timeKeeper.nextIntervalTimeMs}`);
