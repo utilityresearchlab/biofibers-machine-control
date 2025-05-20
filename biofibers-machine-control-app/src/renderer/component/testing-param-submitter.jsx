@@ -37,7 +37,7 @@ class TestingParamSubmitter extends React.Component {
 
     handleOnChange(event) {
         const {name, value} = event.target;
-        console.log(name);
+        // console.log(name);
         this.setState({
             [name]: value
         });

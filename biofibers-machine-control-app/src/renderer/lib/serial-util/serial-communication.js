@@ -151,15 +151,12 @@ class SerialCommunication {
 			// and to wait.
 			// Line:
 			// 	"echo:busy: processing"
-			LOGGER.logD('Received Data:', data.toString());
-			LOGGER.log('parser', data.toString());
+			LOGGER.logD('Received Serial Data:', data.toString());
 			const trimmedData = data.toString().trim();
-			LOGGER.logD('Trimmed received Data:', trimmedData);
+			//LOGGER.logD('Trimmed received Data:', trimmedData);
 
 			const receivedData = trimmedData.split(/(ok)|\n/);
 			// Sometimes the received data can actually be two responses (e.g., OK + temp response)
-			LOGGER.logD("Serial Unack Lines ", that.nackLineCounter.value);
-
 			for (const line of receivedData) {
 				if (!line) {
 					continue;
@@ -170,46 +167,46 @@ class SerialCommunication {
 				}
 
 				LOGGER.logD(`Serial Response Line: ${trimmedLine}`);
-					let item = null;	
+				let item = null;	
 
-					// If Acknowledged and we have pending commands, then we update the nackline 
-					if (trimmedLine == responseSerialOk 
-						|| trimmedLine.includes(responseSerialUnknownCommand)
-						|| trimmedLine.includes(responseSerialBusyProcessing)) {			
-						// Sometimes we may receive an 'ok' event if we didn't send a command
-						// for example, on printer startup. This can lead to negative NACK line values
-						// to avoid this, we simple ignore any acks that come in beyond what we send.
-						if (that.nackLineCounter.value > 0) {	
-							that.nackLineCounter.decrement();
+				// If Acknowledged and we have pending commands, then we update the nackline 
+				if (trimmedLine == responseSerialOk 
+					|| trimmedLine.includes(responseSerialUnknownCommand)
+					|| trimmedLine.includes(responseSerialBusyProcessing)) {			
+					// Sometimes we may receive an 'ok' event if we didn't send a command
+					// for example, on printer startup. This can lead to negative NACK line values
+					// to avoid this, we simple ignore any acks that come in beyond what we send.
+					if (that.nackLineCounter.value > 0) {	
+						that.nackLineCounter.decrement();
+					}
+				}
+
+				// Depending on the response, we handle the command
+				if (trimmedLine === responseSerialOk || trimmedLine.includes(responseSerialUnknownCommand)) {
+					// Response is OK or unknown command
+					// So remove from pending queue and remove nackline
+					if (that.pendingCommandQueue.length > 0) {
+						item = that.pendingCommandQueue.shift();
+						LOGGER.logD("Removed command from pending queue", item);	
+					}
+				} else if (trimmedLine.includes(responseSerialBusyProcessing)) {
+					// If the command was received AND the buffer is full / busy processing
+					// We remove from pending queue at put back at the front of the send queue
+					// then it will be resent in the next send command loop interval
+					if (that.pendingCommandQueue.length > 0) {
+						const item = that.pendingCommandQueue.shift();
+						// Make sure we don't have undefined commands
+						if (item) { 
+							LOGGER.logD("Moving command from Pending to Send Queue", item);
+							// Put item back onto the send queue at the front
+							that.sendCommandQueue.unshift(item);
 						}
 					}
-
-					// Depending on the response, we handle the command
-					if (trimmedLine === responseSerialOk || trimmedLine.includes(responseSerialUnknownCommand)) {
-						// Response is OK or unknown command
-						// So remove from pending queue and remove nackline
-						if (that.pendingCommandQueue.length > 0) {
-							item = that.pendingCommandQueue.shift();
-							LOGGER.logD("Removed command from pending queue", item);	
-						}
-					} else if (trimmedLine.includes(responseSerialBusyProcessing)) {
-						// If the command was received AND the buffer is full / busy processing
-						// We remove from pending queue at put back at the front of the send queue
-						// then it will be resent in the next send command loop interval
-						if (that.pendingCommandQueue.length > 0) {
-							const item = that.pendingCommandQueue.shift();
-							// Make sure we don't have undefined commands
-							if (item) { 
-								LOGGER.logD("Moving command from Pending to Send Queue", item);
-								// Put item back onto the send queue at the front
-								that.sendCommandQueue.unshift(item);
-							}
-						}
 				} 
 				// Below is for debugging serial responses
 				else {
 				// 	// Unhandled line response from the machine
-					LOGGER.logD(`Unhandled response line from machine: ${trimmedLine}`);
+					LOGGER.logD(`Unhandled serial line from machine: ${trimmedLine}`);
 				}		
 				if (receivingCallback) {
 					receivingCallback(line, Date.now());

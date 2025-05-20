@@ -8,7 +8,7 @@ class SafeCounter {
 	  this.queue = this.queue.then(() => {
 		return new Promise((resolve) => {
 		  this.count += by;
-		  console.log(`Counter updated: ${this.count}`);
+		  // console.log(`Counter updated: ${this.count}`);
 		  resolve();
 		});
 	  });
@@ -18,7 +18,7 @@ class SafeCounter {
 		this.queue = this.queue.then(() => {
 		  return new Promise((resolve) => {
 			this.count -= by;
-			console.log(`Counter updated: ${this.count}`);
+			// console.log(`Counter updated: ${this.count}`);
 			resolve();
 		  });
 		});
