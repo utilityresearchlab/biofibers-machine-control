@@ -14,6 +14,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
+import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import HomeIcon from '@mui/icons-material/Home';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
@@ -49,6 +50,7 @@ class SetupParamSubmitter extends React.Component {
         };
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
+        this.handleSetRelativeClick = this.handleSetRelativeClick.bind(this);
         this.handleExtrudePumpClick = this.handleExtrudePumpClick.bind(this);
         this.handleRetractPumpClick = this.handleRetractPumpClick.bind(this);
         this.handleToggleHeatersClick = this.handleToggleHeatersClick.bind(this);
@@ -78,8 +80,21 @@ class SetupParamSubmitter extends React.Component {
     handleHomeAllClick(event) {
         let gcodeBuilder = new GcodeBuilder();
         const gcodeLines = gcodeBuilder
-            .comment('home all and set relative')
+            .comment('home all')
             .homeAll()
+            // .useRelativeCoordinates()
+            // .useRelativeExtrusionDistances()
+            // .resetExtrusionDistance()
+            .toGcode();
+        gcodeLines.forEach((line, index) => {
+            this.handleSubmitCommand(event, line);
+        });
+    }
+
+    handleSetRelativeClick(event) {
+        let gcodeBuilder = new GcodeBuilder();
+        const gcodeLines = gcodeBuilder
+            .comment('set relative')
             .useRelativeCoordinates()
             .useRelativeExtrusionDistances()
             .resetExtrusionDistance()
@@ -269,7 +284,15 @@ class SetupParamSubmitter extends React.Component {
                         startIcon={<HomeIcon/>}
                         disabled={this.props.disabled}
                         onClick={this.handleHomeAllClick} >
-                        Home All & Set Axes to Relative
+                        Home Axes
+                    </Button>
+                    <Button
+                        size="medium"
+                        variant="outlined"
+                        startIcon={<GpsFixedIcon/>}
+                        disabled={this.props.disabled}
+                        onClick={this.handleSetRelativeClick} >
+                        Set Axes to Relative
                     </Button>
                 </Stack>
 
