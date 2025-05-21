@@ -128,7 +128,7 @@ export class GcodeBuilder {
             const cmt = this._concatComment(comment);
             if (cmd == '') {
                 // When we don't have a command preceeding, don't include whitespace
-                line += cmd;
+                line += cmt;
             } else {
                 // Add white space before comment with a command
                 line += ' ' + cmt;
