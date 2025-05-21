@@ -11,6 +11,8 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import ConstrainedNumberTextField from './constrained-number-text-field'
 
 import MathUtil from '../lib/math-util'
+import MiscUtil from '../lib/machine-control/misc-util'
+
 
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
 import * as GCODE_CONSTANTS from '../lib/machine-control/gcode-constants'
@@ -88,9 +90,11 @@ class TestingParamSubmitter extends React.Component {
     }
 
     handleSendMultipleCommands(event) {
+        if (this.props.onSendMultipleSpinningCommands) {
         const spinningCommand = this.getSpinningCommand();
-        for (let i = 0; i < this.state.numCommands; i++) {
-            this.handleSubmitCommand(event, spinningCommand);
+            const numCommands = this.state.numCommands;
+            const timePerCommandMs = MiscUtil.calculateCommandTimeInMilliSec(this.state.eValue, this.state.xValue, this.getCompositeFeedrate());
+            this.props.onSendMultipleSpinningCommands(spinningCommand, numCommands, timePerCommandMs);
         }
     }
 

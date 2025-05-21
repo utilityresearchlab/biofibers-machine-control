@@ -79,6 +79,8 @@ class BaseMachineControlApp extends React.Component {
 
 		this.handleOnChangeSpinningState = this.handleOnChangeSpinningState.bind(this);
 		this.handleOnChangePullDownState = this.handleOnChangePullDownState.bind(this);
+
+		this.handleOnSendMultipleSpinningCommands = this.handleOnSendMultipleSpinningCommands.bind(this);
 	}
 
 	_getMachineState() {
@@ -417,6 +419,81 @@ class BaseMachineControlApp extends React.Component {
 		this._setMachineState(machineState);
 	}
 
+	// Handles sending multiple spinning commands from the testing param submitter
+	handleOnSendMultipleSpinningCommands(spinningCommand, numCommands, timePerCommandMs) {
+		if (this._getMachineState().isMachinePullingDown()) {
+			// If we're pulling down, we cancel the pull-down to send spinning commands
+			this.handleOnChangePullDownState(false);
+		}
+
+		// If no commands, exit early
+		if (numCommands <= 0) {
+			return;
+		}
+
+		// Handle initial setup
+		const gcodeBuilder = new GcodeBuilder();
+		const gcodeLines = gcodeBuilder
+			.comment('start pull down')
+			.useRelativeCoordinates()
+			.useRelativeExtrusionDistances()
+			.resetExtrusionDistance()
+			.toGcode();
+
+		// Send initial setup lines
+		this._sendGcodeLines(gcodeLines);
+		
+		// Prepare a timeout function to send the commands at the proper timeout interval
+		// We set a timeout that is slightly less than our finished command time, otherwise the min timeout
+		const minTimeoutTimeMs = 10;
+		const timeoutOffset = 100;
+		const timeoutTimeMs = Math.max(timePerCommandMs - timeoutOffset, minTimeoutTimeMs);
+		
+		// Send the first command immediately with comment to console
+		let commandComment = gcodeBuilder
+			.reset()
+			.comment(`spinning command ${1} of ${numCommands}`)
+			.toGcodeString();
+		this._sendGcodeLines([commandComment, spinningCommand]);
+		LOGGER.logD(`Sent spinning command ${1} of ${numCommands}: ${spinningCommand} with interval time ${timeoutTimeMs}`);
+
+		// If only 1 command, we exit early
+		if (numCommands == 1) {
+			return;
+		}
+
+		// Now schedule timeout for additional commands
+		const that = this;
+		const sendMultipleCommandsTimeout = (cmd, currentCommandCount, originalNumCommands) => {
+			setTimeout(() => {
+				if (that._getMachineState().isMachineDisconnected()) {
+					// if we've disconnected, stop sending commands
+					LOGGER.logD("Cancelling sending spinning command in timeout (Disconnected).");
+					return;
+				}
+				// Send the command
+				let comment = gcodeBuilder
+					.reset()
+					.comment(`spinning command ${currentCommandCount + 1} of ${originalNumCommands}`)
+					.toGcodeString();
+				that._sendGcodeLines([comment, cmd]);
+
+				// Increment our cmdCount after sending
+				currentCommandCount += 1;
+				LOGGER.logD(`Sent spinning command ${currentCommandCount} of ${originalNumCommands}: ${cmd} with interval time ${timeoutTimeMs}`);
+
+
+				// If we have commands left, schedule the next timeout
+				if (currentCommandCount < originalNumCommands) {
+					sendMultipleCommandsTimeout(cmd, currentCommandCount, originalNumCommands);
+				}
+		  }, timeoutTimeMs);
+		}
+		// Execute the timeout function
+		let cmdCount = 1;
+		sendMultipleCommandsTimeout(spinningCommand, cmdCount, numCommands);
+	}
+
 
 	// Console Data //
 	handleOnReceivedSerialData(data, timestamp) {
@@ -667,7 +744,8 @@ class BaseMachineControlApp extends React.Component {
 						<TestingParamSubmitter
 							disabled={isInputDisabled}
 							onSubmitCallback={this.handleSendCommandClick}
-							onChangeSpinningState={this.handleOnChangeSpinningState} />
+							onChangeSpinningState={this.handleOnChangeSpinningState}
+							onSendMultipleSpinningCommands={this.handleOnSendMultipleSpinningCommands} />
 					</Box>
 
 					<Divider sx={{marginTop: 4, marginBottom: 2}}/>
