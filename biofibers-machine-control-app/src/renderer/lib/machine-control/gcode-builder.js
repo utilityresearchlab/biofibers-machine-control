@@ -125,14 +125,21 @@ export class GcodeBuilder {
             }
         }
         if (comment.length > 0) {
-            line += this._concatComment(comment);
+            const cmt = this._concatComment(comment);
+            if (cmd == '') {
+                // When we don't have a command preceeding, don't include whitespace
+                line += cmd;
+            } else {
+                // Add white space before comment with a command
+                line += ' ' + cmt;
+            }
         }
         return line;
     }
 
 
     _concatComment(comment) {
-        return ' ' + GCODE_CONSTANTS.COMMENT_PREFIX + ' ' + comment.toString();
+        return GCODE_CONSTANTS.COMMENT_PREFIX + ' ' + comment.toString();
     }
 
     _appendCommand(cmd, params=null, comment=null) {
