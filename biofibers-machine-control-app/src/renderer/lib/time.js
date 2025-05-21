@@ -1,5 +1,5 @@
 
-function getReadableTimeOfDay(timestamp, includeMillis=false) {
+export function getReadableTimeOfDay(timestamp, includeMillis=false) {
 	const dt = new Date(timestamp);
 	const hours = String(dt.getHours()).padStart(2, '0');
 	const minutes = String(dt.getMinutes()).padStart(2, '0');
