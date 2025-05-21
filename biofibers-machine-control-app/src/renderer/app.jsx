@@ -421,10 +421,11 @@ class BaseMachineControlApp extends React.Component {
 
 	// Handles sending multiple spinning commands from the testing param submitter
 	handleOnSendMultipleSpinningCommands(spinningCommand, numCommands, timePerCommandMs) {
-		if (this._getMachineState().isMachinePullingDown()) {
-			// If we're pulling down, we cancel the pull-down to send spinning commands
-			this.handleOnChangePullDownState(false);
-		}
+		// if (this._getMachineState().isMachinePullingDown()) {
+		// TODO (mrivera) - this causes a disconnection due to the state change
+		// 	// If we're pulling down, we cancel the pull-down to send spinning commands
+		// 	this.handleOnChangePullDownState(false);
+		// }
 
 		// If no commands, exit early
 		if (numCommands <= 0) {
@@ -453,7 +454,7 @@ class BaseMachineControlApp extends React.Component {
 		let commandComment = gcodeBuilder
 			.reset()
 			.comment(`spinning command ${1} of ${numCommands}`)
-			.toGcodeString();
+			.toGcodeString(); 
 		this._sendGcodeLines([commandComment, spinningCommand]);
 		LOGGER.logD(`Sent spinning command ${1} of ${numCommands}: ${spinningCommand} with interval time ${timeoutTimeMs}`);
 
