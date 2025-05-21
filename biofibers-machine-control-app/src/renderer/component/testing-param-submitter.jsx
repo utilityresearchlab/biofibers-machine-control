@@ -140,7 +140,15 @@ class TestingParamSubmitter extends React.Component {
             wordWrap: 'no-wrap'
         };
 
-        const spinningCommandText = this.getSpinningCommand();
+        const spinningCommandText = this.getSpinningCommand(); 
+        
+        const timePerCommand = Math.max(this.state.eValue, this.state.xValue) / preciseCompositeFeedRate;
+        const perCommandTimeMins = Math.floor(timePerCommand);
+        const perCommandTimeSecs = Math.round((timePerCommand * 60) % 60);
+        
+        const totalTimeForCommands = timePerCommand * this.state.numCommands;
+        const totalCommandTimeMins = Math.floor(totalTimeForCommands);
+        const totalCommandTimeSecs = Math.round((totalTimeForCommands * 60) % 60);
         return (
             <Box
             component="form"
@@ -226,36 +234,29 @@ class TestingParamSubmitter extends React.Component {
                                 {spinningCommandText}
                             </Typography>                        
                     </Stack>
+                  
                 </Stack>
+               
                 <Stack
                     direction="row"
-                    alignItems="left"
-                    alignContent="left"
                     justifyContent="left"
-                    spacing={1}>
-                    <ConstrainedNumberTextField
-                        name="numCommands"
-                        label="Number of Commands to Send"
-                        type="number"
-                        size="small"
-                        color="primary"
-                        value={this.state.numCommands}
-                        disabled={this.props.disabled}
-                        onChange={this.handleOnChange}
-                        sx={{minWidth: 220, maxWidth: 220}}
-                        /> 
-                    {/* <Button
-                        variant="outlined"
-                        size="medium"
-                        disabled={!this.props.isEnabled}
-                        color={(this.state.spinningInProgress) ? "error" : "success"}
-                        onClick={(this.state.spinningInProgress)
-                            ? this.handleStopSpinningClick
-                            : this.handleStartSpinningClick} > 
-                        {this.state.spinningInProgress
-                            ? 'Stop spinning'
-                            : 'Start spinning'}
-                    </Button> */}
+                    alignItems="left"
+                    spacing={1}
+                    p={1}>
+                    <Box variant="div" sx={{display: 'flex'}}>
+                        <ConstrainedNumberTextField
+                            name="numCommands"
+                            label="Number of Commands to Send"
+                            type="number"
+                            size="small"
+                            color="primary"
+                            value={this.state.numCommands}
+                            disabled={this.props.disabled}
+                            onChange={this.handleOnChange}
+                            sx={{minWidth: 220, maxWidth: 220}}
+                            /> 
+
+                        </Box>
                     <Box variant="div" sx={{display: 'flex'}}>
                         <Button
                             variant="outlined"
@@ -268,6 +269,20 @@ class TestingParamSubmitter extends React.Component {
                         </Button>
                     </Box>
                 </Stack>
+                <Stack
+                    direction="column"
+                    justifyContent="left"
+                    alignContent="left"
+                    spacing={1}
+                    padding={2}
+                    paddingBottom={0}>
+                    <Typography gutterBottom variant="span" sx={{fontStyle: 'italic'}} component="div">
+                            Estimated Time Per Command: {perCommandTimeMins} min {perCommandTimeSecs} sec
+                        </Typography>
+                        <Typography variant="span" sx={{fontStyle: 'italic'}} component="div">
+                            Estimated Total Time for <Typography variant="span" fontWeight={500}>{this.state.numCommands}</Typography> Commands: {totalCommandTimeMins} min {totalCommandTimeSecs} sec
+                        </Typography>
+                    </Stack>
             </Box>
         );
     }
