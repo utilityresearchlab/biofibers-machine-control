@@ -50,6 +50,8 @@ import SerialPortHelper from './lib/serial-util/serial-port-helper';
 
 const ScanPortsRefreshTimeInMs = 3000;
 
+const MACHINE_STATE = new BiofibersMachineState();
+
 class BaseMachineControlApp extends React.Component {
 
   constructor(props) {
@@ -60,7 +62,7 @@ class BaseMachineControlApp extends React.Component {
 			baudRate: this.props.serialCommunication.baudRate,
 			consoleData: [],
 			availableSerialPorts: [SerialPortHelper.nonePort()],
-			machineState: new BiofibersMachineState(),
+			machineState: MACHINE_STATE,
 			currentNozzleTemperature: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN,
 			currentSyringeWrapTemperature: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN,
 			selectedMaterial: MaterialHelper.availableMaterials()[0]
@@ -84,13 +86,15 @@ class BaseMachineControlApp extends React.Component {
 	}
 
 	_getMachineState() {
-		return this.state.machineState;
+		return MACHINE_STATE;
 	}
 
-	_setMachineState(state) {
+	// Note that the `callback` here receives "prevState" as an input from the
+	// setState call
+	_setMachineState(state, callback=null) {
 		this.setState({
 			machineState: state
-		});
+		}, callback);
 
 		if (state.isMachineDisconnected()) {
 			// clear interval for pull-down or spinning
@@ -395,7 +399,7 @@ class BaseMachineControlApp extends React.Component {
 					
 					LOGGER.logD(`Sending command: ${pulldownGcodeLines} with interval time ${timeKeeper.nextIntervalTimeMs}`);
 				} else {
-					LOGGER.logD("Next command not ready.");
+					LOGGER.logD("Pull Down: Next command not ready.");
 				}
 			}, minIntervalTimeMs);
 			this.setState({
@@ -414,24 +418,25 @@ class BaseMachineControlApp extends React.Component {
 			//this._sendGcodeLines(gcodeBuilder.toGcode());
 		}
 		// Update machine state
-		let machineState = this._getMachineState();
+		const machineState = this._getMachineState();
 		machineState.setMachineIsPullingDown(isOn);
 		this._setMachineState(machineState);
 	}
 
 	// Handles sending multiple spinning commands from the testing param submitter
 	handleOnSendMultipleSpinningCommands(spinningCommand, numCommands, timePerCommandMs) {
-		// if (this._getMachineState().isMachinePullingDown()) {
-		// TODO (mrivera) - this causes a disconnection due to the state change
-		// 	// If we're pulling down, we cancel the pull-down to send spinning commands
-		// 	this.handleOnChangePullDownState(false);
-		// }
-
 		// If no commands, exit early
 		if (numCommands <= 0) {
 			return;
 		}
 
+		if (this._getMachineState().isMachinePullingDown()) {
+			// TODO (mrivera) - this causes a disconnection due to the state change
+			// 	// If we're pulling down, we cancel the pull-down to send spinning commands
+		 	this.handleOnChangePullDownState(false);
+		}
+	
+		
 		// Handle initial setup
 		const gcodeBuilder = new GcodeBuilder();
 		const gcodeLines = gcodeBuilder
@@ -456,7 +461,7 @@ class BaseMachineControlApp extends React.Component {
 			.comment(`spinning command ${1} of ${numCommands}`)
 			.toGcodeString(); 
 		this._sendGcodeLines([commandComment, spinningCommand]);
-		LOGGER.logD(`Sent spinning command ${1} of ${numCommands}: ${spinningCommand} with interval time ${timeoutTimeMs}`);
+		LOGGER.logD(`Spinning command sent ${1} of ${numCommands}: ${spinningCommand} with interval time ${timeoutTimeMs}`);
 
 		// If only 1 command, we exit early
 		if (numCommands == 1) {
@@ -481,20 +486,19 @@ class BaseMachineControlApp extends React.Component {
 
 				// Increment our cmdCount after sending
 				currentCommandCount += 1;
-				LOGGER.logD(`Sent spinning command ${currentCommandCount} of ${originalNumCommands}: ${cmd} with interval time ${timeoutTimeMs}`);
+				LOGGER.logD(`Spinning command sent ${currentCommandCount} of ${originalNumCommands}: ${cmd} with interval time ${timeoutTimeMs}`);
 
 
 				// If we have commands left, schedule the next timeout
 				if (currentCommandCount < originalNumCommands) {
 					sendMultipleCommandsTimeout(cmd, currentCommandCount, originalNumCommands);
 				}
-		  }, timeoutTimeMs);
+		}, timeoutTimeMs);
 		}
 		// Execute the timeout function
 		let cmdCount = 1;
 		sendMultipleCommandsTimeout(spinningCommand, cmdCount, numCommands);
 	}
-
 
 	// Console Data //
 	handleOnReceivedSerialData(data, timestamp) {
