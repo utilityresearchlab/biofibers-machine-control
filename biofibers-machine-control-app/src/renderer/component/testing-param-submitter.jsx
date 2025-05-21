@@ -91,7 +91,7 @@ class TestingParamSubmitter extends React.Component {
 
     handleSendMultipleCommands(event) {
         if (this.props.onSendMultipleSpinningCommands) {
-        const spinningCommand = this.getSpinningCommand();
+            const spinningCommand = this.getSpinningCommand();
             const numCommands = this.state.numCommands;
             const timePerCommandMs = MiscUtil.calculateCommandTimeInMilliSec(this.state.eValue, this.state.xValue, this.getCompositeFeedrate());
             this.props.onSendMultipleSpinningCommands(spinningCommand, numCommands, timePerCommandMs);
@@ -146,13 +146,14 @@ class TestingParamSubmitter extends React.Component {
 
         const spinningCommandText = this.getSpinningCommand(); 
         
-        const timePerCommand = Math.max(this.state.eValue, this.state.xValue) / preciseCompositeFeedRate;
-        const perCommandTimeMins = Math.floor(timePerCommand);
-        const perCommandTimeSecs = Math.round((timePerCommand * 60) % 60);
-        
-        const totalTimeForCommands = timePerCommand * this.state.numCommands;
-        const totalCommandTimeMins = Math.floor(totalTimeForCommands);
-        const totalCommandTimeSecs = Math.round((totalTimeForCommands * 60) % 60);
+        const timePerCommandTotalSec = Math.floor(MiscUtil.calculateCommandTimeInMilliSec(this.state.eValue, this.state.xValue, this.getCompositeFeedrate()) / 1000);
+        const perCommandTimeMins = Math.floor(timePerCommandTotalSec / 60);
+        const perCommandTimeSecs = timePerCommandTotalSec % 60;
+
+        const totalTimeForAllCommandsSec = Math.round(timePerCommandTotalSec * this.state.numCommands)
+        const totalCommandTimeMins = Math.floor(totalTimeForAllCommandsSec / 60);
+        const totalCommandTimeSecs = totalTimeForAllCommandsSec % 60;
+
         return (
             <Box
             component="form"
