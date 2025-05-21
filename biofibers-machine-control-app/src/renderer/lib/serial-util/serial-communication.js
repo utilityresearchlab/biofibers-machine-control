@@ -9,7 +9,7 @@ import * as LOGGER from '../logger-util';
 const noPortSelected = '';
 const defaultSerialPort = noPortSelected;
 const defaultBaudRate = 250000;
-const defaultSendCommandIntervalTimeMs = 10; // 3/21/2025 orig: 100
+const defaultSendCommandIntervalTimeMs = 20; // 3/21/2025 orig: 100
 
 const responseSerialStart = 'start';
 const responseSerialUnknownCommand = 'echo:Unknown command:';
