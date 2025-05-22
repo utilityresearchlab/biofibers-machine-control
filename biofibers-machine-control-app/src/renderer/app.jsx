@@ -621,7 +621,7 @@ class BaseMachineControlApp extends React.Component {
 		const githubUrl = APP_SETTINGS.BIOFIBERS_GITHUB_URL;
 		const currentYear = new Date().getFullYear();
 		return (
-			<Box component="div" className="App center-page" sx={{paddingTop: 2, paddingBottom: 2}}>
+			<Box component="div" className="App center-page" sx={{paddingTop: 2, paddingBottom: 4}}>
 				<Box component="header">
 					<Stack
 						direction="row"
