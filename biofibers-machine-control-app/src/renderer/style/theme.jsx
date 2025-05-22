@@ -28,11 +28,14 @@ const customPurpleTheme = createTheme(theme, {
 		},
 		special: {
 			// values from: https://v5-0-6.mui.com/customization/palette/
-			info: '#006064',
-			info2: '29b6f6',
-			success: '#66bb6a',
+			info: '#0288d1',
+			info2: '#006064',
+			info3: '#29b6f6',
+			success: '#2e7d32',
+			success2: '#66bb6a',
 			warning: '#ffa726',
 			error: '#f44336',
+			gray: 'gray'
 		}
 	},
 });
