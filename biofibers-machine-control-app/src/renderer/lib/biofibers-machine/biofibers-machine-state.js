@@ -25,6 +25,10 @@ export class BiofibersMachineState {
         }
     }
 
+    setNozzleTempSetPoint(setPointTemp) {
+        this._setPointNozzleTemp = setPointTemp;
+    }
+
     getCurrentNozzleTemp() {
         return this._currentNozzleTemp;
     }
@@ -38,6 +42,9 @@ export class BiofibersMachineState {
         if (setPointTemp != null) {
             this._setPointHeaterWrapTemp = setPointTemp;
         }
+    }
+    setHeaterWrapTempSetPoint(setPointTemp) {
+        this._setPointHeaterWrapTemp = setPointTemp;
     }
 
     getCurrentHeaterWrapTemp() {
