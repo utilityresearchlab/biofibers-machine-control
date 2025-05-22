@@ -687,7 +687,10 @@ class BaseMachineControlApp extends React.Component {
 											id="available-serial-ports-select"
 											label="Serial Port"
 											value={this.state.selectedSerialPort}
-											onChange={this.handleOnSelectSerialPort}>
+											onChange={this.handleOnSelectSerialPort}
+											MenuProps={{
+												disableScrollLock: true, // stops scroll bar from popping
+											  }}>
 											{renderedSerialPortsItems}
 										</Select>
 									</FormControl>
@@ -698,7 +701,10 @@ class BaseMachineControlApp extends React.Component {
 											id="serial-port-baud-rate-select"
 											label="Baud Rate"
 											value={this.state.baudRate}
-											onChange={this.handleOnSelectBaudRate}>
+											onChange={this.handleOnSelectBaudRate}
+											MenuProps={{
+												disableScrollLock: true, // stops scroll bar from popping
+											  }}>
 											{renderedBaudRateItems}
 										</Select>
 									</FormControl>

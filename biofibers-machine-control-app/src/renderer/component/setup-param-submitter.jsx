@@ -539,7 +539,10 @@ class SetupParamSubmitter extends React.Component {
                             label="Material"
                             value={this.state.selectedMaterial}
                             onChange={this.handleOnSelectMaterial}
-                            disabled={this.props.disabled}>
+                            disabled={this.props.disabled}
+                            MenuProps={{
+                                disableScrollLock: true, // stop scroll bar in window from popping
+                              }}>
                             {renderedMaterialItems}
                         </Select>
                     </FormControl>
