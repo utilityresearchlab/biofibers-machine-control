@@ -26,8 +26,10 @@ import {ConsoleDataItem, ConsoleDataType} from './lib/console-data';
 import * as APP_SETTINGS from './app-settings';
 
 import Console from './component/console';
-import TextFieldSubmitter from './component/text-field-submitter'
 import SetupParamSubmitter from './component/setup-param-submitter'
+import StatusBar from './component/status-bar';
+
+import TextFieldSubmitter from './component/text-field-submitter'
 import TestingParamSubmitter from './component/testing-param-submitter'
 
 import imgMachineLogoSrc from '../assets/img/machine-render-logo.png'
@@ -838,6 +840,44 @@ class BaseMachineControlApp extends React.Component {
 								</Stack>
 						</Stack>
 					</Box>
+				</Box>
+				<Box 
+					display="flex"
+					alignItems="center"
+					justifyContent="center">
+					<Stack
+						direction="row"
+						justifyContent="center"
+						alignContent="center"
+						spacing={1}
+						position={"relative"}
+						zIndex={1000}
+						height={40}
+						style={{
+							position: 'fixed', 
+							bottom: 0, //right: 10 originally 
+							justifyContent: 'space-around'}}>
+							<Box 
+								variant="div" 
+								style={{
+									backgroundColor: "#f4f4f4",
+									border: "1px solid lightGray",
+									borderTopLeftRadius: 5,
+									borderTopRightRadius: 5, 
+								}}
+								paddingTop={0.5}
+								paddingBottom={0.5}
+								paddingLeft={1}
+								paddingRight={1}
+								>
+								<StatusBar
+									display="flex"
+									justifyContent="center"
+									alignItems="center"
+									machineState={machineState}
+									onEmergencyStopClicked={this.handleEmergencyStop} /> 
+							</Box>
+					</Stack>
 				</Box>
 			</Box>
 		);
