@@ -395,4 +395,9 @@ export class GcodeBuilder {
             `report temps every ${timeInSeconds} seconds`);
         return this;
     }
+
+    fullShutdown() {
+        this._appendCommand(GCODE_CONSTANTS.CMD_FULL_SHUTDOWN, null, '; emergency shutdown');
+        return this;
+    }
 }
