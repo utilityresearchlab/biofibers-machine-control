@@ -44,9 +44,7 @@ import MiscUtil from './lib/machine-control/misc-util'
 import * as MachineResponseParser from './lib/machine-control/machine-response-parser';
 
 import MaterialHelper from './lib/material-util/material-helper';
-
 import SerialPortHelper from './lib/serial-util/serial-port-helper';
-
 
 const ScanPortsRefreshTimeInMs = 3000;
 
@@ -63,8 +61,6 @@ class BaseMachineControlApp extends React.Component {
 			consoleData: [],
 			availableSerialPorts: [SerialPortHelper.nonePort()],
 			machineState: MACHINE_STATE,
-			currentNozzleTemperature: BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN,
-			currentSyringeWrapTemperature: BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN,
 			selectedMaterial: MaterialHelper.availableMaterials()[0]
 		};
 
@@ -79,6 +75,7 @@ class BaseMachineControlApp extends React.Component {
 		this.handleDisconnectClick = this.handleDisconnectClick.bind(this);
 		this.handleOnReceivedSerialData = this.handleOnReceivedSerialData.bind(this);
 
+		this.handleOnChangeHeatingState = this.handleOnChangeHeatingState.bind(this);
 		this.handleOnChangeSpinningState = this.handleOnChangeSpinningState.bind(this);
 		this.handleOnChangePullDownState = this.handleOnChangePullDownState.bind(this);
 
@@ -326,6 +323,29 @@ class BaseMachineControlApp extends React.Component {
 		};
 		// Trigger sending command
 		this.props.serialCommunication.sendBufferedCommand(cmdText, onSentCallback);
+	}
+
+	// Triggered from the enable heating button
+	handleOnChangeHeatingState(setPointHeaterWrapTemp, setPointNozzleTemp) {
+		let machineState = this._getMachineState();
+
+		let gcodeBuilder = new GcodeBuilder();
+		//gcodeBuilder.retract(this.state.adjustPumpDistance, this.state.adjustPumpFeedRate);
+		if (machineState.isHeatingOn()) {
+			// Turn heaters off
+			gcodeBuilder.setTemperature(0, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
+			gcodeBuilder.setTemperature(0, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
+		} else {
+			// Turn heaters on
+			gcodeBuilder.setTemperature(setPointNozzleTemp, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
+			gcodeBuilder.setTemperature(setPointHeaterWrapTemp, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
+		}
+		const gcodeLines = gcodeBuilder.toGcode();
+		this._sendGcodeLines(gcodeLines);
+		// Update state 		
+		machineState.setHeaterWrapTempSetPoint(setPointHeaterWrapTemp);
+		machineState.setNozzleTempSetPoint(setPointNozzleTemp);
+		this._setMachineState(machineState);
 	}
 
 	handleOnChangeSpinningState(isOn) {
@@ -595,18 +615,18 @@ class BaseMachineControlApp extends React.Component {
 
 	render() {
 		// Machine state
-		const currentState = this._getMachineState();
-		const isConnected = currentState.isMachineConnected();
-		const isDisconnected = currentState.isMachineDisconnected();
-		const isSpinning = currentState.isMachineSpinning();
-		const isPullingDown = currentState.isMachinePullingDown();
-		const isHeatingOn = currentState.isHeatingOn();
+		const machineState = this._getMachineState();
+		const isConnected = machineState.isMachineConnected();
+		const isDisconnected = machineState.isMachineDisconnected();
+		const isSpinning = machineState.isMachineSpinning();
+		const isPullingDown = machineState.isMachinePullingDown();
+		const isHeatingOn = machineState.isHeatingOn();
 
-		const currentNozzleTemp = currentState.getCurrentNozzleTemp();
-		const setPointNozzleTemp = currentState.getSetpointNozzleTemp();
+		const currentNozzleTemp = machineState.getCurrentNozzleTemp();
+		const setPointNozzleTemp = machineState.getSetpointNozzleTemp();
 
-		const currentHeaterWrapTemp = currentState.getCurrentHeaterWrapTemp();
-		const setPointHeaterWrapTemp = currentState.getSetpointHeaterWrapTemp();
+		const currentHeaterWrapTemp = machineState.getCurrentHeaterWrapTemp();
+		const setPointHeaterWrapTemp = machineState.getSetpointHeaterWrapTemp();
 
 		const consoleData = this.state.consoleData;
 		const renderedSerialPortsItems = this.getRenderedSerialPortItems();
@@ -735,13 +755,9 @@ class BaseMachineControlApp extends React.Component {
                 		</Typography>         
 						<SetupParamSubmitter
 							disabled={isInputDisabled}
-							currentNozzleTemp={currentNozzleTemp}
-							currentSyringeWrapTemp={currentHeaterWrapTemp}
-							setPointNozzleTemp={setPointNozzleTemp}
-							setPointHeaterWrapTemp={setPointHeaterWrapTemp}
-							isHeatingOn={isHeatingOn}
-							isMachinePullingDown={isPullingDown}
+							machineState={machineState}
 							onChangePullDownState={this.handleOnChangePullDownState}
+							onChangeHeatingState={this.handleOnChangeHeatingState}
 							onSubmitCallback={this.handleSendCommandClick} />
 					</Box>
 

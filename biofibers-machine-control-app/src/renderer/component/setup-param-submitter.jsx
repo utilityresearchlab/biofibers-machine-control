@@ -118,21 +118,16 @@ class SetupParamSubmitter extends React.Component {
 
     handleToggleHeatersClick(event) {
         event.preventDefault();
-        let gcodeBuilder = new GcodeBuilder();
-        //gcodeBuilder.retract(this.state.adjustPumpDistance, this.state.adjustPumpFeedRate);
-        if (this.props.isHeatingOn) {
-            // Turn heaters off
-            gcodeBuilder.setTemperature(0, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
-            gcodeBuilder.setTemperature(0, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
+        if (this.props.onChangeHeatingState) {
+            const isHeating = this.props.machineState.isHeatingOn();
+            if (!isHeating) {
+                // Enable Heating
+                this.props.onChangeHeatingState(this.state.inputHeaterWrapSetPoint, this.state.inputNozzleTempSetPoint);
         } else {
-            // Turn heaters on
-            gcodeBuilder.setTemperature(this.state.inputNozzleTempSetPoint, false, BF_CONSTANTS.HEATER_NOZZLE_TOOL_ID);
-            gcodeBuilder.setTemperature(this.state.inputHeaterWrapSetPoint, false, BF_CONSTANTS.HEATER_SYRINGE_WRAP_TOOL_ID);
+                // Disable Heating
+                this.props.onChangeHeatingState(0, 0);
         }
-        const gcodeLines = gcodeBuilder.toGcode();
-        gcodeLines.forEach((line, index) => {
-            this.handleSubmitCommand(event, line);
-        });
+        }
     }
 
     handlePurgeClick(event) {
@@ -240,27 +235,34 @@ class SetupParamSubmitter extends React.Component {
 
     render() {
         const renderedMaterialItems = this.getRenderedMaterialItems();
-        const isMachinePullingDown = this.props.isMachinePullingDown;
+        const machineState = this.props.machineState;
+
+        const isMachinePullingDown = machineState.isMachinePullingDown();
+        const currentNozzleTemp = machineState.getCurrentNozzleTemp();
+        const setPointNozzleTemp = machineState.getSetpointNozzleTemp(); 
+        const currentSyringeWrapTemp = machineState.getCurrentHeaterWrapTemp();
+        const setPointSyringeWrapTemp = machineState.getSetpointHeaterWrapTemp();
+        const isHeatingOn = machineState.isHeatingOn();
+
+
         
-        const heaterWrapCurrentTemp = this.props.currentSyringeWrapTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
-        const heaterWrapSetPoint = this.props.setPointHeaterWrapTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
+        const heaterWrapCurrentTemp = currentSyringeWrapTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
+        const heaterWrapSetPoint = setPointSyringeWrapTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
         const isOnHeaterWrapTemp = heaterWrapSetPoint > BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN; 
         const isHeaterWrapTempReached = Math.abs(heaterWrapCurrentTemp - heaterWrapSetPoint) <= BF_CONSTANTS.TEMPERATURE_DEVIATION_AMOUNT;
-        let heaterWrapStatusColor = "body";
+        let heaterWrapStatusColor = "special.gray";
         if (isOnHeaterWrapTemp && isHeaterWrapTempReached) {
             heaterWrapStatusColor = "special.success";
         } else if (isOnHeaterWrapTemp) {
             heaterWrapStatusColor = "special.warning";
         }
 
-        const nozzleCurrentTemp = this.props.currentNozzleTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
-        const nozzleSetPoint = this.props.setPointNozzleTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
+        const nozzleCurrentTemp = currentNozzleTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
+        const nozzleSetPoint = setPointNozzleTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
         const isOnNozzleTemp = nozzleSetPoint > BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN; 
         const isNozzleTempReached = Math.abs(nozzleCurrentTemp - nozzleSetPoint) <= BF_CONSTANTS.TEMPERATURE_DEVIATION_AMOUNT;
 
-        const isHeatingOn = this.props.isHeatingOn;
-
-        let nozzleTempStatusColor = "body";
+        let nozzleTempStatusColor = "special.gray";
         if (isOnNozzleTemp && isNozzleTempReached) {
             nozzleTempStatusColor = "special.success";
         } else if (isOnNozzleTemp) {
