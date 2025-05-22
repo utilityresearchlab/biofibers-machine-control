@@ -78,8 +78,10 @@ class BaseMachineControlApp extends React.Component {
 		this.handleOnChangeHeatingState = this.handleOnChangeHeatingState.bind(this);
 		this.handleOnChangeSpinningState = this.handleOnChangeSpinningState.bind(this);
 		this.handleOnChangePullDownState = this.handleOnChangePullDownState.bind(this);
-
+		
 		this.handleOnSendMultipleSpinningCommands = this.handleOnSendMultipleSpinningCommands.bind(this);
+
+		this.handleEmergencyStop = this.handleEmergencyStop.bind(this);
 	}
 
 	_getMachineState() {
@@ -518,6 +520,17 @@ class BaseMachineControlApp extends React.Component {
 		// Execute the timeout function
 		let cmdCount = 1;
 		sendMultipleCommandsTimeout(spinningCommand, cmdCount, numCommands);
+	}
+
+	// Fired when an emergency stop is triggered
+	handleEmergencyStop() {
+		const gcodeBuilder = new GcodeBuilder();
+		const gcodeLines = gcodeBuilder
+			.fullShutdown()
+			.toGcode();
+		this._sendGcodeLines(gcodeLines);
+
+		// Cancel all commands and time outs 
 	}
 
 	// Console Data //
