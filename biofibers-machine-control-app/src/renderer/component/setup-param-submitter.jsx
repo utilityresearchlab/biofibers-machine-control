@@ -123,10 +123,10 @@ class SetupParamSubmitter extends React.Component {
             if (!isHeating) {
                 // Enable Heating
                 this.props.onChangeHeatingState(this.state.inputHeaterWrapSetPoint, this.state.inputNozzleTempSetPoint);
-        } else {
+            } else {
                 // Disable Heating
                 this.props.onChangeHeatingState(0, 0);
-        }
+            }
         }
     }
 
