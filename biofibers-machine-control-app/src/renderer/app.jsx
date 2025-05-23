@@ -554,13 +554,27 @@ class BaseMachineControlApp extends React.Component {
 
 	// Fired when an emergency stop is triggered
 	handleEmergencyStop() {
+		// Update machine state to trigger stopping sending commands
+		const machineState = this._getMachineState();
+		machineState.setMachineEmergencyStopped();
+		this._setMachineState(machineState);
+
+		// Prepare stop command
 		const gcodeBuilder = new GcodeBuilder();
 		const gcodeLines = gcodeBuilder
 			.fullShutdown()
 			.toGcode();
-		this._sendGcodeLines(gcodeLines);
 
-		// Cancel all commands and time outs 
+		// Forcibly clear the send buffers
+		this.props.serialCommunication.clearSendQueueBuffers();
+
+		// Queue e-stop command immediately
+		this._sendGcodeLines(gcodeLines, true);
+
+		const newData = new ConsoleDataItem("EMERGENCY STOP CALLED!", Date.now(), ConsoleDataType.ERROR);
+		this.setState(prevState => ({
+			consoleData: [...prevState.consoleData, newData]
+		}));		
 	}
 
 	// Console Data //
