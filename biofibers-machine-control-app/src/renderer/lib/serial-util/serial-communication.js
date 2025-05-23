@@ -89,14 +89,16 @@ class SerialCommunication {
 						return value.id;
 					});
 					const itemIndex = cmdIds.indexOf(id);
-					const currentCommandObject = that.sendCommandQueue[itemIndex];
-					// Remove from the send command queue
-					that.sendCommandQueue.splice(itemIndex, 1);
-
-					// Add to the pending command queue
-					if (currentCommandObject) {
-						that.pendingCommandQueue.push(currentCommandObject);
-						LOGGER.logD("Sent command from send queue and put in pending:", currentCommandObject);
+					if (itemIndex >= 0) {
+						// ensure the index exists
+						const currentCommandObject = that.sendCommandQueue[itemIndex];
+						// Remove from the send command queue
+						that.sendCommandQueue.splice(itemIndex, 1);
+						// Add to the pending command queue
+						if (currentCommandObject) {
+							that.pendingCommandQueue.push(currentCommandObject);
+							LOGGER.logD("Sent command from send queue and put in pending:", currentCommandObject);
+						}
 					}
 				}
 				if (callback) {
@@ -107,9 +109,15 @@ class SerialCommunication {
 		}, this.sendCommandIntervalTime);
 	}
 
+	// Clears the buffers
+	clearSendQueueBuffers() {
+		this._resetSendCommandQueues();
+	}
+
 	// Adds a command with an ID to the buffer for sending that gets processes by 
 	// the sendCommandLoop interval with Id: `sendCommandBufferIntervalId`
-	sendBufferedCommand(cmd, onSentCallback) {
+	// Note: `shouldSendImmediately` puts the commands at the front of the queue
+	sendBufferedCommand(cmd, onSentCallback, shouldSendImmediately=false) {
 		if (!this.serialPort || !this.serialPort.isOpen) {
 			LOGGER.logD("can't send command; serial port is closed");
 			if (onSentCallback) {
@@ -123,7 +131,11 @@ class SerialCommunication {
 		}
 
 		let sendCmd = this._createSendCommand(cmd, onSentCallback);
-		this.sendCommandQueue.push(sendCmd);
+		if (shouldSendImmediately) {
+			this.sendCommandQueue.unshift(sendCmd);
+		} else {
+			this.sendCommandQueue.push(sendCmd);
+		}
 		return true;
 	}
 
