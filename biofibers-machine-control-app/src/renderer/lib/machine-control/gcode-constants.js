@@ -4,7 +4,7 @@ export const GCODE_FILE_EXTENSION = ".gcode";
 // Various GCode Commands
 export const CMD_CHANGE_TOOL = 'T';
 
-export const CMD_DISABLE_MOTORS = 'M86';
+export const CMD_DISABLE_MOTORS = 'M84';
 export const CMD_ENABLE_FAN = 'M106';
 export const CMD_DISABLE_FANS = 'M107';
 
