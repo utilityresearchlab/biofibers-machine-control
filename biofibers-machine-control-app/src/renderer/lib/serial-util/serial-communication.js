@@ -26,6 +26,7 @@ class SerialCommunication {
 		this.isReceiving = false;
 		this.sendCommandIntervalTime = sendCommandIntervalTime;
 		this.sendCommandBufferIntervalId = null;
+		this.lastSendCommandTimestamp = 0;
 		this.sendCommandQueue = [];	
 		this.pendingCommandQueue = [];	
 		this.nackLineCounter = new SafeCounter(); // number of lines that did not receive ok
@@ -77,9 +78,15 @@ class SerialCommunication {
 			// }
 
 			const {cmd, callback, id, timestamp} = queue.at(0);
-			this.serialPort.write(cmd + endOfCommand, (err) => {
+			that.serialPort.write(cmd + endOfCommand, (err) => {
 				if (err) {
 					LOGGER.logE("Error on write: ", err.message);
+				}
+			});
+			// Drain serial to write data
+			that.serialPort.drain((err2) => {
+				if (err2) {
+					LOGGER.logE("Error on write: ", err2.message);
 				} else {
 					//const numCmd = cmd.split(endOfCommand).length;
 					that.nackLineCounter.increment();
@@ -102,8 +109,10 @@ class SerialCommunication {
 					}
 				}
 				if (callback) {
-					callback(cmd, err);
+					callback(cmd, err2);
 				}
+				LOGGER.logD("Serial drained!");
+				that.lastSendCommandTimestamp = Date.now();
 			});
 			
 		}, this.sendCommandIntervalTime);
