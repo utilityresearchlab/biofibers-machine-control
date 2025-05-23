@@ -132,6 +132,7 @@ class SerialCommunication {
 
 		let sendCmd = this._createSendCommand(cmd, onSentCallback);
 		if (shouldSendImmediately) {
+			sendCmd.timestamp = 0;
 			this.sendCommandQueue.unshift(sendCmd);
 		} else {
 			this.sendCommandQueue.push(sendCmd);
@@ -210,8 +211,9 @@ class SerialCommunication {
 						// Make sure we don't have undefined commands
 						if (item) { 
 							LOGGER.logD("Moving command from Pending to Send Queue", item);
-							// Put item back onto the send queue at the front
-							that.sendCommandQueue.unshift(item);
+							// Put item back onto the send queue in time-based order
+							that.sendCommandQueue.push(item);
+							that.sendCommandQueue.sort((a, b) => a.timestamp - b.timestamp);
 						}
 					}
 				} 
