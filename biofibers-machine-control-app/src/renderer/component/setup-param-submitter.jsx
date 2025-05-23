@@ -14,6 +14,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import HomeIcon from '@mui/icons-material/Home';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
@@ -41,6 +42,7 @@ class SetupParamSubmitter extends React.Component {
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
         this.handleSetRelativeClick = this.handleSetRelativeClick.bind(this);
+        this.handleDisableMotorsClick = this.handleDisableMotorsClick.bind(this);
         this.handleExtrudePumpClick = this.handleExtrudePumpClick.bind(this);
         this.handleRetractPumpClick = this.handleRetractPumpClick.bind(this);
         this.handleToggleHeatersClick = this.handleToggleHeatersClick.bind(this);
@@ -85,6 +87,16 @@ class SetupParamSubmitter extends React.Component {
             .useRelativeCoordinates()
             .useRelativeExtrusionDistances()
             .resetExtrusionDistance()
+            .toGcode();
+        gcodeLines.forEach((line, index) => {
+            this.handleSubmitCommand(event, line);
+        });
+    }
+
+    handleDisableMotorsClick(event) {
+        let gcodeBuilder = new GcodeBuilder();
+        const gcodeLines = gcodeBuilder
+            .disableMotors()
             .toGcode();
         gcodeLines.forEach((line, index) => {
             this.handleSubmitCommand(event, line);
@@ -244,6 +256,14 @@ class SetupParamSubmitter extends React.Component {
                         disabled={this.props.disabled}
                         onClick={this.handleSetRelativeClick} >
                         Set Axes to Relative
+                    </Button>
+                    <Button
+                        size="medium"
+                        variant="outlined"
+                        startIcon={<LockOpenIcon/>}
+                        disabled={this.props.disabled}
+                        onClick={this.handleDisableMotorsClick} >
+                        Unlock Motors {/* Disable Motors */}
                     </Button>
                 </Stack>
 
