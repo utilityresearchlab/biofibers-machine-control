@@ -26,7 +26,6 @@ class SerialCommunication {
 		this.isReceiving = false;
 		this.sendCommandIntervalTime = sendCommandIntervalTime;
 		this.sendCommandBufferIntervalId = null;
-		this.lastSendCommandTimestamp = 0;
 		this.sendCommandQueue = [];	
 		this.pendingCommandQueue = [];	
 		this.nackLineCounter = new SafeCounter(); // number of lines that did not receive ok
@@ -77,42 +76,35 @@ class SerialCommunication {
 			// 	//return false;
 			// }
 
-			const {cmd, callback, id, timestamp} = queue.at(0);
+			const currentCommandObject = queue.splice(0, 1)[0];
+			const {cmd, callback, id, timestamp} = currentCommandObject;
+
+			// Add to the pending command queue
+			if (currentCommandObject) {
+				that.pendingCommandQueue.push(currentCommandObject);
+				LOGGER.logD("Writing and moving command from send queue to pending:", currentCommandObject);
+			}
+
+			// Write command
 			that.serialPort.write(cmd + endOfCommand, (err) => {
 				if (err) {
 					LOGGER.logE("Error on write: ", err.message);
 				}
 			});
-			// Drain serial to write data
+
+			// Drain serial to write data to machine immediately
 			that.serialPort.drain((err2) => {
 				if (err2) {
-					LOGGER.logE("Error on write: ", err2.message);
+					LOGGER.logE("Error on drain: ", err2.message);
 				} else {
 					//const numCmd = cmd.split(endOfCommand).length;
 					that.nackLineCounter.increment();
 					LOGGER.log("Command Sent: ", cmd);
-
-					const cmdIds = that.sendCommandQueue.map((value) => { 
-						return value.id;
-					});
-					const itemIndex = cmdIds.indexOf(id);
-					if (itemIndex >= 0) {
-						// ensure the index exists
-						const currentCommandObject = that.sendCommandQueue[itemIndex];
-						// Remove from the send command queue
-						that.sendCommandQueue.splice(itemIndex, 1);
-						// Add to the pending command queue
-						if (currentCommandObject) {
-							that.pendingCommandQueue.push(currentCommandObject);
-							LOGGER.logD("Sent command from send queue and put in pending:", currentCommandObject);
-						}
-					}
 				}
 				if (callback) {
 					callback(cmd, err2);
 				}
 				LOGGER.logD("Serial drained!");
-				that.lastSendCommandTimestamp = Date.now();
 			});
 		}, this.sendCommandIntervalTime);
 	}
