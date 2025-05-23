@@ -674,6 +674,7 @@ class BaseMachineControlApp extends React.Component {
 		// Machine state
 		const machineState = this._getMachineState();
 		const isConnected = machineState.isMachineConnected();
+		const isEmergencyStopped = machineState.isMachineEmergencyStopped();
 		const isDisconnected = machineState.isMachineDisconnected();
 		const isSpinning = machineState.isMachineSpinning();
 		const isPullingDown = machineState.isMachinePullingDown();
@@ -694,7 +695,7 @@ class BaseMachineControlApp extends React.Component {
 		// const serialCommIsConnected = (this.props.serialCommunication) ? this.props.serialCommunication.isConnected() : false;
 		// const serialCommIsDisconnected = !serialCommIsConnected;
 		//const isInputDisabled = serialCommIsDisconnected && !this.props.isDebugging;
-		const isInputDisabled = serialCommIsDisconnected && !this.props.isDebugging;
+		const isInputDisabled = (serialCommIsDisconnected && !this.props.isDebugging) || isEmergencyStopped;
 		const githubUrl = APP_SETTINGS.BIOFIBERS_GITHUB_URL;
 		const currentYear = new Date().getFullYear();
 		return (
