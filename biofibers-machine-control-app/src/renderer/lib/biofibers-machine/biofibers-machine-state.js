@@ -60,24 +60,29 @@ export class BiofibersMachineState {
         return this._setPointHeaterWrapTemp > 0 || this._setPointNozzleTemp > 0;
     }
 
-    resetHeatingSetpoints() {
+    resetHeatingState() {
+        this._currentHeaterWrapTemp = BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN;
         this._setPointHeaterWrapTemp = 0;
+        
+        this._currentNozzleTemp = BF_CONSTANTS.EXTRUDER_TEMPERATURE_MIN;
         this._setPointNozzleTemp = 0;
     }
 
     setMachineDisconnected() {
         this._state = MACHINE_STATE_IS_DISCONNECTED;
+        this.resetHeatingState();
     }
 
     setMachineConnected() {
         this._state = MACHINE_STATE_IS_CONNECTED;
+        this.resetHeatingState();
     }
 
     setMachineEmergencyStopped() {
         this._state |= MACHINE_STATE_IS_EMERGENCY_STOPPED;
         this.setMachineIsPullingDown(false);
         this.setMachineIsSpinning(false);
-        this.resetHeatingSetpoints();
+        this.resetHeatingState();
     }
     
     setMachineIsSpinning(isOn) {
