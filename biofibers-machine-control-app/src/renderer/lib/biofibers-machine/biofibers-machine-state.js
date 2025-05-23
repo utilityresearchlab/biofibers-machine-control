@@ -60,6 +60,11 @@ export class BiofibersMachineState {
         return this._setPointHeaterWrapTemp > 0 || this._setPointNozzleTemp > 0;
     }
 
+    resetHeatingSetpoints() {
+        this._setPointHeaterWrapTemp = 0;
+        this._setPointNozzleTemp = 0;
+    }
+
     setMachineDisconnected() {
         this._state = MACHINE_STATE_IS_DISCONNECTED;
     }
@@ -72,6 +77,7 @@ export class BiofibersMachineState {
         this._state |= MACHINE_STATE_IS_EMERGENCY_STOPPED;
         this.setMachineIsPullingDown(false);
         this.setMachineIsSpinning(false);
+        this.resetHeatingSetpoints();
     }
     
     setMachineIsSpinning(isOn) {
