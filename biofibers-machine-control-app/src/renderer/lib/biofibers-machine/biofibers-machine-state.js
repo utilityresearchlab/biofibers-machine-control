@@ -70,6 +70,8 @@ export class BiofibersMachineState {
 
     setMachineEmergencyStopped() {
         this._state |= MACHINE_STATE_IS_EMERGENCY_STOPPED;
+        this.setMachineIsPullingDown(false);
+        this.setMachineIsSpinning(false);
     }
     
     setMachineIsSpinning(isOn) {
