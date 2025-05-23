@@ -25,7 +25,10 @@ function countDecimals(value) {
 
 function toMinimumPrecision(value, maxPrecision=5) {
 	if (value === null || value == '') {
-		return '';
+		return 0;
+	}
+	if (value === 0) {
+		return 0;
 	}
 	const decimalCount = countDecimals(value);
 	if (decimalCount == 0) {
