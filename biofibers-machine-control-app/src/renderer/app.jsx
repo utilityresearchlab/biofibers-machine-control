@@ -97,7 +97,8 @@ class BaseMachineControlApp extends React.Component {
 			machineState: state
 		}, callback);
 
-		if (state.isMachineDisconnected()) {
+		// If we were disconnected or emergency stopped kill any send intervals
+		if (state.isMachineDisconnected() || state.isMachineEmergencyStopped()) {
 			// clear interval for pull-down or spinning
 			if (this.state.nIntervalId) {
 				clearInterval(this.state.nIntervalId);
@@ -157,6 +158,17 @@ class BaseMachineControlApp extends React.Component {
 		// Send start g-code
 		const that = this;
 		setTimeout(() => {
+			if (that._getMachineState().isMachineDisconnected()) {
+				// if we've disconnected, stop sending commands
+				LOGGER.logD("Cancelling start gcode timeout (Disconnected).");
+				return;
+			}
+
+			if (that._getMachineState().isMachineEmergencyStopped()) {
+				// if we have an E-stop exit immediately
+				LOGGER.logD("Cancelling start gcode timeout (EMERGENCY STOPPED).");
+				return;
+			}
 			const initMachineGcodeLines = new GcodeBuilder()
 			.comment('Machine Init G-Code')
 			.reportTemperaturesImmediately()
@@ -390,6 +402,18 @@ class BaseMachineControlApp extends React.Component {
 			let isInitialRun = true;
 			const that = this;
 			let intervalId = setInterval(() => {
+				if (that._getMachineState().isMachineDisconnected()) {
+					// if we've disconnected, stop sending commands
+					LOGGER.logD("Cancelling sending pull down command interval (Disconnected).");
+					return;
+				}
+
+				if (that._getMachineState().isMachineEmergencyStopped()) {
+					// if we have an E-stop exit immediately
+					LOGGER.logD("Cancelling sending pull down command interval (EMERGENCY STOPPED).");
+					return;
+				}
+
 				const defaultParams = MaterialHelper.defaultParams()[this.state.selectedMaterial];
 
 				// TODO (mrivera): replace with E, X, F for pull-down inputs in interface
@@ -455,8 +479,7 @@ class BaseMachineControlApp extends React.Component {
 		}
 
 		if (this._getMachineState().isMachinePullingDown()) {
-			// TODO (mrivera) - this causes a disconnection due to the state change
-			// 	// If we're pulling down, we cancel the pull-down to send spinning commands
+			// If we're pulling down, we cancel the pull-down to send spinning commands
 		 	this.handleOnChangePullDownState(false);
 		}
 	
@@ -499,6 +522,11 @@ class BaseMachineControlApp extends React.Component {
 				if (that._getMachineState().isMachineDisconnected()) {
 					// if we've disconnected, stop sending commands
 					LOGGER.logD("Cancelling sending spinning command in timeout (Disconnected).");
+					return;
+				}
+				if (that._getMachineState().isMachineEmergencyStopped()) {
+					// if we have an E-stop exit immediately
+					LOGGER.logD("Cancelling sending spinning command in timeout (EMERGENCY STOPPED).");
 					return;
 				}
 				// Send the command
