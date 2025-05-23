@@ -83,7 +83,7 @@ class BaseMachineControlApp extends React.Component {
 		
 		this.handleOnSendMultipleSpinningCommands = this.handleOnSendMultipleSpinningCommands.bind(this);
 
-		this.handleEmergencyStop = this.handleEmergencyStop.bind(this);
+		this.handleEmergencyStopClicked = this.handleEmergencyStopClicked.bind(this);
 	}
 
 	_getMachineState() {
@@ -553,7 +553,7 @@ class BaseMachineControlApp extends React.Component {
 	}
 
 	// Fired when an emergency stop is triggered
-	handleEmergencyStop() {
+	handleEmergencyStopClicked() {
 		// Update machine state to trigger stopping sending commands
 		const machineState = this._getMachineState();
 		machineState.setMachineEmergencyStopped();
@@ -583,11 +583,11 @@ class BaseMachineControlApp extends React.Component {
 		const dataString = data.toString();
 		const parsedResult = MachineResponseParser.parseResponse(dataString);
 		let consoleDataType = ConsoleDataType.RECEIVED;
+		const machineState = this._getMachineState();
 		switch (parsedResult.responseType) {
 			case MachineResponseParser.RESPONSE_TYPE.TEMPERATURE_STATUS:
 				// update temps
 				consoleDataType = ConsoleDataType.RECEIVED_STATUS;
-				let machineState = this._getMachineState();
 				const tempData = parsedResult.parsedData;  
 				for (let i = 0; i < tempData.length; i += 1) {
 					const item = tempData[i];
@@ -614,7 +614,11 @@ class BaseMachineControlApp extends React.Component {
 				this._setMachineState(machineState);
 				break;
 			case MachineResponseParser.RESPONSE_TYPE.ERROR:
-				// handle error
+			case MachineResponseParser.RESPONSE_TYPE.EMERGENCY_STOP:
+				// Update machine state to trigger stopping sending commands
+				machineState.setMachineEmergencyStopped();
+				this._setMachineState(machineState);
+				consoleDataType = ConsoleDataType.ERROR;
 				break;
 			case MachineResponseParser.RESPONSE_TYPE.UNKNOWN:
 			default: 
@@ -918,7 +922,7 @@ class BaseMachineControlApp extends React.Component {
 									justifyContent="center"
 									alignItems="center"
 									machineState={machineState}
-									onEmergencyStopClicked={this.handleEmergencyStop} /> 
+									onEmergencyStopClicked={this.handleEmergencyStopClicked} /> 
 							</Box>
 					</Stack>
 				</Box>
