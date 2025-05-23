@@ -508,7 +508,7 @@ class BaseMachineControlApp extends React.Component {
 			.comment(`spinning command ${1} of ${numCommands}`)
 			.toGcodeString(); 
 		this._sendGcodeLines([commandComment, spinningCommand]);
-		LOGGER.logD(`Spinning command sent ${1} of ${numCommands}: ${spinningCommand} with interval time ${timeoutTimeMs}`);
+		LOGGER.logD(`Spinning command sent ${1} of ${numCommands} with interval time ${timeoutTimeMs}: ${spinningCommand} `);
 
 		// If only 1 command, we exit early
 		if (numCommands == 1) {
@@ -538,7 +538,7 @@ class BaseMachineControlApp extends React.Component {
 
 				// Increment our cmdCount after sending
 				currentCommandCount += 1;
-				LOGGER.logD(`Spinning command sent ${currentCommandCount} of ${originalNumCommands}: ${cmd} with interval time ${timeoutTimeMs}`);
+				LOGGER.logD(`Spinning command sent ${currentCommandCount} of ${originalNumCommands} with interval time ${timeoutTimeMs}: ${cmd} `);
 
 
 				// If we have commands left, schedule the next timeout
