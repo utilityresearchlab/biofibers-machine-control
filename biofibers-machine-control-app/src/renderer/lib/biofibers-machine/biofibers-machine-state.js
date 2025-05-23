@@ -5,6 +5,7 @@ const MACHINE_STATE_IS_DISCONNECTED = 0x00;
 const MACHINE_STATE_IS_CONNECTED = 0x01;
 const MACHINE_STATE_IS_SPINNING = 0x02; 
 const MACHINE_STATE_IS_PULLING_DOWN = 0x04; 
+const MACHINE_STATE_IS_EMERGENCY_STOPPED = 0x80;
 
 export class BiofibersMachineState {
    
@@ -66,6 +67,10 @@ export class BiofibersMachineState {
     setMachineConnected() {
         this._state = MACHINE_STATE_IS_CONNECTED;
     }
+
+    setMachineEmergencyStopped() {
+        this._state |= MACHINE_STATE_IS_EMERGENCY_STOPPED;
+    }
     
     setMachineIsSpinning(isOn) {
         if (isOn) {
@@ -99,6 +104,10 @@ export class BiofibersMachineState {
 
     isMachineDisconnected() {
         return !this.isMachineConnected();
+    }
+
+    isMachineEmergencyStopped() {
+       return this._isBitOn(MACHINE_STATE_IS_EMERGENCY_STOPPED);
     }
 
     // Internal methods
