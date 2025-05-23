@@ -3,11 +3,6 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-
 import Stack from '@mui/material/Stack';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -22,15 +17,13 @@ import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
-import SwipeDownAltIcon from '@mui/icons-material/SwipeDownAlt';
+
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 
 import ConstrainedNumberTextField from './constrained-number-text-field'
 import * as BF_CONSTANTS from '../lib/biofibers-machine/biofibers-machine-constants'
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
-import MaterialHelper from '../lib/material-util/material-helper';
-import MathUtil from '../lib/math-util'
-import MiscUtil from '../lib/machine-control/misc-util';
+
 
 class SetupParamSubmitter extends React.Component {
     constructor(props) {
@@ -44,9 +37,6 @@ class SetupParamSubmitter extends React.Component {
             inputHeaterWrapSetPoint: 52,
             collectorSpeed: 100,
             collectorDirection: BF_CONSTANTS.COLLECTOR_DIRECTION_STOPPED, // stopped by default
-            pullDownInProgress: false,
-            nIntervalId: null,
-            selectedMaterial: MaterialHelper.availableMaterials()[0]
         };
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
@@ -58,10 +48,7 @@ class SetupParamSubmitter extends React.Component {
         this.handlePurgeClick = this.handlePurgeClick.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
         this.handleOnDirectionChange = this.handleOnDirectionChange.bind(this);
-        this.handleStartPullDownClick = this.handleStartPullDownClick.bind(this);
-        this.handleStopPullDownClick = this.handleStopPullDownClick.bind(this);
         this.handleOnKeyUp = this.handleOnKeyUp.bind(this);
-        this.handleOnSelectMaterial = this.handleOnSelectMaterial.bind(this);
     }
 
     handleSubmitCommand(event, command) {
@@ -136,25 +123,12 @@ class SetupParamSubmitter extends React.Component {
         this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
     }
 
-    handleStartPullDownClick(event) {
-        if (this.props.onChangePullDownState) {
-            this.props.onChangePullDownState(true);
-        }
-    }
-
-    handleStopPullDownClick(event) {
-        if (this.props.onChangePullDownState) {
-            this.props.onChangePullDownState(false);
-        }
-    }
-
     handleOnChange(event) {
         const { name, value } = event.target;
         this.setState({
             [name]: value ? Number(value) : 0
         });
     }
-
 
     handleOnDirectionChange(event, newDirection) {
         if (newDirection !== null 
@@ -179,26 +153,6 @@ class SetupParamSubmitter extends React.Component {
             this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
         }
 
-    }
-
-    handleOnSelectMaterial(event) {
-        const material = String(event.target.value);
-        this.setState({ 
-            selectedMaterial: material 
-        });
-    }
-
-    getRenderedMaterialItems() {
-        const availableMaterials = MaterialHelper.availableMaterials();
-        let renderedMaterialItems = availableMaterials.map((item, index) => {
-            const value = item.toString();
-            return (
-                <MenuItem
-                    key={"item-material-" + value}
-                    value={value}>{value}</MenuItem>
-            )
-        });
-        return renderedMaterialItems;
     }
 
     // Trigger submmit command if we press enter in the textbox
@@ -234,18 +188,13 @@ class SetupParamSubmitter extends React.Component {
     }
 
     render() {
-        const renderedMaterialItems = this.getRenderedMaterialItems();
         const machineState = this.props.machineState;
-
-        const isMachinePullingDown = machineState.isMachinePullingDown();
         const currentNozzleTemp = machineState.getCurrentNozzleTemp();
         const setPointNozzleTemp = machineState.getSetpointNozzleTemp(); 
         const currentSyringeWrapTemp = machineState.getCurrentHeaterWrapTemp();
         const setPointSyringeWrapTemp = machineState.getSetpointHeaterWrapTemp();
         const isHeatingOn = machineState.isHeatingOn();
 
-
-        
         const heaterWrapCurrentTemp = currentSyringeWrapTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
         const heaterWrapSetPoint = setPointSyringeWrapTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
         const isOnHeaterWrapTemp = heaterWrapSetPoint > BF_CONSTANTS.HEATER_WRAP_TEMPERATURE_MIN; 
@@ -526,43 +475,6 @@ class SetupParamSubmitter extends React.Component {
                             </span>
                         </Tooltip>
                     </ToggleButtonGroup>
-                </Stack>
-                <Stack
-                    direction="row"
-                    justifyContent="left"
-                    alignItems="left"
-                    spacing={1}
-                    p={1}>
-                    <FormControl size="small" sx={{ mb: 1, mr: 1, minWidth: 300 }}>
-                        <InputLabel id="material-label">Material</InputLabel>
-                        <Select
-                            labelId="material"
-                            id="material-select"
-                            label="Material"
-                            value={this.state.selectedMaterial}
-                            onChange={this.handleOnSelectMaterial}
-                            disabled={this.props.disabled}
-                            MenuProps={{
-                                disableScrollLock: true, // stop scroll bar in window from popping
-                              }}>
-                            {renderedMaterialItems}
-                        </Select>
-                    </FormControl>
-                    <Box variant="div" sx={{display: 'flex'}}>
-                        <Button
-                            variant="outlined"
-                            size="medium"
-                            disabled={this.props.disabled}
-                            color={(isMachinePullingDown) ? "error" : "success"}
-                            startIcon={<SwipeDownAltIcon />}
-                            onClick={(isMachinePullingDown)
-                                ? this.handleStopPullDownClick
-                                : this.handleStartPullDownClick} >
-                            {(isMachinePullingDown)
-                                ? 'Stop Pull-Down'
-                                : 'Start Pull-Down'}
-                        </Button>
-                    </Box>
                 </Stack>
             </Box>
         );
