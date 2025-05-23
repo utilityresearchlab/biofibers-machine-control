@@ -343,7 +343,14 @@ class BaseMachineControlApp extends React.Component {
 			// Update console log
 			that.addConsoleData(consoleMessage, messageDataType);
 		};
-		// Trigger sending command
+		// If command is a comment, as comments do not send on serial as these do not generate responses
+		const commentStartIndex = cmdText.indexOf(GCODE_CONSTANTS.COMMENT_PREFIX);
+		if (commentStartIndex == 0 || commentStartIndex == 1) {
+			// Instead, immediately trigger callbackk to update console
+			onSentCallback(cmdText);
+			return;
+		}
+		// Otherwise, queue command for sending
 		this.props.serialCommunication.sendBufferedCommand(cmdText, onSentCallback, shouldSendImmediately);
 	}
 
