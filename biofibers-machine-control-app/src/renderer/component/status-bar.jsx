@@ -95,6 +95,10 @@ class StatusBar extends React.Component {
             machineStatusText = "Spinning - In Progress ";
             shortMachineStatusText = "Spinning";
             machineStatusColorSetup = "special.warning";
+        } else if (machineState.isMachineEmergencyStopped()) {
+            machineStatusText = "Emergency Stop Called! ";
+            shortMachineStatusText = "Stopped";
+            machineStatusColorSetup = "special.error";
         } else {
             // Connected but no status
             machineStatusText = "Machine Idle";
@@ -109,6 +113,8 @@ class StatusBar extends React.Component {
                 return (<SwipeDownAltIcon sx={iconSx} color={machineStatusColor} />);
             } else if (machineState.isMachineSpinning()) {
                 return (<AutoModeIcon sx={iconSx} color={machineStatusColor} />)
+            } else if (machineState.isMachineEmergencyStopped()) {
+                return (<DangerousIcon sx={iconSx} color={machineStatusColor} />) 
             } else {
                 // Connected but no status
                 return (<PendingOutlinedIcon sx={iconSx} color={machineStatusColor} />);
