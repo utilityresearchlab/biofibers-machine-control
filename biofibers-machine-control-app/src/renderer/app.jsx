@@ -62,12 +62,15 @@ class BaseMachineControlApp extends React.Component {
 			baudRate: this.props.serialCommunication.baudRate,
 			consoleData: [],
 			availableSerialPorts: [SerialPortHelper.nonePort()],
+			refreshSerialPortsInterval: null, // for serialport listening
 			machineState: MACHINE_STATE,
 			selectedMaterial: MaterialHelper.availableMaterials()[0]
 		};
 
 		// init serialport listening
-		this.refreshSerialPortsInterval = null;
+		//this.refreshSerialPortsInterval = null;
+		// Bind Serial Intervals to use this
+		this.listenForAvailableSerialPorts = this.listenForAvailableSerialPorts.bind(this);
 
 		// Bind events to use "this" in callback
 		this.handleOnSelectSerialPort = this.handleOnSelectSerialPort.bind(this);
@@ -123,15 +126,15 @@ class BaseMachineControlApp extends React.Component {
 
 	componentWillUnmount() {
 		this.props.serialCommunication.disconnect();
-		if (this.refreshSerialPortsInterval) {
-			clearTimeout(this.refreshSerialPortsInterval);
+		if (this.state.refreshSerialPortsInterval) {
+			clearTimeout(this.state.refreshSerialPortsInterval);
 		}
 	}
 
 	listenForAvailableSerialPorts() {
 		const that = this;
-		if (this.refreshSerialPortsInterval) {
-			clearInterval(this.refreshSerialPortsInterval);
+		if (this.state.refreshSerialPortsInterval) {
+			clearInterval(this.state.refreshSerialPortsInterval);
 		}
 		// updates serial ports
 		const triggerUpdateSerialPortsList = () => {
@@ -143,9 +146,13 @@ class BaseMachineControlApp extends React.Component {
 		triggerUpdateSerialPortsList();
 
 		// Then set interval
-		this.refreshSerialPortsInterval = setInterval(() => {
+		let refreshSerialPortsInterval = setInterval(() => {
 			triggerUpdateSerialPortsList();
+
 		}, ScanPortsRefreshTimeInMs);
+		this.setState({
+			refreshSerialPortsInterval: refreshSerialPortsInterval
+		});
 	}
 
 	// Sends the start g-code for our machine and updates machine state
@@ -195,13 +202,12 @@ class BaseMachineControlApp extends React.Component {
 	handleUpdateAvailableSerialPorts(updatedPortsInfo, err) {
 		if (err) {
 			LOGGER.logE(err);
-			// todo show port info in console?
 		}
 		const updatedPorts = (err || !updatedPortsInfo || updatedPortsInfo.length == 0)
 			? [SerialPortHelper.nonePort()]
 			: updatedPortsInfo;
 		this.setState({availableSerialPorts: updatedPorts});
-		LOGGER.log("Serial Ports - ", updatedPorts);
+		LOGGER.logI("Serial Ports - ", updatedPorts);
 
 		// If our serial port disappears, we have a forced disconnect
 		let isPortStillActive = false;
@@ -214,13 +220,13 @@ class BaseMachineControlApp extends React.Component {
 		}
 	}
 
-	handleOnSelectSerialPort(event) {
-		const serialPortName = String(event.target.value);
+	handleOnSelectSerialPort(evt) {
+		const serialPortName = String(evt.target.value);
 		this.setState({selectedSerialPort: serialPortName});
 	}
 
-	handleOnSelectBaudRate(event) {
-		const baudRate = Number(event.target.value);
+	handleOnSelectBaudRate(evt) {
+		const baudRate = Number(evt.target.value);
 		this.setState({baudRate: baudRate});
 	}
 
