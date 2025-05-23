@@ -17,7 +17,7 @@ import ConstrainedNumberTextField from './constrained-number-text-field'
 
 import MathUtil from '../lib/math-util'
 import MiscUtil from '../lib/machine-control/misc-util'
-
+import TimeUtil from '../lib/time'
 
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
 import * as GCODE_CONSTANTS from '../lib/machine-control/gcode-constants'
@@ -128,16 +128,27 @@ class PullDownParamSubmitter extends React.Component {
 
     getPullDownCommand() {
         let gcodeBuilder = new GcodeBuilder();
-        const eFeedrate = this.state.eFeedrate;
-        const xFeedrate = MiscUtil.calculateXFeedrate(this.state.eValue, this.state.eFeedrate);
-        const compositeFeedrate = MiscUtil.getCompositeFeedrate(xFeedrate, eFeedrate);
-
         gcodeBuilder.move({
             [GCODE_CONSTANTS.PARAM_E]: this.state.eValue,
-            [GCODE_CONSTANTS.PARAM_F]: compositeFeedrate,
+            [GCODE_CONSTANTS.PARAM_F]: this.getCompositeFeedrate(),
             }, 
             'pull down'); 
         return gcodeBuilder.toGcodeString();
+    }
+
+    getCompositeFeedrate() {
+        const eFeedrate = this.state.eFeedrate;
+        const xFeedrate = this.calculateXFeedrate();
+        const compositeFeedrate = MiscUtil.getCompositeFeedrate(xFeedrate, eFeedrate);
+        return compositeFeedrate;
+    }
+
+    calculateXFeedrate() {
+        const eValue = this.state.eValue;
+        const eFeedrate = this.state.eFeedrate;
+        const xValue = this.state.xValue;
+        const xFeedrate = MiscUtil.calculateXFeedrate(eValue, eFeedrate, xValue);
+        return xFeedrate;
     }
 
     getRenderedMaterialItems() {
@@ -157,11 +168,7 @@ class PullDownParamSubmitter extends React.Component {
         const renderedMaterialItems = this.getRenderedMaterialItems();
         const machineState = this.props.machineState;
         const isMachinePullingDown = machineState.isMachinePullingDown();
-        const eFeedrate = this.state.eFeedrate;
-        const eValue = this.state.eValue;
-        const xValue = 0;
-        const xFeedrate = MiscUtil.calculateXFeedrate(eValue, eFeedrate, xValue);
-        const compositeFeedrate = MiscUtil.getCompositeFeedrate(xFeedrate, eFeedrate);
+        const compositeFeedrate = this.getCompositeFeedrate();
 
         const preciseCompositeFeedRate = MathUtil.toMinimumPrecision(
             compositeFeedrate, 
@@ -177,14 +184,11 @@ class PullDownParamSubmitter extends React.Component {
         };
 
         const spinningCommandText = this.getPullDownCommand(); 
-        
-        const timePerCommandTotalSec = Math.floor(MiscUtil.calculateCommandTimeInMilliSec(eValue, xValue, compositeFeedrate) / 1000);
-        const perCommandTimeMins = Math.floor(timePerCommandTotalSec / 60);
-        const perCommandTimeSecs = timePerCommandTotalSec % 60;
 
-        const totalTimeForAllCommandsSec = Math.round(timePerCommandTotalSec * this.state.numCommands)
-        const totalCommandTimeMins = Math.floor(totalTimeForAllCommandsSec / 60);
-        const totalCommandTimeSecs = totalTimeForAllCommandsSec % 60;
+        const timePerCommandTotalSec = MiscUtil.calculateCommandTimeInMilliSec(this.state.eValue, this.state.xValue, compositeFeedrate) / 1000;
+        const perCommandTimeMins = Math.floor(timePerCommandTotalSec / 60);
+        const perCommandTimeSecs = Math.round(timePerCommandTotalSec % 60);
+        const perCommandTimeText = TimeUtil.getMinSecText(perCommandTimeMins, perCommandTimeSecs);
 
         const materialSelectComponent = () => {
             return (!FEATURE_FLAGS.SHOW_MATERIAL_SELECT_PULL_DOWN) 
@@ -234,7 +238,7 @@ class PullDownParamSubmitter extends React.Component {
                                 color="primary"
                                 margin="dense"
                                 sx={{minWidth: 170, maxWidth: 170}}
-                                value={eValue}
+                                value={this.state.eValue}
                                 min={BF_CONSTANTS.EXTRUSION_AMOUNT_MIN}
                                 max={BF_CONSTANTS.EXTRUSION_AMOUNT_MAX}
                                 disabled={this.props.disabled}
@@ -251,7 +255,7 @@ class PullDownParamSubmitter extends React.Component {
                             margin="dense"
                             sx={{minWidth: 200, maxWidth: 200}}
                             min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
-                            value={eFeedrate}
+                            value={this.state.eFeedrate}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
                             />  
@@ -294,7 +298,7 @@ class PullDownParamSubmitter extends React.Component {
                             </Typography>                        
                     </Stack>
                     <Typography gutterBottom variant="span" sx={{fontStyle: 'italic'}} component="div">
-                            Estimated Time Per Command: {perCommandTimeMins} min {perCommandTimeSecs} sec
+                        Estimated Time Per Command: {perCommandTimeText}
                         </Typography>
                 </Stack>
             </Box>

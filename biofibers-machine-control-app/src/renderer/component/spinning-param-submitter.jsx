@@ -11,6 +11,7 @@ import ConstrainedNumberTextField from './constrained-number-text-field'
 
 import MathUtil from '../lib/math-util'
 import MiscUtil from '../lib/machine-control/misc-util'
+import * as TimeUtil from "../lib/time";
 
 
 import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
@@ -141,14 +142,16 @@ class SpinningParamSubmitter extends React.Component {
         };
 
         const spinningCommandText = this.getSpinningCommand(); 
-        
-        const timePerCommandTotalSec = Math.floor(MiscUtil.calculateCommandTimeInMilliSec(this.state.eValue, this.state.xValue, this.getCompositeFeedrate()) / 1000);
-        const perCommandTimeMins = Math.floor(timePerCommandTotalSec / 60);
-        const perCommandTimeSecs = timePerCommandTotalSec % 60;
 
-        const totalTimeForAllCommandsSec = Math.round(timePerCommandTotalSec * this.state.numCommands)
+        const timePerCommandTotalSec = MiscUtil.calculateCommandTimeInMilliSec(this.state.eValue, this.state.xValue, this.getCompositeFeedrate()) / 1000;
+        const perCommandTimeMins = Math.floor(timePerCommandTotalSec / 60);
+        const perCommandTimeSecs = Math.round(timePerCommandTotalSec % 60);
+        const perCommandTimeText = TimeUtil.getMinSecText(perCommandTimeMins, perCommandTimeSecs);
+
+        const totalTimeForAllCommandsSec = timePerCommandTotalSec * this.state.numCommands;
         const totalCommandTimeMins = Math.floor(totalTimeForAllCommandsSec / 60);
-        const totalCommandTimeSecs = totalTimeForAllCommandsSec % 60;
+        const totalCommandTimeSecs = Math.round(totalTimeForAllCommandsSec % 60);
+        const totalCommandTimeText = TimeUtil.getMinSecText(totalCommandTimeMins, totalCommandTimeSecs);
 
         return (
             <Box
@@ -279,11 +282,11 @@ class SpinningParamSubmitter extends React.Component {
                     spacing={1}
                     padding={2}
                     paddingBottom={0}>
-                    <Typography gutterBottom variant="span" sx={{fontStyle: 'italic'}} component="div">
-                            Estimated Time Per Command: {perCommandTimeMins} min {perCommandTimeSecs} sec
+                        <Typography gutterBottom variant="span" sx={{fontStyle: 'italic'}} component="div">
+                            Estimated Time Per Command: {perCommandTimeText}                    
                         </Typography>
                         <Typography variant="span" sx={{fontStyle: 'italic'}} component="div">
-                            Estimated Total Time for <Typography variant="span" fontWeight={500}>{this.state.numCommands}</Typography> Commands: {totalCommandTimeMins} min {totalCommandTimeSecs} sec
+                            Estimated Total Time for <Typography variant="span" fontWeight={500}>{this.state.numCommands}</Typography> Commands: {totalCommandTimeText}
                         </Typography>
                     </Stack>
             </Box>

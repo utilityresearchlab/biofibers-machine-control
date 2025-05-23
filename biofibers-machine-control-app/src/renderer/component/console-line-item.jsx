@@ -4,8 +4,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 
-import getReadableTimeOfDay from "../lib/time"
-
+import * as TimeUtil from "../lib/time";
 import { ConsoleDataType } from "../lib/console-data";
 
 
@@ -47,7 +46,7 @@ class ConsoleLineItem extends React.Component {
 	render() {
 		const props = this.props;
 		const {text, timestamp, id, dataType, fontSize} = props;
-		const formattedTime = getReadableTimeOfDay(timestamp, true);
+		const formattedTime = TimeUtil.getReadableTimeOfDay(timestamp, true);
 		const colorStyle = this.getColorStyle(dataType);
 		return (
 			<ListItem
