@@ -693,12 +693,6 @@ class BaseMachineControlApp extends React.Component {
 		const isPullingDown = machineState.isMachinePullingDown();
 		const isHeatingOn = machineState.isHeatingOn();
 
-		const currentNozzleTemp = machineState.getCurrentNozzleTemp();
-		const setPointNozzleTemp = machineState.getSetpointNozzleTemp();
-
-		const currentHeaterWrapTemp = machineState.getCurrentHeaterWrapTemp();
-		const setPointHeaterWrapTemp = machineState.getSetpointHeaterWrapTemp();
-
 		const consoleData = this.state.consoleData;
 		const renderedSerialPortsItems = this.getRenderedSerialPortItems();
 		const renderedBaudRateItems = this.getRenderedBaudRateItems();
