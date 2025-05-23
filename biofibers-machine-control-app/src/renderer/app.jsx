@@ -633,6 +633,15 @@ class BaseMachineControlApp extends React.Component {
 		this.setState(prevState => ({
 			consoleData: [...prevState.consoleData, newData]
 		}));
+
+		// // Add restart message
+		// if (machineState.isMachineEmergencyStopped()) {
+		// 	const newData = new ConsoleDataItem("Printer halted — disconnect and reconnect to continue...", Date.now(), ConsoleDataType.ERROR);
+		// 	this.setState(prevState => ({
+		// 		consoleData: [...prevState.consoleData, newData]
+		// 	}));
+		// }
+
 		LOGGER.logD("Received data:", newData);
 	}
 
