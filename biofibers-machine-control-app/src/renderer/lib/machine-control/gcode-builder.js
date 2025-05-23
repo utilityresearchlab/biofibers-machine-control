@@ -397,7 +397,7 @@ export class GcodeBuilder {
     }
 
     fullShutdown() {
-        this._appendCommand(GCODE_CONSTANTS.CMD_FULL_SHUTDOWN, null, '; emergency shutdown');
+        this._appendCommand(GCODE_CONSTANTS.CMD_FULL_SHUTDOWN, null, 'emergency shutdown');
         return this;
     }
 }
