@@ -26,11 +26,11 @@ import {ConsoleDataItem, ConsoleDataType} from './lib/console-data';
 import * as APP_SETTINGS from './app-settings';
 
 import Console from './component/console';
+import PullDownParamSubmitter from './component/pulldown-param-submitter'
 import SetupParamSubmitter from './component/setup-param-submitter'
+import SpinningParamSubmitter from './component/spinning-param-submitter'
 import StatusBar from './component/status-bar';
-
 import TextFieldSubmitter from './component/text-field-submitter'
-import TestingParamSubmitter from './component/testing-param-submitter'
 
 import imgMachineLogoSrc from '../assets/img/machine-render-logo.png'
 import imgUtilityLabLogoSrc from '../assets/img/utility-research-web-logo-500x75.png'
@@ -364,19 +364,116 @@ class BaseMachineControlApp extends React.Component {
 		this._setMachineState(machineState);
 	}
 
-	handleOnChangeSpinningState(isOn) {
-		// TODO cancel pulldown if running, the handle isOn state
-		//if 
-		// todo
+	handleOnChangeSpinningState(isOn, eValue, eFeedrate, xValue) {
+		if (this._getMachineState().isMachineDisconnected()) {
+			// Do nothing if we aren't connected
+			return;
+		}
+		if (this._getMachineState().isMachinePullingDown() && isOn) {
+			// If we are already spinning, we should cancel then restart
+			if (this.state.nIntervalId) {
+				clearInterval(this.state.nIntervalId);
+			}
+		}
+		// Handle on or off for pull down
+		if (isOn) {
+			let gcodeBuilder = new GcodeBuilder();
+			const gcodeLines = gcodeBuilder
+				.comment('start spinning')
+				.useRelativeCoordinates()
+				.useRelativeExtrusionDistances()
+				.resetExtrusionDistance()
+				.toGcode();
+			this._sendGcodeLines(gcodeLines);
+			
+			// Prepare time tracking
+			// We use a min interval time of 50 ms to avoid overloading/blocking ui
+			// For normal printing this would be smaller, but with fibers it can be fairly large as
+			// the movements take a while
+			const minIntervalTimeMs = 100;
+			let timeKeeper = {
+				lastSendCommandTime: 0,
+				nextIntervalTimeMs: minIntervalTimeMs
+			};
+			// Set up interval for pull down
+			let isInitialRun = true;
+			const that = this;
+			let intervalId = setInterval(() => {
+				if (that._getMachineState().isMachineDisconnected()) {
+					// if we've disconnected, stop sending commands
+					LOGGER.logD("Cancelling sending pull down command interval (Disconnected).");
+					return;
+				}
+
+				if (that._getMachineState().isMachineEmergencyStopped()) {
+					// if we have an E-stop exit immediately
+					LOGGER.logD("Cancelling sending pull down command interval (EMERGENCY STOPPED).");
+					return;
+				}
+
+				let paramE = eValue;
+				let paramX = xValue; // There is no x-movement in pulldown mode
+				let paramF = eFeedrate; // TODO use composite feedrate for Spinning
+
+				if (isInitialRun) {
+					timeKeeper.nextIntervalTimeMs = MiscUtil.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
+					isInitialRun = false;
+				}
+				const timeDelta = Date.now() - timeKeeper.lastSendCommandTime;
+				let minCommandTime = Math.max(minIntervalTimeMs, timeKeeper.nextIntervalTimeMs - minIntervalTimeMs);
+				// Check if ready to send command
+				if (timeDelta >= minCommandTime) {
+					let pullDownGcodeBuilder = new GcodeBuilder();
+					const pulldownGcodeLines = 
+						pullDownGcodeBuilder.move({
+								[GCODE_CONSTANTS.PARAM_E]: paramE,
+								[GCODE_CONSTANTS.PARAM_F]: paramF,
+							}, 
+							'pull down')
+							.toGcode(); // value from experiments
+					that._sendGcodeLines(pulldownGcodeLines);
+
+					// Update time keeping
+					timeKeeper.nextIntervalTimeMs = MiscUtil.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
+					timeKeeper.lastSendCommandTime = Date.now();
+					
+					LOGGER.logD(`Sending spinning command with interval time ${timeKeeper.nextIntervalTimeMs}: ${pulldownGcodeLines}`);
+				} else {
+					LOGGER.logD("Spinning: Next command not ready.");
+				}
+			}, minIntervalTimeMs);
+			this.setState({
+				nIntervalId: intervalId,
+			});
+		} else {
+			if (this.state.nIntervalId) {
+				clearInterval(this.state.nIntervalId);
+			}
+			// stop pull down
+			this.setState({
+				nIntervalId: null
+			});
+			//let gcodeBuilder = new GcodeBuilder();
+			// gcodeBuilder.setSpindleSpeed(0, true);
+			//this._sendGcodeLines(gcodeBuilder.toGcode());
+		}
+		// Update machine state
+		const machineState = this._getMachineState();
+		machineState.setMachineIsPullingDown(isOn);
+		this._setMachineState(machineState);
 	}
 
 
-	handleOnChangePullDownState(isOn) {
-		// TODO handle machine state and clean up vars
-		if (this._getMachineState().isMachinePullingDown() && isOn) {
-			// If we're already pulling down, then no need to restart
-			// just exit early 
+	handleOnChangePullDownState(isOn, eValue, eFeedrate) {
+		if (this._getMachineState().isMachineDisconnected()) {
+			// Do nothing if we aren't connected
 			return;
+		}
+		if (this._getMachineState().isMachinePullingDown() && isOn) {
+			// If we are already spinning, we should cancel then restart
+			if (this.state.nIntervalId) {
+				clearInterval(this.state.nIntervalId);
+			}
 		}
 		// Handle on or off for pull down
 		if (isOn) {
@@ -414,18 +511,13 @@ class BaseMachineControlApp extends React.Component {
 					return;
 				}
 
-				const defaultParams = MaterialHelper.defaultParams()[this.state.selectedMaterial];
-
-				// TODO (mrivera): replace with E, X, F for pull-down inputs in interface
-				let paramE = defaultParams[GCODE_CONSTANTS.PARAM_E];
-				let paramX = defaultParams[GCODE_CONSTANTS.PARAM_X];
-				let paramF = defaultParams[GCODE_CONSTANTS.PARAM_F];
+				let paramE = eValue;
+				let paramX = 0; // There is no x-movement in pulldown mode
+				let paramF = eFeedrate;
 				if (isInitialRun) {
 					timeKeeper.nextIntervalTimeMs = MiscUtil.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
 					isInitialRun = false;
 				}
-
-
 				const timeDelta = Date.now() - timeKeeper.lastSendCommandTime;
 				let minCommandTime = Math.max(minIntervalTimeMs, timeKeeper.nextIntervalTimeMs - minIntervalTimeMs);
 				// Check if ready to send command
@@ -434,10 +526,9 @@ class BaseMachineControlApp extends React.Component {
 					const pulldownGcodeLines = 
 						pullDownGcodeBuilder.move({
 								[GCODE_CONSTANTS.PARAM_E]: paramE,
-								[GCODE_CONSTANTS.PARAM_X]: paramX,
 								[GCODE_CONSTANTS.PARAM_F]: paramF,
 							}, 
-							'extrude and move X')
+							'pull down')
 							.toGcode(); // value from experiments
 					that._sendGcodeLines(pulldownGcodeLines);
 
@@ -445,7 +536,7 @@ class BaseMachineControlApp extends React.Component {
 					timeKeeper.nextIntervalTimeMs = MiscUtil.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
 					timeKeeper.lastSendCommandTime = Date.now();
 					
-					LOGGER.logD(`Sending command: ${pulldownGcodeLines} with interval time ${timeKeeper.nextIntervalTimeMs}`);
+					LOGGER.logD(`Sending pull down command with interval time ${timeKeeper.nextIntervalTimeMs}: ${pulldownGcodeLines}`);
 				} else {
 					LOGGER.logD("Pull Down: Next command not ready.");
 				}
@@ -756,113 +847,119 @@ class BaseMachineControlApp extends React.Component {
 				<Divider sx={{width: "100%", margin: "0 auto"}} />
 				<Box variant="div">
 					<Box variant="div">
-							<Typography gutterBottom variant="h6" component="div" sx={{paddingTop: '1em'}} >
-								Connect
-							</Typography>
-							<Stack
-								direction="row"
-								justifyContent="left"
-								alignItems="left"
-								spacing={1}
-								p={1}>
-									<FormControl size="small" sx={{minWidth: 350 }}>
-										<InputLabel id="available-serial-ports-label">Serial Port</InputLabel>
-										<Select
-											labelId="available-serial-ports"
-											id="available-serial-ports-select"
-											label="Serial Port"
-											value={this.state.selectedSerialPort}
-											onChange={this.handleOnSelectSerialPort}
-											MenuProps={{
-												disableScrollLock: true, // stops scroll bar from popping
-											  }}>
-											{renderedSerialPortsItems}
-										</Select>
-									</FormControl>
-									<FormControl size="small" sx={{mb: 1, minWidth: 120 }} >
-										<InputLabel id="available-serial-baud-rates-label">Baud Rate</InputLabel>
-										<Select
-											labelId="serial-port-baud-rate"
-											id="serial-port-baud-rate-select"
-											label="Baud Rate"
-											value={this.state.baudRate}
-											onChange={this.handleOnSelectBaudRate}
-											MenuProps={{
-												disableScrollLock: true, // stops scroll bar from popping
-											  }}>
-											{renderedBaudRateItems}
-										</Select>
-									</FormControl>
-                    				<Box variant="div" sx={{display: 'flex'}}>
-										<Button
-											size="medium"
-											variant="outlined"
-											color={(serialCommIsDisconnected) ? "success" : "error"}
-											startIcon={(serialCommIsDisconnected)
-												? <UsbIcon/>
-												: <UsbOffIcon />}
-											onClick={(serialCommIsDisconnected)
-												? this.handleConnectClick
-												: this.handleDisconnectClick} >
-													{(!serialCommIsConnected)
-														? "Connect"
-														: "Disconnect"}
-										</Button>
-									</Box>
-							</Stack>
-					</Box>
-
-					<Divider sx={{marginTop: 4, marginBottom: 2}} />
-
-					<Box variant="div">
-						<Typography gutterBottom variant="h6" component="div">
-                    		Setup
-                		</Typography>         
-						<SetupParamSubmitter
-							disabled={isInputDisabled}
-							machineState={machineState}
-							onChangePullDownState={this.handleOnChangePullDownState}
-							onChangeHeatingState={this.handleOnChangeHeatingState}
-							onSubmitCallback={this.handleSendCommandClick} />
-					</Box>
-
-					<Divider sx={{marginTop: 4, marginBottom: 2}} />
-
-					<Box variant="div">
-						<Typography gutterBottom variant="h6" component="div">
-                   			Spinning
-                		</Typography>
-
-						<TestingParamSubmitter
-							disabled={isInputDisabled}
-							onSubmitCallback={this.handleSendCommandClick}
-							onChangeSpinningState={this.handleOnChangeSpinningState}
-							onSendMultipleSpinningCommands={this.handleOnSendMultipleSpinningCommands} />
-					</Box>
-
-					<Divider sx={{marginTop: 4, marginBottom: 2}}/>
-					
-					<Box variant="div">
-						<Typography gutterBottom variant="h6" component="div">
-								Command Console
+						<Typography gutterBottom variant="h6" component="div" sx={{paddingTop: '1em'}} >
+							Connect
 						</Typography>
-						<Box 
-							variant="div"
-							sx={{minWidth: 700, maxWidth: 700}}
+						<Stack
+							direction="row"
+							justifyContent="left"
+							alignItems="left"
+							spacing={1}
 							p={1}>
-							<TextFieldSubmitter	
-								fieldLabel="Send Command"
-								buttonLabel="Send"
-								buttonIcon={<SendIcon />}
-								disabled={isInputDisabled}
-								onSubmitCallback={this.handleSendCommandClick} />
-                    		<Box
-								variant="div" 
-								sx={{paddingTop: 1}}>
-								<Console data={consoleData} />
-							</Box>
+								<FormControl size="small" sx={{minWidth: 350 }}>
+									<InputLabel id="available-serial-ports-label">Serial Port</InputLabel>
+									<Select
+										labelId="available-serial-ports"
+										id="available-serial-ports-select"
+										label="Serial Port"
+										value={this.state.selectedSerialPort}
+										onChange={this.handleOnSelectSerialPort}
+										MenuProps={{
+											disableScrollLock: true, // stops scroll bar from popping
+											}}>
+										{renderedSerialPortsItems}
+									</Select>
+								</FormControl>
+								<FormControl size="small" sx={{mb: 1, minWidth: 120 }} >
+									<InputLabel id="available-serial-baud-rates-label">Baud Rate</InputLabel>
+									<Select
+										labelId="serial-port-baud-rate"
+										id="serial-port-baud-rate-select"
+										label="Baud Rate"
+										value={this.state.baudRate}
+										onChange={this.handleOnSelectBaudRate}
+										MenuProps={{
+											disableScrollLock: true, // stops scroll bar from popping
+											}}>
+										{renderedBaudRateItems}
+									</Select>
+								</FormControl>
+								<Box variant="div" sx={{display: 'flex'}}>
+									<Button
+										size="medium"
+										variant="outlined"
+										color={(serialCommIsDisconnected) ? "success" : "error"}
+										startIcon={(serialCommIsDisconnected)
+											? <UsbIcon/>
+											: <UsbOffIcon />}
+										onClick={(serialCommIsDisconnected)
+											? this.handleConnectClick
+											: this.handleDisconnectClick} >
+												{(!serialCommIsConnected)
+													? "Connect"
+													: "Disconnect"}
+									</Button>
+								</Box>
+						</Stack>
+					</Box>
+				<Divider sx={{marginTop: 4, marginBottom: 2}} />
+				<Box variant="div">
+					<Typography gutterBottom variant="h6" component="div">
+						Setup
+					</Typography>         
+					<SetupParamSubmitter
+						disabled={isInputDisabled}
+						machineState={machineState}
+						onChangeHeatingState={this.handleOnChangeHeatingState}
+						onSubmitCallback={this.handleSendCommandClick} />
+				</Box>
+				<Divider sx={{marginTop: 4, marginBottom: 2}} />
+				<Box variant="div">
+					<Typography gutterBottom variant="h6" component="div">
+						Pull Down
+					</Typography>
+
+					<PullDownParamSubmitter
+						disabled={isInputDisabled}
+						machineState={machineState}
+						onSubmitCallback={this.handleSendCommandClick}
+						onChangePullDownState={this.handleOnChangePullDownState}
+						onSendMultipleSpinningCommands={this.handleOnSendMultipleSpinningCommands} />
+				</Box>
+				<Divider sx={{marginTop: 4, marginBottom: 2}} />
+				<Box variant="div">
+					<Typography gutterBottom variant="h6" component="div">
+						Spinning
+					</Typography>
+					<SpinningParamSubmitter
+						disabled={isInputDisabled}
+						onSubmitCallback={this.handleSendCommandClick}
+						onChangeSpinningState={this.handleOnChangeSpinningState}
+						onSendMultipleSpinningCommands={this.handleOnSendMultipleSpinningCommands} />
+				</Box>
+				<Divider sx={{marginTop: 4, marginBottom: 2}}/>
+				
+				<Box variant="div">
+					<Typography gutterBottom variant="h6" component="div">
+							Command Console
+					</Typography>
+					<Box 
+						variant="div"
+						sx={{minWidth: 700, maxWidth: 700}}
+						p={1}>
+						<TextFieldSubmitter	
+							fieldLabel="Send Command"
+							buttonLabel="Send"
+							buttonIcon={<SendIcon />}
+							disabled={isInputDisabled}
+							onSubmitCallback={this.handleSendCommandClick} />
+						<Box
+							variant="div" 
+							sx={{paddingTop: 1}}>
+							<Console data={consoleData} />
 						</Box>
 					</Box>
+				</Box>
 				</Box>
 				<Divider sx={{marginTop: 4, marginBottom: 4}} />
 				<Box component="footer">
