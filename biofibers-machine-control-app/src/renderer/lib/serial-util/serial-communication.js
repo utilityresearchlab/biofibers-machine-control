@@ -114,7 +114,6 @@ class SerialCommunication {
 				LOGGER.logD("Serial drained!");
 				that.lastSendCommandTimestamp = Date.now();
 			});
-			
 		}, this.sendCommandIntervalTime);
 	}
 
@@ -189,55 +188,60 @@ class SerialCommunication {
 				}
 
 				LOGGER.logD(`Serial Response Line: ${trimmedLine}`);
-				let item = null;	
-
-				// If Acknowledged and we have pending commands, then we update the nackline 
-				if (trimmedLine == responseSerialOk 
-					|| trimmedLine.includes(responseSerialUnknownCommand)
-					|| trimmedLine.includes(responseSerialBusyProcessing)) {			
-					// Sometimes we may receive an 'ok' event if we didn't send a command
-					// for example, on printer startup. This can lead to negative NACK line values
-					// to avoid this, we simple ignore any acks that come in beyond what we send.
-					if (that.nackLineCounter.value > 0) {	
-						that.nackLineCounter.decrement();
-					}
-				}
-
-				// Depending on the response, we handle the command
-				if (trimmedLine === responseSerialOk || trimmedLine.includes(responseSerialUnknownCommand)) {
-					// Response is OK or unknown command
-					// So remove from pending queue and remove nackline
-					if (that.pendingCommandQueue.length > 0) {
-						item = that.pendingCommandQueue.shift();
-						LOGGER.logD("Removed command from pending queue", item);	
-					}
-				} else if (trimmedLine.includes(responseSerialBusyProcessing)) {
-					// If the command was received AND the buffer is full / busy processing
-					// We remove from pending queue at put back at the front of the send queue
-					// then it will be resent in the next send command loop interval
-					if (that.pendingCommandQueue.length > 0) {
-						const item = that.pendingCommandQueue.shift();
-						// Make sure we don't have undefined commands
-						if (item) { 
-							LOGGER.logD("Moving command from Pending to Send Queue", item);
-							// Put item back onto the send queue in time-based order
-							that.sendCommandQueue.push(item);
-							that.sendCommandQueue.sort((a, b) => a.timestamp - b.timestamp);
+				const startResponse = trimmedLine == responseSerialStart;
+				if (startResponse) {
+					LOGGER.logD("Machine Starting..");
+					that.clearSendQueueBuffers();
+				} else {
+					const busyResponse = trimmedLine.includes(responseSerialBusyProcessing);
+					let item = null;	
+					// If Acknowledged and we have pending commands, then we update the nackline 
+					if (trimmedLine == responseSerialOk 
+						|| trimmedLine.includes(responseSerialUnknownCommand)
+						|| busyResponse) {			
+						// Sometimes we may receive an 'ok' event if we didn't send a command
+						// for example, on printer startup. This can lead to negative NACK line values
+						// to avoid this, we simple ignore any acks that come in beyond what we send.
+						if (that.nackLineCounter.value > 0) {	
+							that.nackLineCounter.decrement();
 						}
 					}
-				} 
-				// Below is for debugging serial responses
-				else {
-				// 	// Unhandled line response from the machine
-					LOGGER.logD(`Unhandled serial line from machine: ${trimmedLine}`);
-				}		
+
+					// Depending on the response, we handle the command
+					if (trimmedLine === responseSerialOk || trimmedLine.includes(responseSerialUnknownCommand)) {
+						// Response is OK or unknown command
+						// So remove from pending queue and remove nackline
+						if (that.pendingCommandQueue.length > 0) {
+							item = that.pendingCommandQueue.shift();
+							LOGGER.logD("Removed command from pending queue", item);	
+						}
+					} else if (busyResponse) {
+						// If the command was received AND the buffer is full / busy processing
+						// We remove from pending queue at put back at the front of the send queue
+						// then it will be resent in the next send command loop interval
+						if (that.pendingCommandQueue.length > 0) {
+							item = that.pendingCommandQueue.shift();
+							// Make sure we don't have undefined commands
+							if (item) { 
+								LOGGER.logD("Moving command from Pending to Send Queue", item);
+								// Put item back onto the send queue in time-based order
+								that.sendCommandQueue.push(item);
+								that.sendCommandQueue.sort((a, b) => a.timestamp - b.timestamp);
+							}
+						}
+					} else {
+						// Below is for debugging serial responses
+						// 	// Unhandled line response from the machine
+						LOGGER.logD(`Unhandled serial line from machine: ${trimmedLine}`);
+					}
+					
+				}
+					
 				if (receivingCallback) {
 					receivingCallback(line, Date.now());
 				}						
 			}
 			LOGGER.logD("Updated Serial Unack Lines ", that.nackLineCounter.value);
-
-
 		});
 		this.isReceiving = true;
 	}
