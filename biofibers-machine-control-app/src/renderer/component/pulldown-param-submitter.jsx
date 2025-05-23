@@ -23,6 +23,7 @@ import { GcodeBuilder } from '../lib/machine-control/gcode-builder';
 import * as GCODE_CONSTANTS from '../lib/machine-control/gcode-constants'
 
 import * as BF_CONSTANTS from '../lib/biofibers-machine/biofibers-machine-constants'
+import { FEATURE_FLAGS } from '../app-settings';
 
 class PullDownParamSubmitter extends React.Component {
     constructor(props) {
@@ -185,40 +186,45 @@ class PullDownParamSubmitter extends React.Component {
         const totalCommandTimeMins = Math.floor(totalTimeForAllCommandsSec / 60);
         const totalCommandTimeSecs = totalTimeForAllCommandsSec % 60;
 
+        const materialSelectComponent = () => {
+            return (!FEATURE_FLAGS.SHOW_MATERIAL_SELECT_PULL_DOWN) 
+                ? '' 
+                : ( <Stack
+                direction="row"
+                justifyContent="left"
+                alignItems="left"
+                spacing={1}
+                p={1}>
+                <FormControl size="small" sx={{ mb: 1, mr: 1, minWidth: 300 }}>
+                    <InputLabel id="material-label">Material</InputLabel>
+                    <Select
+                        labelId="material"
+                        id="material-select"
+                        label="Material"
+                        value={this.state.selectedMaterial.name}
+                        onChange={this.handleOnSelectMaterial}
+                        disabled={this.props.disabled}
+                        MenuProps={{
+                            disableScrollLock: true, // stop scroll bar in window from popping
+                          }}>
+                        {renderedMaterialItems}
+                    </Select>
+                </FormControl>
+            </Stack>);
+        };
+
         return (
             <Box
             component="form"
             noValidate
-            autoComplete="off">   
+            autoComplete="off">  
+                 {materialSelectComponent()}
                 <Stack
                     direction="row"
                     justifyContent="left"
                     alignItems="left"
                     spacing={1}
-                    p={1}>
-                    <FormControl size="small" sx={{ mb: 1, mr: 1, minWidth: 300 }}>
-                        <InputLabel id="material-label">Material</InputLabel>
-                        <Select
-                            labelId="material"
-                            id="material-select"
-                            label="Material"
-                            value={this.state.selectedMaterial.name}
-                            onChange={this.handleOnSelectMaterial}
-                            disabled={this.props.disabled}
-                            MenuProps={{
-                                disableScrollLock: true, // stop scroll bar in window from popping
-                              }}>
-                            {renderedMaterialItems}
-                        </Select>
-                    </FormControl>
-                </Stack>
-                <Stack
-                    direction="row"
-                    justifyContent="left"
-                    alignItems="left"
-                    spacing={1}
-                    padding={1}
-                >
+                    padding={1}>
                     <Box variant="div" sx={{display: 'flex'}}>
                         <ConstrainedNumberTextField
                                 name="eValue"
