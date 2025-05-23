@@ -12,4 +12,15 @@ export function getReadableTimeOfDay(timestamp, includeMillis=false) {
 	return timeString;
 }
 
-export default getReadableTimeOfDay;
+export function getMinSecText(mins, secs) {
+	if (mins == 0) {
+		if (secs < 1) {
+			return "<1 sec";
+		} else {
+			return `${secs} sec`;
+		}
+	} 
+	return `${mins} min ${secs} sec`;
+}
+
+export default {getReadableTimeOfDay, getMinSecText};
