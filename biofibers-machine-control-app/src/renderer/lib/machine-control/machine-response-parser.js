@@ -1,11 +1,16 @@
 // Used to determine temperature response commands and their parameters
 const TEMP_RESPONSE_PARAM_REGEX =  /([T]\d*):([\d.]+)\s*\/\s*([\d.]+)/g;
+const EMERGENCY_STOP_REGEX = /((Error:Printer halted\. kill\(\) called!)|(echo:M112 Shutdown))/;
+const HEATING_FAILED_REGEX = /((Error:Heating failed, system stopped!)|(echo:Heating Failed))/;
+const HOMING_FAILED_REGEX = /(echo:Homing Failed)/;
+const GENERIC_ERROR = /(Error:)/;
 
 // Enum-like object to signal what our response type is
 const RESPONSE_TYPE = {
     UNKNOWN: 0,
     TEMPERATURE_STATUS: 1,
-    ERROR: 999,
+    ERROR: 30,
+    EMERGENCY_STOP: 99999,
 };
 
 // Parses responses to g-code commands sent from the machine
@@ -34,6 +39,13 @@ const parseResponse = (() => {
         if (TEMP_RESPONSE_PARAM_REGEX.test(line)) {
             result.parsedData = parseTempResponse(line);
             result.responseType = RESPONSE_TYPE.TEMPERATURE_STATUS;
+        } else if (EMERGENCY_STOP_REGEX.test(line)) {
+            result.responseType = RESPONSE_TYPE.EMERGENCY_STOP;
+        } else if (HEATING_FAILED_REGEX.test(line) 
+            || HOMING_FAILED_REGEX.test(line)) {
+            result.responseType = RESPONSE_TYPE.ERROR;
+        } else if (GENERIC_ERROR.test(line)) {
+            result.responseType = RESPONSE_TYPE.ERROR;
         }
         return result;
     };
