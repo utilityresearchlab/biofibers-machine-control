@@ -169,13 +169,13 @@ class BaseMachineControlApp extends React.Component {
 		}, APP_SETTINGS.MACHINE_INIT_TIMEOUT);
 		
 	}
-
-	_sendGcodeLines(gcodeLines) {
+	
+	_sendGcodeLines(gcodeLines, shouldSendImmediately=false) {
 		if (!gcodeLines || gcodeLines.length == 0) {
 			return;
 		}
 		gcodeLines.forEach((line, index) => {
-			this.handleSendCommandClick(line);
+			this.handleSendCommandClick(line, shouldSendImmediately);
 		});
 
 	}
@@ -304,7 +304,7 @@ class BaseMachineControlApp extends React.Component {
 		that._setMachineState(machineState);
 	}
 
-	handleSendCommandClick(cmdText) {
+	handleSendCommandClick(cmdText, shouldSendImmediately=false) {
 		if (!cmdText || cmdText.length == 0) {
 			return;
 		}
@@ -326,7 +326,7 @@ class BaseMachineControlApp extends React.Component {
 			that.addConsoleData(consoleMessage, messageDataType);
 		};
 		// Trigger sending command
-		this.props.serialCommunication.sendBufferedCommand(cmdText, onSentCallback);
+		this.props.serialCommunication.sendBufferedCommand(cmdText, onSentCallback, shouldSendImmediately);
 	}
 
 	// Triggered from the enable heating button
