@@ -2,7 +2,7 @@
 // See:
 // - https://github.com/electron/forge/issues/2169
 // - https://github.com/kethan1/Simple-To-Do-App/blob/main/forge.config.js
-const buildID = new Date().toISOString().replace(/T.*/,'').split('-').reverse().join('-');
+const buildID = new Date().toISOString().replace(/T.*/,'').split('-').join('-');
 
 
 module.exports = {
