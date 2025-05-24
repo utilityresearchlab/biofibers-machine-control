@@ -71,7 +71,7 @@ export class GcodeBuilder {
         }
         const str = value.toString();
         if (str.indexOf(".") !== -1 && str.indexOf("-") !== -1) {
-            return str.split("-")[1] || 0;
+            return str.split(".")[1].length || 0;
         } else if (str.indexOf(".") !== -1) {
             return str.split(".")[1].length || 0;
         }
