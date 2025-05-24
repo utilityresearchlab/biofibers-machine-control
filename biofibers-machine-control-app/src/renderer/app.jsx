@@ -378,13 +378,13 @@ class BaseMachineControlApp extends React.Component {
 		this._setMachineState(machineState);
 	}
 
-	handleOnChangeSpinningState(isOn, eValue, eFeedrate, xValue) {
+	handleOnChangeSpinningState(isOn, spinningStateObj) {
 		if (this._getMachineState().isMachineDisconnected()) {
 			// Do nothing if we aren't connected
 			return;
 		}
-		if (this._getMachineState().isMachinePullingDown() && isOn) {
-			// If we are already spinning, we should cancel then restart
+		if (this._getMachineState().isMachineSpinningOrPullingDown()  && isOn) {
+			// If we are already spinning or pulling-down, we should cancel then restart
 			if (this.state.nIntervalId) {
 				clearInterval(this.state.nIntervalId);
 			}
@@ -409,26 +409,28 @@ class BaseMachineControlApp extends React.Component {
 				lastSendCommandTime: 0,
 				nextIntervalTimeMs: minIntervalTimeMs
 			};
-			// Set up interval for pull down
+			// Set up interval for spinning
 			let isInitialRun = true;
 			const that = this;
+			const spinningState = spinningStateObj;
 			let intervalId = setInterval(() => {
 				if (that._getMachineState().isMachineDisconnected()) {
 					// if we've disconnected, stop sending commands
-					LOGGER.logD("Cancelling sending pull down command interval (Disconnected).");
+					LOGGER.logD("Cancelling sending spinning command interval (Disconnected).");
 					return;
 				}
 
 				if (that._getMachineState().isMachineEmergencyStopped()) {
 					// if we have an E-stop exit immediately
-					LOGGER.logD("Cancelling sending pull down command interval (EMERGENCY STOPPED).");
+					LOGGER.logD("Cancelling sending spinning command interval (EMERGENCY STOPPED).");
 					return;
 				}
-
+				// Spinning has x, e, xfeedrate, and efeedrate
+				let {eValue, eFeedrate, xValue} = spinningState;
 				let paramE = eValue;
-				let paramX = xValue; // There is no x-movement in pulldown mode
-				let paramF = eFeedrate; // TODO use composite feedrate for Spinning
-
+				let paramX = xValue;
+				let xFeedRate = MiscUtil.calculateXFeedrate(eValue, eFeedrate, paramX);
+				let paramF = MiscUtil.getCompositeFeedrate(xFeedRate, eFeedrate); 
 				if (isInitialRun) {
 					timeKeeper.nextIntervalTimeMs = MiscUtil.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
 					isInitialRun = false;
@@ -437,21 +439,21 @@ class BaseMachineControlApp extends React.Component {
 				let minCommandTime = Math.max(minIntervalTimeMs, timeKeeper.nextIntervalTimeMs - minIntervalTimeMs);
 				// Check if ready to send command
 				if (timeDelta >= minCommandTime) {
-					let pullDownGcodeBuilder = new GcodeBuilder();
-					const pulldownGcodeLines = 
-						pullDownGcodeBuilder.move({
+					let gcodeBuilder = new GcodeBuilder();
+					const spinningGcodeLines = 
+						gcodeBuilder.move({
 								[GCODE_CONSTANTS.PARAM_E]: paramE,
+								[GCODE_CONSTANTS.PARAM_X]: paramX,
 								[GCODE_CONSTANTS.PARAM_F]: paramF,
 							}, 
-							'pull down')
+							'spinning')
 							.toGcode(); // value from experiments
-					that._sendGcodeLines(pulldownGcodeLines);
+					that._sendGcodeLines(spinningGcodeLines);
 
 					// Update time keeping
 					timeKeeper.nextIntervalTimeMs = MiscUtil.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
 					timeKeeper.lastSendCommandTime = Date.now();
-					
-					LOGGER.logD(`Sending spinning command with interval time ${timeKeeper.nextIntervalTimeMs}: ${pulldownGcodeLines}`);
+					LOGGER.logD(`Sending spinning command with interval time ${timeKeeper.nextIntervalTimeMs}: ${spinningGcodeLines}`);
 				} else {
 					LOGGER.logD("Spinning: Next command not ready.");
 				}
@@ -470,7 +472,7 @@ class BaseMachineControlApp extends React.Component {
 		}
 		// Update machine state
 		const machineState = this._getMachineState();
-		machineState.setMachineIsPullingDown(isOn);
+		machineState.setMachineIsSpinning(isOn);
 		this._setMachineState(machineState);
 	}
 
@@ -480,7 +482,7 @@ class BaseMachineControlApp extends React.Component {
 			// Do nothing if we aren't connected
 			return;
 		}
-		if (this._getMachineState().isMachinePullingDown() && isOn) {
+		if (this._getMachineState().isMachineSpinningOrPullingDown() && isOn) {
 			// If we are already spinning, we should cancel then restart
 			if (this.state.nIntervalId) {
 				clearInterval(this.state.nIntervalId);
@@ -521,10 +523,11 @@ class BaseMachineControlApp extends React.Component {
 					LOGGER.logD("Cancelling sending pull down command interval (EMERGENCY STOPPED).");
 					return;
 				}
-
+				
 				let paramE = eValue;
-				let paramX = 0; // There is no x-movement in pulldown mode
-				let paramF = eFeedrate;
+				let paramX = 0; // There is no x-movement in pulldown mode\
+				let xFeedRate = MiscUtil.calculateXFeedrate(eValue, eFeedrate, paramX);
+				let paramF = MiscUtil.getCompositeFeedrate(xFeedRate, eFeedrate); 
 				if (isInitialRun) {
 					timeKeeper.nextIntervalTimeMs = MiscUtil.calculateCommandTimeInMilliSec(paramE, paramX, paramF);
 					isInitialRun = false;
