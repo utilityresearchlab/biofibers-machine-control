@@ -86,13 +86,13 @@ class PullDownParamSubmitter extends React.Component {
 		}
     }
     // added from setup
-    handleStartPullDownClick(event) {
+    handleStartPullDownClick(evt) {
         if (this.props.onChangePullDownState) {
             this.props.onChangePullDownState(true, this.state.eValue, this.state.eFeedrate);
         }
     }
 
-    handleStopPullDownClick(event) {
+    handleStopPullDownClick(evt) {
         if (this.props.onChangePullDownState) {
             this.props.onChangePullDownState(false);
         }
