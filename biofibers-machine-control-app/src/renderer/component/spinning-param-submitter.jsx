@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
@@ -152,6 +153,9 @@ class SpinningParamSubmitter extends React.Component {
         const totalCommandTimeMins = Math.floor(totalTimeForAllCommandsSec / 60);
         const totalCommandTimeSecs = Math.round(totalTimeForAllCommandsSec % 60);
         const totalCommandTimeText = TimeUtil.getMinSecText(totalCommandTimeMins, totalCommandTimeSecs);
+		const progressIndicator = () => {
+			return (<CircularProgress color="warning" size={20}/>);
+		};
 
         return (
             <Box
@@ -210,6 +214,11 @@ class SpinningParamSubmitter extends React.Component {
                             onChange={this.handleOnChange}
                             />   
                     </Box>
+                    <Stack variant="div"   justifyContent="center"
+                    alignContent="center" sx={{display: 'flex'}}>
+                        {(isMachineSpinning) ? progressIndicator() : ''}
+                    </Stack>
+                    
                 </Stack>
                 <Stack
                     direction="column"
