@@ -6,6 +6,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
+import AutoModeIcon from '@mui/icons-material/AutoMode';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
 import ConstrainedNumberTextField from './constrained-number-text-field'
@@ -50,7 +51,6 @@ class SpinningParamSubmitter extends React.Component {
 
     handleOnChange(event) {
         const {name, value} = event.target;
-        // console.log(name);
         this.setState({
             [name]: value
         });
@@ -98,35 +98,16 @@ class SpinningParamSubmitter extends React.Component {
 		}
     }
 
-    handleStartSpinningClick(event) {
-        // keep sending command to extrude until spinning is stopped
-        // TODO: Determine proper interval timing instead of hard-coding 1000 ms
-        let intervalId = setInterval(() => {
-            let gcodeBuilder = new GcodeBuilder();
-            gcodeBuilder.move({
-                    [GCODE_CONSTANTS.PARAM_E]: this.state.eValue,
-                    [GCODE_CONSTANTS.PARAM_X]: this.state.xValue,
-                    [GCODE_CONSTANTS.PARAM_F]: this.getCompositeFeedrate(),
-                }, 
-                'extrude and move X'); 
-            this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
-        }, 1000);
-        this.setState({
-            nIntervalId: intervalId,
-            spinningInProgress: true
-        });
+    handleStartSpinningClick(evt) {
+        if (this.props.onChangeSpinningState) {
+            this.props.onChangeSpinningState(true, this.getSpinningState());
+        }
     }
 
-     handleStopSpinningClick(event) {
-        let intervalId = this.state.nIntervalId;
-        this.setState({
-            spinningInProgress: false,
-            nIntervalId: null
-        });
-        clearInterval(intervalId);
-        let gcodeBuilder = new GcodeBuilder();
-        gcodeBuilder.setSpindleSpeed(0, true);
-        this.handleSubmitCommand(event, gcodeBuilder.toGcodeString());
+     handleStopSpinningClick(evt) {
+        if (this.props.onChangeSpinningState) {
+            this.props.onChangeSpinningState(false);
+        }
     }
 
     handleSendMultipleCommands(event) {
@@ -258,6 +239,21 @@ class SpinningParamSubmitter extends React.Component {
                             onChange={this.handleOnChange}
                             onKeyUp={this.handleOnKeyUp}
                             />   
+                    </Box>
+                    <Box variant="div" sx={{display: 'flex'}}>
+                            <Button
+                                variant="outlined"
+                                size="medium"
+                                disabled={this.props.disabled}
+                                color={(isMachineSpinning) ? "error" : "success"}
+                                startIcon={<AutoModeIcon />}
+                                onClick={(isMachineSpinning)
+                                    ? this.handleStopSpinningClick
+                                    : this.handleStartSpinningClick} >
+                                {(isMachineSpinning)
+                                    ? 'Stop Spinning'
+                                    : 'Start Spinning'}
+                            </Button>
                     </Box>
                     <Stack variant="div"   justifyContent="center"
                     alignContent="center" sx={{display: 'flex'}}>
