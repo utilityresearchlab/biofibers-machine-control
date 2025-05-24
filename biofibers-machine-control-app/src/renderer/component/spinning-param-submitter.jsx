@@ -163,6 +163,7 @@ class SpinningParamSubmitter extends React.Component {
         };
 
         const spinningCommandText = this.getSpinningCommand(); 
+        const isMachineSpinning = this.props.machineState.isMachineSpinning();
 
         const timePerCommandTotalSec = MiscUtil.calculateCommandTimeInMilliSec(this.state.eValue, this.state.xValue, this.getCompositeFeedrate()) / 1000;
         const perCommandTimeMins = Math.floor(timePerCommandTotalSec / 60);
