@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 
 import AutoModeIcon from '@mui/icons-material/AutoMode';
+import CircularProgress from '@mui/material/CircularProgress';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import PendingOutlinedIcon from '@mui/icons-material/PendingOutlined';
 import SwipeDownAltIcon from '@mui/icons-material/SwipeDownAlt';
@@ -90,7 +91,7 @@ class StatusBar extends React.Component {
         } else if (machineState.isMachinePullingDown()) {
             machineStatusText = "Pull Down - In Progress ";
             shortMachineStatusText = "Pulling";
-            machineStatusColorSetup = "special.success";
+            machineStatusColorSetup = "special.warning";
         } else if (machineState.isMachineSpinning()) {
             machineStatusText = "Spinning - In Progress ";
             shortMachineStatusText = "Spinning";
@@ -120,6 +121,17 @@ class StatusBar extends React.Component {
                 return (<PendingOutlinedIcon sx={iconSx} color={machineStatusColor} />);
             }
         };
+
+        const machineProgressIndicator = () => {
+            if (machineState.isMachineSpinningOrPullingDown()) {
+            return (
+                <Stack spacing={2} direction="column">
+                    <CircularProgress color="warning" size={15}/>
+                 </Stack>);
+            } else {
+                return '';
+            }
+        }
 
         const heaterWrapCurrentTemp = currentSyringeWrapTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
         const heaterWrapSetPoint = setPointSyringeWrapTemp.toFixed(BF_CONSTANTS.TEMPERATURE_DECIMAL_PRECISION);
@@ -181,8 +193,9 @@ class StatusBar extends React.Component {
                                         fontSize: '0.8rem', 
                                         fontWeight: 600,
                                         }}>
-                                        {shortMachineStatusText}
+                                        {shortMachineStatusText}                                
                                 </Typography>
+                                {machineProgressIndicator()}
                         </Stack>
                     </Tooltip>
                     <Divider component="span" orientation="vertical" flexItem/>
