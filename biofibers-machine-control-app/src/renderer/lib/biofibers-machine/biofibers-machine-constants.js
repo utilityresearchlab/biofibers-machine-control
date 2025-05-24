@@ -20,10 +20,9 @@ export const HEATER_NOZZLE_TOOL_ID = 1;
 export const TEMPERATURE_DECIMAL_PRECISION = 2;
 export const TEMPERATURE_DEVIATION_AMOUNT = 2;
 
-
 export const EXTRUSION_FEED_RATE_DEFAULT = 16;
 export const EXTRUSION_FEED_RATE_MIN = 0;
-
+export const EXTRUSION_FEED_RATE_MAX = 100;
 
 export const EXTRUSION_FEED_RATE_PURGE = 1;
 export const EXTRUSION_AMOUNT_PURGE = 0.1;
@@ -31,4 +30,8 @@ export const EXTRUSION_AMOUNT_PURGE = 0.1;
 export const EXTRUSION_AMOUNT_MAX = 100;
 export const EXTRUSION_AMOUNT_MIN = 0;
 
-export const X_AXIS_DEFAULT_FEED_RATE = 20;
+export const X_AXIS_DEFAULT_FEED_RATE = 200;
+export const X_AXIS_DEFAULT_FEED_RATE_SLOW = 20;
+
+export const X_AXIS_POSITION_MAX = 200;
+export const X_AXIS_POSITION_MIN = -200;
