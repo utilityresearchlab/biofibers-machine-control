@@ -946,6 +946,7 @@ class BaseMachineControlApp extends React.Component {
 					</Typography>
 					<SpinningParamSubmitter
 						disabled={isInputDisabled}
+						machineState={machineState}
 						onSubmitCallback={this.handleSendCommandClick}
 						onChangeSpinningState={this.handleOnChangeSpinningState}
 						onSendMultipleSpinningCommands={this.handleOnSendMultipleSpinningCommands} />
