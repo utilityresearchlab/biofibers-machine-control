@@ -467,9 +467,6 @@ class BaseMachineControlApp extends React.Component {
 			this.setState({
 				nIntervalId: null
 			});
-			//let gcodeBuilder = new GcodeBuilder();
-			// gcodeBuilder.setSpindleSpeed(0, true);
-			//this._sendGcodeLines(gcodeBuilder.toGcode());
 		}
 		// Update machine state
 		const machineState = this._getMachineState();
@@ -566,9 +563,6 @@ class BaseMachineControlApp extends React.Component {
 			this.setState({
 				nIntervalId: null
 			});
-			//let gcodeBuilder = new GcodeBuilder();
-			// gcodeBuilder.setSpindleSpeed(0, true);
-			//this._sendGcodeLines(gcodeBuilder.toGcode());
 		}
 		// Update machine state
 		const machineState = this._getMachineState();
