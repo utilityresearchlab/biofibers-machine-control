@@ -169,9 +169,9 @@ export class GcodeBuilder {
 
     _getMoveParams(axis, value, feedrate=null) {
         let moveParams = {}
-        moveParams[axis] = value;
+        moveParams[axis] = parseFloat(value);
         if (feedrate) {
-            moveParams['F'] = feedrate;
+            moveParams['F'] = parseFloat(feedrate);
         }
         return moveParams;
     }
@@ -202,6 +202,10 @@ export class GcodeBuilder {
     }
 
     move(axisToValueDic, comment=null) {
+        // Ensure we have float values
+        for (const axis in axisToValueDic) {
+            axisToValueDic[axis] = parseFloat(axisToValueDic[axis]);
+        } 
         this._appendCommand(GCODE_CONSTANTS.CMD_MOVE, axisToValueDic, comment);
         return this;
     }
