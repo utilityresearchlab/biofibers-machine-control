@@ -20,7 +20,7 @@ MiscUtil.calculateXFeedrate = function(eValue, eFeedrate, xValue=0) {
     if (xValue == 0) {
         return 0;
     }
-    return xValue * (eFeedrate / eValue);
+    return Math.abs(xValue * (eFeedrate / eValue));
 }
 
 MiscUtil.getCompositeFeedrate = function(...values) {
