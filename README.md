@@ -18,8 +18,10 @@ Desktop App to Control the Biofibers Spinning Machine
 0. Run `nvm use` to activate the proper node version
 1. Run `source .venv/bin/activate` to activate the python Venv
 2. Run `npm run start`
+
 #### Build Errors
-- Build doesn't compile on MacOS Sonoma + Python 3.12 because node-gyp fails to compile serialport bindings:
+- You should accept Xcode License in terminal using: `sudo xcodebuild -license accept`
+- If build doesn't compile on MacOS Sonoma + Python 3.12 because node-gyp fails to compile serialport bindings:
     - Run `pip3 install setuptools` (you should probably run this in a virtual environment)
     - For more info see this [post](https://github.com/nodejs/node-gyp/issues/2992#issuecomment-2101781719)
 
@@ -34,7 +36,7 @@ Desktop App to Control the Biofibers Spinning Machine
 2. If you want a MacOS Universal app, run `npm run pack-mac-unv`.
 3. If you want a MacOS x64 app, run `npm run pack-mac-x64`
 4. If you want a MacOS arm64 app, run `npm run pack-mac-arm64`
-5. The output of either file will be present in the `out` folder.
+5. The output of either file will be present in the `out/` folder within a sub-folder named by current date of format `{year}-{month}-{day}`.  
 6. Zip the app, then share.
 
 ##### Handling the "App is Damaged Message" When Installing on MacOS
