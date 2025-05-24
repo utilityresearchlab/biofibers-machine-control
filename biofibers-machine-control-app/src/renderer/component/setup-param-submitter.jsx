@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 
 import Stack from '@mui/material/Stack';
 import ToggleButton from '@mui/material/ToggleButton';
@@ -43,6 +44,7 @@ class SetupParamSubmitter extends React.Component {
         this.handleHomeAllClick = this.handleHomeAllClick.bind(this);
         this.handleSetRelativeClick = this.handleSetRelativeClick.bind(this);
         this.handleDisableMotorsClick = this.handleDisableMotorsClick.bind(this);
+        this.handleMoveX = this.handleMoveX.bind(this);
         this.handleExtrudePumpClick = this.handleExtrudePumpClick.bind(this);
         this.handleRetractPumpClick = this.handleRetractPumpClick.bind(this);
         this.handleToggleHeatersClick = this.handleToggleHeatersClick.bind(this);
@@ -103,6 +105,20 @@ class SetupParamSubmitter extends React.Component {
         });
     }
 
+    handleMoveX(evt) {
+        if (!evt) {
+            return;
+        }
+        const value = parseFloat(evt.target.textContent);
+        let gcodeBuilder = new GcodeBuilder();
+        const gcodeLines = gcodeBuilder
+            .moveX(value, BF_CONSTANTS.X_AXIS_DEFAULT_FEED_RATE, 'move x')
+            .toGcode();
+        gcodeLines.forEach((line, index) => {
+            this.handleSubmitCommand(event, line);
+        });
+    }
+    
     handleExtrudePumpClick(event) {
         let gcodeBuilder = new GcodeBuilder();
         gcodeBuilder.extrude(this.state.adjustPumpDistance, this.state.adjustPumpFeedRate);
@@ -266,7 +282,36 @@ class SetupParamSubmitter extends React.Component {
                         Unlock Motors {/* Disable Motors */}
                     </Button>
                 </Stack>
-
+                <Stack
+                    direction="row"
+                    justifyContent="left"
+                    alignItems="left"
+                    spacing={2}
+                    p={1}>
+                    <Stack
+                        direction="row"
+                        justifyContent="center"
+                        alignItems="center">                
+                            <Typography p={1}>X:</Typography>    
+                            <Tooltip title={"Move X Position"}>                 
+                            <ButtonGroup 
+                            variant="outlined" 
+                            aria-label="Move X" 
+                            size="small"
+                            color="secondary"
+                            onClick={this.handleMoveX}>
+                                    <Button>-100</Button>
+                                    <Button>-10</Button>
+                                    <Button>-1</Button>
+                                    <Button>-0.1</Button>
+                                    <Button>0.1</Button>
+                                    <Button>1</Button>
+                                    <Button>10</Button>
+                                    <Button>100</Button>
+                                </ButtonGroup>
+                        </Tooltip>
+                    </Stack>
+                </Stack>
                 <Stack
                     direction="row"
                     justifyContent="left"
