@@ -86,6 +86,7 @@ class BaseMachineControlApp extends React.Component {
 		
 		this.handleOnSendMultipleSpinningCommands = this.handleOnSendMultipleSpinningCommands.bind(this);
 
+		this.handleOnClearConsole = this.handleOnClearConsole.bind(this);
 		this.handleEmergencyStopClicked = this.handleEmergencyStopClicked.bind(this);
 	}
 
@@ -656,6 +657,11 @@ class BaseMachineControlApp extends React.Component {
 		sendMultipleCommandsTimeout(spinningCommand, cmdCount, numCommands);
 	}
 
+	// Fired when clearing console
+	handleOnClearConsole() {
+		this.setState({consoleData: []});
+	}
+
 	// Fired when an emergency stop is triggered
 	handleEmergencyStopClicked() {
 		// Update machine state to trigger stopping sending commands
@@ -969,7 +975,7 @@ class BaseMachineControlApp extends React.Component {
 						<Box
 							variant="div" 
 							sx={{paddingTop: 1}}>
-							<Console data={consoleData} />
+							<Console data={consoleData} onClearConsole={this.handleOnClearConsole} />
 						</Box>
 					</Box>
 				</Box>

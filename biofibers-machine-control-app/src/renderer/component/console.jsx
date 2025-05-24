@@ -7,17 +7,17 @@ import ButtonGroup from "@mui/material/ButtonGroup";
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 
+import DeleteIcon from '@mui/icons-material/Delete';
+import InsightsIcon from '@mui/icons-material/Insights';
+import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
+import OutboxIcon from '@mui/icons-material/Outbox';
 import ToggleButton from "@mui/material/ToggleButton";
 import Tooltip from "@mui/material/Tooltip";
 
 
-import InsightsIcon from '@mui/icons-material/Insights';
-import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
-import OutboxIcon from '@mui/icons-material/Outbox';
-
 import ConsoleLineItem from "./console-line-item";
 import { ConsoleDataType } from "../lib/console-data";
-import { Stack } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 
 class Console extends React.Component {
 
@@ -32,6 +32,7 @@ class Console extends React.Component {
 		this.toggleShouldScroll = this.toggleShouldScroll.bind(this);
 		this.toggleShowSendEvents = this.toggleShowSendEvents.bind(this);
 		this.toggleShowReceivedStatusEvents = this.toggleShowReceivedStatusEvents.bind(this);
+		this.clearConsoleWindow = this.clearConsoleWindow.bind(this);
 	}
 
 	componentDidMount() {
@@ -63,6 +64,12 @@ class Console extends React.Component {
 	toggleShowReceivedStatusEvents() {
 		const showReceivedStatus = !this.state.showReceivedStatusEvents;
 		this.setState({showReceivedStatusEvents: showReceivedStatus });
+	}
+
+	clearConsoleWindow() {
+		if (this.props.onClearConsole) {
+			this.props.onClearConsole();
+		}
 	}
 
 	render() {
@@ -148,6 +155,16 @@ class Console extends React.Component {
 							<InsightsIcon />
 						</ToggleButton>
 					</Tooltip>
+					<Tooltip title="Clear Console">
+						<ToggleButton
+							value='show'
+							size='small'
+							variant='outlined'
+							onChange={this.clearConsoleWindow}>
+							<DeleteIcon />
+						</ToggleButton>
+					</Tooltip>
+					
 				</Stack>
 			</Box>
 		);
