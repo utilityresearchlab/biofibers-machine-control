@@ -260,6 +260,7 @@ class PullDownParamSubmitter extends React.Component {
                             margin="dense"
                             sx={{minWidth: 200, maxWidth: 200}}
                             min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
+                            max={BF_CONSTANTS.EXTRUSION_FEED_RATE_MAX}
                             value={this.state.eFeedrate}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}

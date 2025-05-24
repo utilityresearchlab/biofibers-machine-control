@@ -195,6 +195,7 @@ class SpinningParamSubmitter extends React.Component {
                             margin="dense"
                             sx={{minWidth: 200, maxWidth: 200}}
                             min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
+                            max={BF_CONSTANTS.EXTRUSION_FEED_RATE_MAX}
                             value={this.state.eFeedrate}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
@@ -208,7 +209,9 @@ class SpinningParamSubmitter extends React.Component {
                             size="small"
                             color="primary"
                             margin="dense"
-                            sx={{minWidth: 170, maxWidth: 170}}
+                            sx={{minWidth: 160, maxWidth: 160}}
+                            min={BF_CONSTANTS.X_AXIS_POSITION_MIN}
+                            max={BF_CONSTANTS.X_AXIS_POSITION_MAX}
                             value={this.state.xValue}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
