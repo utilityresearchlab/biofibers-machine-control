@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -189,7 +190,7 @@ class PullDownParamSubmitter extends React.Component {
         const perCommandTimeMins = Math.floor(timePerCommandTotalSec / 60);
         const perCommandTimeSecs = Math.round(timePerCommandTotalSec % 60);
         const perCommandTimeText = TimeUtil.getMinSecText(perCommandTimeMins, perCommandTimeSecs);
-
+        
         const materialSelectComponent = () => {
             return (!FEATURE_FLAGS.SHOW_MATERIAL_SELECT_PULL_DOWN) 
                 ? '' 
@@ -215,6 +216,10 @@ class PullDownParamSubmitter extends React.Component {
                     </Select>
                 </FormControl>
             </Stack>);
+        };
+
+        const progressIndicator = () => {
+            return (<CircularProgress color="warning" size={20}/>);
         };
 
         return (
@@ -275,6 +280,10 @@ class PullDownParamSubmitter extends React.Component {
                                     : 'Start Pull-Down'}
                             </Button>
                         </Box>
+                        <Stack variant="div"   justifyContent="center"
+                            alignContent="center" sx={{display: 'flex'}}>
+                                {(isMachinePullingDown) ? progressIndicator() : ''}
+                        </Stack>
                 </Stack>
                 <Stack
                     direction="column"
