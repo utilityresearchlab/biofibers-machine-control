@@ -42,10 +42,37 @@ class PullDownParamSubmitter extends React.Component {
         };
         
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
+        this.handleOnKeyUp = this.handleOnKeyUp.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
         this.handleOnSelectMaterial = this.handleOnSelectMaterial.bind(this);
         this.handleStartPullDownClick = this.handleStartPullDownClick.bind(this);
         this.handleStopPullDownClick = this.handleStopPullDownClick.bind(this);
+    }
+
+    handleOnKeyUp(event) {
+        event.preventDefault();
+        if (event.charCode == 13
+            || event.keyCode == 13
+            || event.key === 'Enter') {
+            const {name, value} = event.target;
+              // update pulling down process with new values, if they changed
+            const machineState = this.props.machineState;
+            const isPullingDown = machineState.isMachinePullingDown();
+            if (isPullingDown 
+                && (name == 'eValue' || name == 'eFeedrate')
+                && !isNaN(value) && parseFloat(value) >= 0) {
+                let eValue = this.state.eValue;
+                let eFeedrate = this.state.eFeedrate;
+                if (name == 'eValue') {
+                    eValue = value;
+                } else if (name == 'eFeedrate') {
+                    eFeedrate = value;
+                }
+                if (this.props.onChangePullDownState) {
+                    this.props.onChangePullDownState(true, eValue, eFeedrate);
+                }
+            }
+        }
     }
 
     handleOnChange(event) {
@@ -53,24 +80,6 @@ class PullDownParamSubmitter extends React.Component {
         this.setState({
             [name]: value
         });
-
-        // update pulling down process with new values, if they changed
-        const machineState = this.props.machineState;
-        const isPullingDown = machineState.isMachinePullingDown();
-        if (isPullingDown 
-            && (name == 'eValue' || name == 'eFeedrate')
-            && !isNaN(value) && parseFloat(value) >= 0) {
-            let eValue = this.state.eValue;
-            let eFeedrate = this.state.eFeedrate;
-            if (name == 'eValue') {
-                eValue = value;
-            } else if (name == 'eFeedrate') {
-                eFeedrate = value;
-            }
-            if (this.props.onChangePullDownState) {
-                this.props.onChangePullDownState(true, eValue, eFeedrate);
-            }
-        }
     }
 
     handleSubmitCommand(event, command) {
@@ -248,6 +257,7 @@ class PullDownParamSubmitter extends React.Component {
                                 max={BF_CONSTANTS.EXTRUSION_AMOUNT_MAX}
                                 disabled={this.props.disabled}
                                 onChange={this.handleOnChange}
+                                onKeyUp={this.handleOnKeyUp}
                                 />
                     </Box>
                     <Box variant="div" sx={{display: 'flex'}}>
@@ -264,6 +274,7 @@ class PullDownParamSubmitter extends React.Component {
                             value={this.state.eFeedrate}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
+                            onKeyUp={this.handleOnKeyUp}
                             />  
                     </Box>
                     <Box variant="div" sx={{display: 'flex'}}>
