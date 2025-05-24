@@ -31,11 +31,21 @@ class SpinningParamSubmitter extends React.Component {
             numCommands: 5,
             nIntervalId: null
         };
+        this.getSpinningState = this.getSpinningState.bind(this);
         this.handleSubmitCommand = this.handleSubmitCommand.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
+        this.handleOnKeyUp = this.handleOnKeyUp.bind(this);
         this.handleStartSpinningClick = this.handleStartSpinningClick.bind(this);
         this.handleStopSpinningClick = this.handleStopSpinningClick.bind(this);
         this.handleSendMultipleCommands = this.handleSendMultipleCommands.bind(this);
+    }  
+
+    getSpinningState() {
+        return {
+            eValue: this.state.eValue,
+            eFeedrate: this.state.eFeedrate,
+            xValue: this.state.xValue,
+        };
     }
 
     handleOnChange(event) {
@@ -45,6 +55,35 @@ class SpinningParamSubmitter extends React.Component {
             [name]: value
         });
     }
+
+    handleOnKeyUp(event) {
+        event.preventDefault();
+        if (event.charCode == 13
+            || event.keyCode == 13
+            || event.key === 'Enter') {
+            const {name, value} = event.target;
+
+            // update spinning down process with new values, if they changed
+            const machineState = this.props.machineState;
+            if (machineState.isMachineSpinning()
+                && (name == 'eValue' || name == 'eFeedrate' || name == 'xValue')
+                && !isNaN(value) && parseFloat(value) >= 0) {
+                let eValue = this.state.eValue;
+                let eFeedrate = this.state.eFeedrate;
+                let xValue = this.state.xValue;
+                if (name == 'eValue') {
+                    eValue = value;
+                } else if (name == 'eFeedrate') {
+                    eFeedrate = value;
+                } else if (name == 'xValue') {
+                    xValue = value;
+                }
+                if (this.props.onChangeSpinningState) {
+                    this.props.onChangeSpinningState(true, this.getSpinningState());
+                }
+            }
+        }
+    }  
 
     handleSubmitCommand(event, command) {
         // prevent page refresh on submit
@@ -177,12 +216,13 @@ class SpinningParamSubmitter extends React.Component {
                             size="small"
                             color="primary"
                             margin="dense"
-                            sx={{minWidth: 170, maxWidth: 170}}
+                            sx={{minWidth: 160, maxWidth: 160}}
                             value={this.state.eValue}
                             min={BF_CONSTANTS.EXTRUSION_AMOUNT_MIN}
                             max={BF_CONSTANTS.EXTRUSION_AMOUNT_MAX}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
+                            onKeyUp={this.handleOnKeyUp}
                             />
                     </Box>
                     <Box variant="div" sx={{display: 'flex'}}>
@@ -193,12 +233,13 @@ class SpinningParamSubmitter extends React.Component {
                             size="small"
                             color="primary"
                             margin="dense"
-                            sx={{minWidth: 200, maxWidth: 200}}
+                            sx={{minWidth: 190, maxWidth: 190}}
                             min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
                             max={BF_CONSTANTS.EXTRUSION_FEED_RATE_MAX}
                             value={this.state.eFeedrate}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
+                            onKeyUp={this.handleOnKeyUp}
                             />  
                     </Box>
                     <Box variant="div" sx={{display: 'flex'}}>
@@ -215,6 +256,7 @@ class SpinningParamSubmitter extends React.Component {
                             value={this.state.xValue}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
+                            onKeyUp={this.handleOnKeyUp}
                             />   
                     </Box>
                     <Stack variant="div"   justifyContent="center"
