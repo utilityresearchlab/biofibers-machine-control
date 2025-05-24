@@ -111,6 +111,10 @@ export class BiofibersMachineState {
         return this._isBitOn(MACHINE_STATE_IS_PULLING_DOWN);
     }
 
+    isMachineSpinningOrPullingDown() {
+        return this.isMachineSpinning() || this.isMachinePullingDown();
+    }
+
     isMachineConnected() {
         return this._isBitOn(MACHINE_STATE_IS_CONNECTED);
     }
