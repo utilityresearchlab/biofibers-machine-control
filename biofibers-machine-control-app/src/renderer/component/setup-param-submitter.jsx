@@ -340,6 +340,7 @@ class SetupParamSubmitter extends React.Component {
                         margin="dense"
                         sx={{minWidth: 200, maxWidth: 200}}
                         min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
+                        max={BF_CONSTANTS.EXTRUSION_FEED_RATE_MAX}
                         value={this.state.adjustPumpFeedRate}
                         disabled={this.props.disabled}
                         onChange={this.handleOnChange}
@@ -459,6 +460,7 @@ class SetupParamSubmitter extends React.Component {
                             margin="dense"
                             sx={{minWidth: 190, maxWidth: 190}}
                             min={BF_CONSTANTS.EXTRUSION_FEED_RATE_MIN}
+                            max={BF_CONSTANTS.EXTRUSION_FEED_RATE_MAX}
                             value={this.state.purgeFeedRate}
                             disabled={this.props.disabled}
                             onChange={this.handleOnChange}
