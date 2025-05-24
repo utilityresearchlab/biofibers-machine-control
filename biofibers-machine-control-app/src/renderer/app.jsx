@@ -296,9 +296,9 @@ class BaseMachineControlApp extends React.Component {
 	handleDisconnectClick() {
 		// Build Disconnect callback
 		const that = this;
+		const portPath = that.props.serialCommunication.getSerialPortPath();
+		const baudRate = that.props.serialCommunication.getBaudRate();
 		const onDisconnectCallback = (err) => {
-			const portPath = that.props.serialCommunication.getSerialPortPath();
-			const baudRate = that.props.serialCommunication.getBaudRate();
 			let consoleMessage;
 			let messageDataType;
 			if (err) {
