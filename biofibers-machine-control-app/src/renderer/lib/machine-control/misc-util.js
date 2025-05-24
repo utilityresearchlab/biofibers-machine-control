@@ -11,11 +11,11 @@ MiscUtil.calculateCommandTimeInMilliSec = function(eValue, xValue, compositeFeed
 MiscUtil.calculateXFeedrate = function(eValue, eFeedrate, xValue=0) {
     // If no extrusion simply use the default X feed rate
     if (eValue == 0) {
-        return BF_CONSTANTS.X_AXIS_DEFAULT_FEED_RATE;
+        return BF_CONSTANTS.X_AXIS_DEFAULT_FEED_RATE_SLOW;
     }
     // If no e-feed rate, use default X feedrate
     if (eFeedrate == 0) {
-        return BF_CONSTANTS.X_AXIS_DEFAULT_FEED_RATE;
+        return BF_CONSTANTS.X_AXIS_DEFAULT_FEED_RATE_SLOW;
     }
     if (xValue == 0) {
         return 0;
