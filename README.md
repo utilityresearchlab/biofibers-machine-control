@@ -19,7 +19,7 @@ Desktop App to Control the Biofibers Spinning Machine
 1. Run `source .venv/bin/activate` to activate the python Venv
 2. Run `npm run start`
 
-#### Build Errors
+#### Build Errors on MacOS
 - You should accept Xcode License in terminal using: `sudo xcodebuild -license accept`
 - If build doesn't compile on MacOS Sonoma + Python 3.12 because node-gyp fails to compile serialport bindings:
     - Run `pip3 install setuptools` (you should probably run this in a virtual environment)
@@ -76,24 +76,27 @@ You can find more information about this issue on this [Apple Discussions Forum 
 	- Configure fnm environment:
 	    `fnm env --use-on-cd | Out-String | Invoke-Expression`
 	- Download and install Node.js:
-	    `fnm use --install-if-missing 22`
+	    `fnm use --install-if-missing`
 	- Verifies the right Node.js version is in the environment
-	    `node -v # should print v22.11.0` 
+	    `node -v # should print node version in .nvmrc` 
 	- Verifies the right npm version is in the environment
-	    `npm -v # should print '10.9.0'`
+	    `npm -v # should print npm version`
 7. With Node Env set-up and active, install NPM packages: `npm install`
 
 ### Running the App on Windows
 1. Activate Python Venv: `. .\.venv\Scripts\activate`
-2. Activate the node env `fnm use --install-if-missing 22`
+2. Activate the node env `fnm use --install-if-missing`
 3. To Start app run: `npx electron-forge start`
+
+#### Build Errors on Windows 10
+1. If the build fails: `Error: Could not find any Visual Studio installation to use` appears from Node-gyp, follow instructions at the following link to install visualstudio2022-workload-vctools using Chocolately:https://github.com/nodejs/node-gyp?tab=readme-ov-file#on-windows
+
 
 ### Packaging App for Windows on Windows:
 1. Activate Python Venv and Node env activated
 2. Run: `npx electron-forge package --platform='win32' --arch='x64'`
-
-
-
+3. The output of either file will be present in the `out/` folder within a sub-folder named by current date of format `{year}-{month}-{day}`.  
+4. Zip the app, then share.
 
 
 #### Other references for Packaging Apps
