@@ -1,9 +1,12 @@
-Desktop App to Control the Biofibers Spinning Machine
+# Desktop App to Control the Biofibers Spinning Machine
+The application is the companion to the [Desktop Biofibers Spinning Machine](https://github.com/utilityresearchlab/desktop-biofibers-spinning). It makes it much easier to send commands, and control the spinning process compared to other g-code based interfaces.
 
-# Instructions for Running, Building, and Distributing the Biofibers Machine Control App
+It is currently available for MacOS and Windows.
 
-## On MacOS (>= Sonoma 14.5)
-### Installing the App on MacOS
+## Instructions for Running, Building, and Distributing the Biofibers Machine Control App
+
+### On MacOS (>= Sonoma 14.5)
+#### Installing the App on MacOS
 0. Install NVM, Node and NPM using directions on (Nodejs.org)[https://nodejs.org/en/download]
 1. Go to the project directory, and run the following to setup a python virtual enviroment (this is required for MacOS Sonoma + Python 3.12 due to the removal of setuptools) 
     - `python3 -m venv .venv`
@@ -14,24 +17,24 @@ Desktop App to Control the Biofibers Spinning Machine
 4. Run `npm install` to install the packages
 5. Alternatively, `npm run reinstall` will clear all node_modules and install them again
 
-### Running / Debugging the App on MacOS
+#### Running / Debugging the App on MacOS
 0. Run `nvm use` to activate the proper node version
 1. Run `source .venv/bin/activate` to activate the python Venv
 2. Run `npm run start`
 
-#### Build Errors on MacOS
+##### Build Errors on MacOS
 - You should accept Xcode License in terminal using: `sudo xcodebuild -license accept`
 - If build doesn't compile on MacOS Sonoma + Python 3.12 because node-gyp fails to compile serialport bindings:
     - Run `pip3 install setuptools` (you should probably run this in a virtual environment)
     - For more info see this [post](https://github.com/nodejs/node-gyp/issues/2992#issuecomment-2101781719)
 
-#### SECURITY WARNINGS ON MAC
+##### SECURITY WARNINGS ON MAC
 - When attempting to run the app on MacOS, you may run into security errors like "fsevent.node" cannot be opened". 
 - To resolve this error, when you see the pop-up, go to `System Preferences` -> `Privacy and Security` -> Scroll Down -> Click "Allow" for the associatied security warning shown. 
 - Note that you may have to click "cancel" in the first dialog window that appears for the security item to appear in System Preferences. 
 
-### Packaging App for Different Platforms on MacOS
-#### Packaging MacOS Apps on MacOS
+#### Packaging App for Different Platforms on MacOS
+##### Packaging MacOS Apps on MacOS
 1. First run `nvm use && source .venv/bin/activate`, then run one of the following commands:
 2. If you want a MacOS Universal app, run `npm run pack-mac-unv`.
 3. If you want a MacOS x64 app, run `npm run pack-mac-x64`
@@ -39,7 +42,7 @@ Desktop App to Control the Biofibers Spinning Machine
 5. The output of either file will be present in the `out/` folder within a sub-folder named by current date of format `{year}-{month}-{day}`.  
 6. Zip the app, then share.
 
-##### Handling the "App is Damaged Message" When Installing on MacOS
+###### Handling the "App is Damaged Message" When Installing on MacOS
 If you download an application from the internet, MacOS will tell you an application is damaged and you should move it to the trash. This is a safety feature to ensure users don't install applications that are not signed with a certificate and/or not from a verified developer. This will typically happen if you try to run our application. 
 
 To open the application properly once you have downloaded the zip file, you must do the following:
@@ -57,12 +60,13 @@ You can find more information about this issue on this [Apple Discussions Forum 
     2. [Installing Wine on a Mac](https://github.com/Gcenx/wine-on-mac)
     3. With HomeBrew Installed already, in your terminal run `brew install --cask --no-quarantine wine@staging`
     4. Then run `brew install mono`
+
 ##### Build the App for Windows on MacOS
 1. To compile a x64 windows application, run `npm run pack-win-x64`
 2. The output app will be present in the `out` folder.
 
-## On Windows 10 (x64)
-### Installing the App on Windows 10 
+### On Windows 10 (x64)
+#### Installing the App on Windows 10 
 1. Clone the repository
 2. Go to repository folder: `cd .\biofibers-machine-control\`
 3. Create Python Venv: `python3 -m venv .venv`
@@ -83,21 +87,21 @@ You can find more information about this issue on this [Apple Discussions Forum 
 	    `npm -v # should print npm version`
 7. With Node Env set-up and active, install NPM packages: `npm install`
 
-### Running the App on Windows
+#### Running the App on Windows
 1. Activate Python Venv: `. .\.venv\Scripts\activate`
 2. Activate the node env `fnm use --install-if-missing`
 3. To Start app run: `npx electron-forge start`
 
-#### Build Errors on Windows 10
+##### Build Errors on Windows 10
 1. If the build fails: `Error: Could not find any Visual Studio installation to use` appears from Node-gyp, follow instructions at the following link to install visualstudio2022-workload-vctools using Chocolately:https://github.com/nodejs/node-gyp?tab=readme-ov-file#on-windows
 
 
-### Packaging App for Windows on Windows:
+#### Packaging App for Windows on Windows:
 1. Activate Python Venv and Node env activated
 2. Run: `npx electron-forge package --platform='win32' --arch='x64'`
 3. The output of either file will be present in the `out/` folder within a sub-folder named by current date of format `{year}-{month}-{day}`.  
 4. Zip the app, then share.
 
 
-#### Other references for Packaging Apps
+##### Other references for Packaging Apps
 - Info about Packaging Apps for Mac/Windows/Linux Guide: https://stevenklambert.com/writing/comprehensive-guide-building-packaging-electron-app/#packaging-an-electron-app
