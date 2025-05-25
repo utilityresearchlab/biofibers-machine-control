@@ -1,8 +1,8 @@
 {
   "name": "biofibers-machine-control-app",
   "productName": "biofibers-machine-control",
-  "version": "0.0.1",
-  "description": "Application to control a machine over serial",
+  "version": "0.1.0-beta",
+  "description": "Application to control the Desktop Biofibers Spinning Machine",
   "private": true,
   "main": ".webpack/main",
   "build": {
