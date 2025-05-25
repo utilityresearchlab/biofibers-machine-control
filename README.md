@@ -78,6 +78,7 @@ You can find more information about this issue on this [Apple Discussions Forum 
 
 ### On Windows 10 (x64)
 #### Installing the App on Windows 10 
+0. Install NVM, Node and NPM using directions on (Nodejs.org)[https://nodejs.org/en/download]
 1. Clone the repository
 2. Go to repository folder: `cd .\biofibers-machine-control\`
 3. Create Python Venv: `python3 -m venv .venv`
