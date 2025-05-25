@@ -3,7 +3,18 @@ The application is the companion to the [Desktop Biofibers Spinning Machine](htt
 
 It is currently available for MacOS and Windows.
 
-## Instructions for Running, Building, and Distributing the Biofibers Machine Control App
+## Instructions for Using the Application
+This repository houses the source code if you are curious, but make it easy for you to use the application without building the source. 
+
+*To get started using the application, simply [download the latest release](https://github.com/utilityresearchlab/biofibers-machine-control/releases) for your operating system.*
+
+
+## Getting Help
+Join our Discord server for help getting started or if you run into any errors with the application: https://discord.gg/vDmk3t2FMX
+
+-----
+
+## For Advanced Users: Instructions for Running, Building, and Distributing from the Source Code
 
 ### On MacOS (>= Sonoma 14.5)
 #### Installing the App on MacOS
