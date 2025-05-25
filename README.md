@@ -1,21 +1,20 @@
-# Desktop App to Control the Biofibers Spinning Machine
-The application is the companion to the [Desktop Biofibers Spinning Machine](https://github.com/utilityresearchlab/desktop-biofibers-spinning). It makes it much easier to send commands, and control the spinning process compared to other g-code based interfaces.
+# Biofibers Machine Control Desktop Application
+The application is the companion to the [Desktop Biofibers Spinning Machine](https://github.com/utilityresearchlab/desktop-biofibers-spinning). It makes it much easier to send commands, and control the spinning process compared to other g-code based interfaces. It is currently available for MacOS and Windows.
 
-It is currently available for MacOS and Windows.
+<img width="400" alt="Screenshot 2025-05-24 at 10 34 34 PM" src="https://github.com/user-attachments/assets/ea6ced0a-d474-43f2-9ccf-06404f2c8780" />
+<img width="400" alt="Screenshot 2025-05-24 at 10 32 20 PM" src="https://github.com/user-attachments/assets/bcd75dcd-f69e-42fe-8962-07ce5166ee25" />
 
 ## Instructions for Downloading and Using the Application
 This repository houses the source code of the application if you are curious, but we make it easy for you to use the application without compiling code! 
 
 **To get started using the application, simply [download the latest release](https://github.com/utilityresearchlab/biofibers-machine-control/releases) for your operating system.**
 
-
 ## Getting Help
 Join our Discord server for help getting started or if you run into any errors with the application: https://discord.gg/vDmk3t2FMX
 
 -----
 
-## For Advanced Users: Instructions for Running, Building, and Distributing from the Source Code
-
+## Development (Advanced Users) - Instructions for Running, Building, and Distributing from the Source Code
 ### On MacOS (>= Sonoma 14.5)
 #### Installing the App on MacOS
 0. Install NVM, Node and NPM using directions on (Nodejs.org)[https://nodejs.org/en/download]
