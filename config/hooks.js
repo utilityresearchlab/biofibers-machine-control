@@ -2,6 +2,8 @@ const fs = require('fs-extra');
 const path = require('path');
 const spawn = require('child_process').spawn;
 const process = require('process');
+const pkg = require('../package.json');
+
 const buildID = new Date().toISOString().replace(/T.*/,'').split('-').join('-');
 
 // https://www.electronforge.io/config/hooks
@@ -12,6 +14,9 @@ module.exports = {
     postPackage: async (forgeConfig, options) => {
         console.info('Packages built at:', options.outputPaths);
         console.info(options);
+        const version = pkg.version;
+        console.info(`App Package Version: ${version}`);
+
         const packageDir = options.outputPaths[0]; // The output directory
         const files = fs.readdirSync(packageDir);
         // YYYY-MM-DD format
@@ -22,7 +27,7 @@ module.exports = {
             const ext = path.extname(file);
             if (ext.includes("app") || ext.includes("exe") || ext.includes("zip")) {
                 const baseName = path.basename(file, ext);
-                const newFileName = `${baseName}-${dateSuffix}${ext}`;
+                const newFileName = `${baseName}-${version}_${dateSuffix}${ext}`;
                 const newPath = path.join(packageDir, newFileName);
                 fs.renameSync(oldPath, newPath);
                 // console.info(`** Renamed ${file} to ${newFileName}`);
