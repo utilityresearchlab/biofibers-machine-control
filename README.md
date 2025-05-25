@@ -1,8 +1,17 @@
 # Biofibers Machine Control Desktop Application
-The application is the companion to the [Desktop Biofibers Spinning Machine](https://github.com/utilityresearchlab/desktop-biofibers-spinning). It makes it much easier to send commands, and control the spinning process compared to other g-code based interfaces. It is currently available for MacOS and Windows.
+This application is the companion to the [Desktop Biofibers Spinning Machine](https://github.com/utilityresearchlab/desktop-biofibers-spinning). It makes it much easier to send commands, and control the spinning process compared to other g-code based interfaces. It is currently available for MacOS and Windows. 
 
 <img width="400" alt="Screenshot 2025-05-24 at 10 34 34 PM" src="https://github.com/user-attachments/assets/ea6ced0a-d474-43f2-9ccf-06404f2c8780" />
 <img width="400" alt="Screenshot 2025-05-24 at 10 32 20 PM" src="https://github.com/user-attachments/assets/bcd75dcd-f69e-42fe-8962-07ce5166ee25" />
+
+## Key Features:
+- Automated machine initialization (setting relative movement, relative extrusion mode, etc.) on serial connection.
+- Toggle automated sending of pull-down or spinning commands to the machine to make fiber set-up and production easier. 
+- Display for generated commands and estimated time for pull downs and spinning based on amount extruded, extrusion rate, and x-axis movement.
+- Easily set collector speed/direction and temperatures for the syringe wrap and nozzle.
+- Emergency stop (E-Stop) button to immediately halt and turn off the machine using Marlin's [M112](https://marlinfw.org/docs/gcode/M112.html) g-code command.
+- Status bar to help you keep track of what the machine is doing and what the temperatures are.
+
 
 ## Instructions for Downloading and Using the Application
 This repository houses the source code of the application if you are curious, but we make it easy for you to use the application without compiling code! 
@@ -15,17 +24,20 @@ Join our Discord server for help getting started or if you run into any errors w
 -----
 
 ## Development (Advanced Users) - Instructions for Running, Building, and Distributing from the Source Code
+This app is built using [Electron](https://github.com/electron/electron), [React](https://github.com/facebook/react), [MaterialUI](https://github.com/mui/material-ui), and [Webpack](https://github.com/webpack/webpack). To setup the development environment, you will need Node.js and Python installed. 
+- You can install NVM, Node and NPM using directions on (Nodejs.org)[https://nodejs.org/en/download]. 
+- If you system doesn't have python3, you should install following instructions for your OS. It is highly recommended that you use a package mananger such as [HomeBrew](https://brew.sh/) for MacOS. On Windows, follow the [Python's Windows installation instructions](https://docs.python.org/3/using/windows.html).
+
 ### On MacOS (>= Sonoma 14.5)
 #### Installing the App on MacOS
-0. Install NVM, Node and NPM using directions on (Nodejs.org)[https://nodejs.org/en/download]
-1. Go to the project directory, and run the following to setup a python virtual enviroment (this is required for MacOS Sonoma + Python 3.12 due to the removal of setuptools) 
+1. Clone the repository
+2. Go to the project directory, and run the following to setup a python virtual enviroment (this is required for MacOS Sonoma + Python 3.12 due to the removal of setuptools) 
     - `python3 -m venv .venv`
     - `source .venv/bin/activate`
     - `python3 -m pip install -r requirements.txt`
-2. Run `nvm install` to install the node version
-3. Run `nvm use` to activate the node version
-4. Run `npm install` to install the packages
-5. Alternatively, `npm run reinstall` will clear all node_modules and install them again
+3. Run `nvm install` to install the node version
+4. Run `nvm use` to activate the node version
+5. Run `npm install` to install the packages. Alternatively, `npm run reinstall` will clear all node_modules and install them again.
 
 #### Running / Debugging the App on MacOS
 0. Run `nvm use` to activate the proper node version
@@ -77,7 +89,6 @@ You can find more information about this issue on this [Apple Discussions Forum 
 
 ### On Windows 10 (x64)
 #### Installing the App on Windows 10 
-0. Install NVM, Node and NPM using directions on (Nodejs.org)[https://nodejs.org/en/download]
 1. Clone the repository
 2. Go to repository folder: `cd .\biofibers-machine-control\`
 3. Create Python Venv: `python3 -m venv .venv`
@@ -105,7 +116,6 @@ You can find more information about this issue on this [Apple Discussions Forum 
 
 ##### Build Errors on Windows 10
 1. If the build fails: `Error: Could not find any Visual Studio installation to use` appears from Node-gyp, follow instructions at the following link to install visualstudio2022-workload-vctools using Chocolately:https://github.com/nodejs/node-gyp?tab=readme-ov-file#on-windows
-
 
 #### Packaging App for Windows on Windows:
 1. Activate Python Venv and Node env activated
