@@ -3,10 +3,10 @@ The application is the companion to the [Desktop Biofibers Spinning Machine](htt
 
 It is currently available for MacOS and Windows.
 
-## Instructions for Using the Application
-This repository houses the source code if you are curious, but make it easy for you to use the application without building the source. 
+## Instructions for Downloading and Using the Application
+This repository houses the source code of the application if you are curious, but we make it easy for you to use the application without compiling code! 
 
-*To get started using the application, simply [download the latest release](https://github.com/utilityresearchlab/biofibers-machine-control/releases) for your operating system.*
+**To get started using the application, simply [download the latest release](https://github.com/utilityresearchlab/biofibers-machine-control/releases) for your operating system.**
 
 
 ## Getting Help
