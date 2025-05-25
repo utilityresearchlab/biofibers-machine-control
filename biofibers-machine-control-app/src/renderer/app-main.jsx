@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 
-
 import applyTheme from './style/theme'
 
 import * as APP_SETTINGS from './app-settings'
@@ -10,9 +9,17 @@ import * as LOGGER from './lib/logger-util'
 
 import {SerialCommunication, defaultBaudRate, defaultSerialPort} from './lib/serial-util/serial-communication';
 
-const serialComm = new SerialCommunication(defaultSerialPort, defaultBaudRate);
-const isDebugging = APP_SETTINGS.DEBUG_MODE;
+const { ipcRenderer } = require('electron');
 
+const serialComm = new SerialCommunication(defaultSerialPort, defaultBaudRate);
+
+const isAppDebugging = async () => {
+	const isPackaged = await ipcRenderer.invoke('BFMAIN_isPackaged');
+	if (!isPackaged) {
+		LOGGER.logD("Is App Packaged:", isPackaged);
+	}
+	return !isPackaged;
+};
 
 const appWillQuitCallback = () => {
 	if (serialComm && serialComm.isConnected) {
@@ -27,7 +34,7 @@ window.addEventListener('beforeunload', function(event) {
 
 let appStarted = false;
 // Set-up react app here; see: https://reactjs.org/docs/hello-world.html
-function initApp() {
+function initApp(isDebugging=false) {
 	LOGGER.logD("InitApp");
 	if (appStarted) {
 		return;
@@ -51,6 +58,6 @@ function initApp() {
 	appStarted = true;
 }
 
-// Start react app
-initApp();
+// Start react app with debugging flag
+initApp(await isAppDebugging());
 

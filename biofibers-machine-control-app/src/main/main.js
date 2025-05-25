@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell } = require('electron');
+const { app, BrowserWindow, shell, ipcMain } = require('electron');
 const path = require('path');
 
 let window;
@@ -38,6 +38,11 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
   window = createWindow();
+
+  // Handle sending packaged state to renderer
+  ipcMain.handle('BFMAIN_isPackaged', () => {
+    return app.isPackaged;
+  });
 });
 
 
@@ -62,7 +67,6 @@ app.on('activate', () => {
     window = createWindow();
   }
 });
-
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.

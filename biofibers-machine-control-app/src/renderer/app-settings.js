@@ -2,7 +2,7 @@
 export const UTILITY_RESEARCH_LAB_URL = "https://utilityresearchlab.org";
 export const BIOFIBERS_GITHUB_URL = "https://github.com/utilityresearchlab/desktop-biofibers-spinning";
 
-// Toggles logging for debug mode
+// Toggles logging for debug mode in unpackaged app
 export const DEBUG_MODE = true;
 
 export const MACHINE_INIT_TIMEOUT = 2000;
